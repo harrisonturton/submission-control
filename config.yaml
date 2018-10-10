@@ -1,0 +1,10 @@
+dependencies:
+  - go
+  - gnatmake
+  - ghci
+  - quickcheck
+
+build-command: gnatmake -Pproject_file.gpr
+
+test-commands:
+  - quickcheck -p 100 -t tests.h
