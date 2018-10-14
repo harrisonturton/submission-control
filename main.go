@@ -1,12 +1,30 @@
 package main
 
 import (
-	"fmt"
-	"github.com/harrisonturton/submission-control/environment"
-	"strconv"
+	//"github.com/harrisonturton/submission-control/environment"
+	//"github.com/harrisonturton/submission-control/server"
+	"github.com/harrisonturton/submission-control/cli"
+	//"strconv"
 	"sync"
+	//"flag"
+	"fmt"
 )
 
+//var port = flag.String("port", "3000", "Port to listen on")
+
+var wg sync.WaitGroup
+
+func main() {
+	//flag.Parse()
+	//server.Run(*port)
+	stop := make(chan bool)
+	wg.Add(1)
+	go cli.Run(stop, &wg)
+	wg.Wait()
+	fmt.Println("Goodbye!")
+}
+
+/*
 const (
 	EnvironmentCount = 5
 	MessageCount     = 10
@@ -45,4 +63,4 @@ func panicErr(err error) {
 		fmt.Println(err.Error())
 		panic(err)
 	}
-}
+}*/
