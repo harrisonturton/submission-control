@@ -3,6 +3,7 @@ package cli
 import (
 	"bufio"
 	"fmt"
+	"github.com/harrisonturton/hydra-ci/util"
 	"os"
 	"strings"
 	"sync"
@@ -88,7 +89,7 @@ func exitHandler(argv []string, stop chan bool, requests chan<- string) {
 }
 
 func requestHandler(argv []string, stop chan bool, requests chan<- string) {
-	id := uuid()
+	id := util.Uuid()
 	fmt.Println(fmt.Sprintf("Making request [%s]", id))
 	requests <- fmt.Sprintf("[Request %s]", id)
 }
@@ -97,12 +98,4 @@ func printWelcome() {
 	fmt.Println("Kerboros 0.0.1")
 	fmt.Println("[Dev Branch " + time.Now().Format("Mon Jan 2006, 3:04pm") + "]")
 	fmt.Println("\033[1;31mWarning: Kerboros is still in development, and could be unstable.\033[0m")
-}
-
-func uuid() string {
-	f, _ := os.Open("/dev/urandom")
-	b := make([]byte, 16)
-	f.Read(b)
-	f.Close()
-	return fmt.Sprintf("%x", b[0:4])
 }

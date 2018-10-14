@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/harrisonturton/submission-control/cli"
-	"github.com/harrisonturton/submission-control/environment"
+	"github.com/harrisonturton/hydra-ci/cli"
+	"github.com/harrisonturton/hydra-ci/environment"
 	"sync"
 )
 
