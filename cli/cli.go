@@ -17,7 +17,7 @@ const (
 	Request
 )
 
-type Handler func(argv []string, stop chan bool)
+type Handler func(argv []string, stop chan bool, requests chan<- string)
 
 var commandNames = map[string]Command{
 	"help": Help,
@@ -31,7 +31,7 @@ var commandHandlers = map[Command]Handler{
 	Request: requestHandler,
 }
 
-func Run(stop chan bool, wg *sync.WaitGroup) {
+func Run(stop chan bool, wg *sync.WaitGroup, requests chan<- string) {
 	defer wg.Done()
 	printWelcome()
 	for {
@@ -45,12 +45,12 @@ func Run(stop chan bool, wg *sync.WaitGroup) {
 				fmt.Println(err.Error())
 				continue
 			}
-			handleInput(*input, stop)
+			handleInput(*input, stop, requests)
 		}
 	}
 }
 
-func handleInput(input []string, stop chan bool) {
+func handleInput(input []string, stop chan bool, requests chan<- string) {
 	if len(input) == 0 {
 		return
 	}
@@ -64,7 +64,7 @@ func handleInput(input []string, stop chan bool) {
 		fmt.Println("Failed to handle " + input[0])
 		return
 	}
-	handler(input, stop)
+	handler(input, stop, requests)
 }
 
 func readInput() (*[]string, error) {
@@ -78,21 +78,31 @@ func readInput() (*[]string, error) {
 	return &inputFields, nil
 }
 
-func helpHandler(argv []string, stop chan bool) {
+func helpHandler(argv []string, stop chan bool, requests chan<- string) {
 	fmt.Println("Help!")
 }
 
-func exitHandler(argv []string, stop chan bool) {
+func exitHandler(argv []string, stop chan bool, requests chan<- string) {
 	fmt.Println("Stopping server...")
 	close(stop)
 }
 
-func requestHandler(argv []string, stop chan bool) {
-	fmt.Println("Request!")
+func requestHandler(argv []string, stop chan bool, requests chan<- string) {
+	id := uuid()
+	fmt.Println(fmt.Sprintf("Making request [%s]", id))
+	requests <- fmt.Sprintf("[Request %s]", id)
 }
 
 func printWelcome() {
 	fmt.Println("Kerboros 0.0.1")
 	fmt.Println("[Dev Branch " + time.Now().Format("Mon Jan 2006, 3:04pm") + "]")
 	fmt.Println("\033[1;31mWarning: Kerboros is still in development, and could be unstable.\033[0m")
+}
+
+func uuid() string {
+	f, _ := os.Open("/dev/urandom")
+	b := make([]byte, 16)
+	f.Read(b)
+	f.Close()
+	return fmt.Sprintf("%x", b[0:4])
 }
