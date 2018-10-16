@@ -48,6 +48,11 @@ func (client *Client) CreateService(fromImageID string, replicas uint64, command
 	}, types.ServiceCreateOptions{})
 }
 
+// Remove an existing service
+func (client *Client) RemoveService(serviceID string) error {
+	return client.Instance.ServiceRemove(client.Context, serviceID)
+}
+
 // Change the number of replicas on a service
 func (client *Client) ScaleService(serviceID string, replicas uint64) error {
 	// Need to make sure *Spec and Version numbers match

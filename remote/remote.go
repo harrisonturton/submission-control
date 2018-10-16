@@ -28,7 +28,12 @@ func (remote *RemoteServer) CreateService(createArgs *types.ServiceCreateSpec, I
 	return err
 }
 
-// Handle RPC call to container.ScaleService
+// Handle RPC call to remove a service
+func (remote *RemoteServer) RemoveService(removeArgs *types.ServiceRemoveSpec, reply *int) error {
+	return remote.client.RemoveService(removeArgs.ServiceID)
+}
+
+// Handle RPC call to scale a service (i.e. increase or decrease number of replicas)
 func (remote *RemoteServer) ScaleService(scaleArgs *types.ServiceScaleSpec, reply *int) error {
 	return remote.client.ScaleService(scaleArgs.ServiceID, scaleArgs.Replicas)
 }
