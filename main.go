@@ -6,13 +6,14 @@ import (
 	"github.com/harrisonturton/hydra-daemon/remote"
 	"net/http"
 	"net/rpc"
+	"os"
 )
 
 var port = flag.String("port", "3000", "The port to run the local RPC server on")
 
 func main() {
 	flag.Parse()
-	remote, err := remote.NewRemoteServer("1.38")
+	remote, err := remote.NewRemoteServer("1.38", os.Stdout)
 	if err != nil {
 		panic(err)
 	}
