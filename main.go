@@ -12,12 +12,6 @@ func main() {
 	panicError(err)
 	err = handlers.RunCommand(os.Args, client)
 	panicError(err)
-
-	/*args := Args{5, 10}
-	var reply int
-	err = client.Call("Arith.Multiply", args, &reply)
-	panicError(err)
-	fmt.Println(fmt.Sprintf("%d", reply))*/
 }
 
 func panicError(err error) {

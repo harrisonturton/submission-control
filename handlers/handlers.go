@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"github.com/harrisonturton/hydra-cli/types"
 	"net/rpc"
 	"strconv"
 )
@@ -62,17 +63,19 @@ func helpHandler(argv []string, client *rpc.Client) error {
 	return nil
 }
 
-// Handler for the "scale" command
+// Send an RPC call for container.Scale to the hydra daemon
 func scaleHandler(argv []string, client *rpc.Client) error {
-	if len(argv) < 3 {
-		fmt.Println(argv)
+	if len(argv) < 4 {
 		return errors.New("Usage: hydra scale SERVICE_ID REPLICAS")
 	}
-	replicas, err := strconv.Atoi(argv[2])
+	replicas, err := strconv.ParseUint(argv[3], 10, 64)
 	if err != nil {
 		return err
 	}
-	fmt.Println(argv[1])
-	fmt.Println(argv[2])
-	return nil
+	args := types.ServiceScaleSpec{
+		ServiceID: argv[2],
+		Replicas:  replicas,
+	}
+	var reply int
+	return client.Call("RemoteServer.ScaleService", args, &reply)
 }
