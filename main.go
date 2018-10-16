@@ -2,16 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/harrisonturton/hydra-cli/cli"
-	"sync"
+	"github.com/harrisonturton/hydra-cli/handlers"
+	"os"
 )
 
-var wg sync.WaitGroup
-var stop = make(chan bool)
-
 func main() {
-	wg.Add(1)
-	go cli.Run(stop, &wg)
-	wg.Wait()
-	fmt.Println("Goodbye!")
+	err := handlers.RunCommand(os.Args)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
