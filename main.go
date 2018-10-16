@@ -2,30 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/harrisonturton/hydra-daemon/container"
+	"github.com/harrisonturton/hydra-daemon/server"
+	"sync"
 	"time"
 )
 
-var replicas uint64 = 3
-var name = "test"
+var stop = make(chan bool)
+var wg sync.WaitGroup
 
+// Run server for 10 seconds before stopping (test graceful shutdown)
 func main() {
-	client, err := container.NewClient("1.38")
-	panicErr(err)
-
-	resp, err := client.CreateService(name, "alpine", replicas, []string{"ping", "docker.com"})
-	panicErr(err)
-	fmt.Println(fmt.Sprintf("ID: %s", resp.ID))
-
+	wg.Add(1)
+	go server.NewServer("localhost:3000").Serve(stop, &wg)
 	time.Sleep(time.Second * 10)
-	err = client.ScaleService(resp.ID, 7)
-	panicErr(err)
-	fmt.Println("Increased number of replicas")
-}
-
-func panicErr(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-		panic(err)
-	}
+	close(stop)
+	wg.Wait()
+	fmt.Println("Finished.")
 }
