@@ -18,7 +18,17 @@ func NewRemoteServer(version string) (*RemoteServer, error) {
 	return &RemoteServer{client}, nil
 }
 
-// Handle and RPC call to container.ScaleService
-func (remote *RemoteServer) ScaleContainer(scaleArgs *types.ScaleArgs, reply *int) error {
+// Handle an RPC call to create a service
+func (remote *RemoteServer) CreateService(createArgs *types.ServiceCreateSpec, ID *string) error {
+	resp, err := remote.client.CreateService(createArgs.BaseImage, createArgs.Replicas, createArgs.Commands)
+	if err != nil {
+		return err
+	}
+	*ID = resp.ID
+	return err
+}
+
+// Handle RPC call to container.ScaleService
+func (remote *RemoteServer) ScaleService(scaleArgs *types.ServiceScaleSpec, reply *int) error {
 	return remote.client.ScaleService(scaleArgs.ServiceID, scaleArgs.Replicas)
 }

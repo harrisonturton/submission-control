@@ -32,11 +32,8 @@ func (client *Client) CreateContainer(fromImageID string) (container.ContainerCr
 }
 
 // Create a new service from an exiting image
-func (client *Client) CreateService(name string, fromImageID string, replicas uint64, command []string) (types.ServiceCreateResponse, error) {
+func (client *Client) CreateService(fromImageID string, replicas uint64, command []string) (types.ServiceCreateResponse, error) {
 	return client.Instance.ServiceCreate(client.Context, swarm.ServiceSpec{
-		Annotations: swarm.Annotations{
-			Name: name,
-		},
 		TaskTemplate: swarm.TaskSpec{
 			ContainerSpec: &swarm.ContainerSpec{
 				Image:   fromImageID,
