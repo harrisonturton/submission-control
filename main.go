@@ -1,21 +1,25 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"github.com/harrisonturton/hydra-daemon/server"
-	"sync"
-	"time"
+	"github.com/harrisonturton/hydra-daemon/remote"
+	"net/http"
+	"net/rpc"
 )
 
-var stop = make(chan bool)
-var wg sync.WaitGroup
+var port = flag.String("port", "3000", "The port to run the local RPC server on")
 
-// Run server for 10 seconds before stopping (test graceful shutdown)
 func main() {
-	wg.Add(1)
-	go server.NewServer("localhost:3000").Serve(stop, &wg)
-	time.Sleep(time.Second * 10)
-	close(stop)
-	wg.Wait()
-	fmt.Println("Finished.")
+	flag.Parse()
+	remote, err := remote.NewRemoteServer("1.38")
+	if err != nil {
+		panic(err)
+	}
+
+	rpc.Register(remote)
+	rpc.HandleHTTP()
+	if err := http.ListenAndServe(":"+*port, nil); err != nil {
+		fmt.Println(err.Error())
+	}
 }
