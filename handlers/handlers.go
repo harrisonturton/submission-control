@@ -15,22 +15,28 @@ type Handler func(argv []string, client *rpc.Client) error
 const (
 	Stop Command = iota
 	Help
+	Create
+	Remove
 	Scale
 )
 
 // Convert from the string representation into
 // our internal representation
 var commandNames = map[string]Command{
-	"stop":  Stop,
-	"help":  Help,
-	"scale": Scale,
+	"stop":   Stop,
+	"help":   Help,
+	"create": Create,
+	"remove": Remove,
+	"scale":  Scale,
 }
 
 // Find the handler for a specific command
 var commandHandlers = map[Command]Handler{
-	Stop:  stopHandler,
-	Help:  helpHandler,
-	Scale: scaleHandler,
+	Stop:   stopHandler,
+	Help:   helpHandler,
+	Create: createHandler,
+	Remove: removeHandler,
+	Scale:  scaleHandler,
 }
 
 // Attempt to run a command
@@ -63,7 +69,42 @@ func helpHandler(argv []string, client *rpc.Client) error {
 	return nil
 }
 
-// Send an RPC call for container.Scale to the hydra daemon
+// Send an RPC call to creates a new service
+func createHandler(argv []string, client *rpc.Client) error {
+	if len(argv) < 4 {
+		return errors.New("Usage: hydra create BASE_IMAGE REPLICAS [COMMANDS]")
+	}
+	replicas, err := strconv.ParseUint(argv[3], 10, 64)
+	if err != nil {
+		return err
+	}
+	args := types.ServiceCreateSpec{
+		BaseImage: argv[2],
+		Replicas:  replicas,
+		Commands:  argv[1:],
+	}
+	var reply string
+	err = client.Call("RemoteServer.CreateService", args, &reply)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Created service: " + reply)
+	return nil
+}
+
+// Send an RPC call to remove an existing service
+func removeHandler(argv []string, client *rpc.Client) error {
+	if len(argv) < 3 {
+		return errors.New("USAGE: hydra remove SERVICE_ID")
+	}
+	args := types.ServiceRemoveSpec{
+		ServiceID: argv[2],
+	}
+	var reply int
+	return client.Call("RemoteServer.RemoveService", args, &reply)
+}
+
+// Send an RPC call to scale a service (i.e. increase or decrease the number of replicas)
 func scaleHandler(argv []string, client *rpc.Client) error {
 	if len(argv) < 4 {
 		return errors.New("Usage: hydra scale SERVICE_ID REPLICAS")
