@@ -1,31 +1,82 @@
 package container
 
 import (
-	"fmt"
-	"github.com/harrisonturton/hydra-ci/util"
-	"time"
+	"context"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/swarm"
+	"github.com/docker/docker/client"
 )
 
-type Container struct {
-	ID            string
-	EnvironmentID string
-	BaseImage     string
-	Results       chan<- string
+type Client struct {
+	Instance *client.Client
+	Context  context.Context
 }
 
-// Create a new container instance
-func NewContainer(environmentID string, baseImage string, results chan<- string) *Container {
-	return &Container{
-		ID:            util.Uuid(),
-		EnvironmentID: environmentID,
-		BaseImage:     baseImage,
-		Results:       results,
+// Create a new Instance of a Docker client.
+// If the Go SDK version is incompatible with the
+// Docker client service, specify a lower version no.
+func NewClient(version string) (*Client, error) {
+	cli, err := client.NewClientWithOpts(client.WithVersion(version))
+	if err != nil {
+		return nil, err
 	}
+	return &Client{cli, context.Background()}, nil
 }
 
-// Fake building & running test cases
-func (container *Container) Run(request string) {
-	fmt.Println(fmt.Sprintf("[%s][%s] Handling %s", container.EnvironmentID, container.ID, request))
-	time.Sleep(time.Second * 5)
-	container.Results <- fmt.Sprintf("[%s][%s] Passed [%s]", container.EnvironmentID, container.ID, request)
+// Create a new container from an existing image.
+func (client *Client) CreateContainer(fromImageID string) (container.ContainerCreateCreatedBody, error) {
+	return client.Instance.ContainerCreate(client.Context, &container.Config{
+		Image: fromImageID,
+	}, nil, nil, "")
+}
+
+// Create a new service from an exiting image
+func (client *Client) CreateService(name string, fromImageID string, replicas uint64, command []string) (types.ServiceCreateResponse, error) {
+	return client.Instance.ServiceCreate(client.Context, swarm.ServiceSpec{
+		Annotations: swarm.Annotations{
+			Name: name,
+		},
+		TaskTemplate: swarm.TaskSpec{
+			ContainerSpec: &swarm.ContainerSpec{
+				Image:   fromImageID,
+				Command: command,
+			},
+		},
+		Mode: swarm.ServiceMode{
+			Replicated: &swarm.ReplicatedService{
+				Replicas: &replicas,
+			},
+		},
+	}, types.ServiceCreateOptions{})
+}
+
+// Change the number of replicas on a service
+func (client *Client) ScaleService(serviceID string, replicas uint64) error {
+	// Need to make sure *Spec and Version numbers match
+	inspectResp, _, err := client.Instance.ServiceInspectWithRaw(client.Context, serviceID, types.ServiceInspectOptions{})
+	if err != nil {
+		return err
+	}
+	spec := inspectResp.Spec
+	spec.Mode.Replicated.Replicas = &replicas
+	_, err = client.Instance.ServiceUpdate(client.Context, serviceID, inspectResp.Meta.Version, spec, types.ServiceUpdateOptions{})
+	return err
+}
+
+// Start a container. Can start a stopped container, or a container that hasn't
+// been run yet.
+func (client *Client) StartContainer(ID string) error {
+	return client.Instance.ContainerStart(client.Context, ID, types.ContainerStartOptions{})
+}
+
+// Check if the files in the container have changed since it has been run.
+// After we run & clean up user code, check this to make sure no side-effects have
+// occured. If they have, restart the container and flag the user's submission.
+func (client *Client) ContainerEnvHasChanged(containerID string) (bool, error) {
+	changes, err := client.Instance.ContainerDiff(client.Context, containerID)
+	if err != nil {
+		return false, err
+	}
+	return len(changes) > 0, nil
 }
