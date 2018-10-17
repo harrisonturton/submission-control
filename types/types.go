@@ -24,7 +24,7 @@ func (spec *ServiceCreateSpec) String() string {
 	result := ""
 	result += fmt.Sprintf("\n  Base Image: %s", spec.BaseImage)
 	result += fmt.Sprintf("\n  Replicas: %d", spec.Replicas)
-	result += "\n  Comands: "
+	result += "\n  Commands: "
 	for _, command := range spec.Commands {
 		result += command + " "
 	}

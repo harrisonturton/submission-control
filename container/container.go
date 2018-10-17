@@ -2,10 +2,13 @@ package container
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/docker/docker/client"
+	"time"
 )
 
 type Client struct {
@@ -29,6 +32,21 @@ func (client *Client) CreateContainer(fromImageID string) (container.ContainerCr
 	return client.Instance.ContainerCreate(client.Context, &container.Config{
 		Image: fromImageID,
 	}, nil, nil, "")
+}
+
+// Wait for the next exit state of a container, with timeout (in seconds)
+func (client *Client) WaitForContainer(containerID string, timeout int) (*container.ContainerWaitOKBody, error) {
+	ctx, cancel := context.WithTimeout(client.Context, time.Second*10)
+	defer cancel()
+	respCh, errCh := client.Instance.ContainerWait(client.Context, containerID, container.WaitConditionNextExit)
+	select {
+	case err := <-errCh:
+		return nil, err
+	case resp := <-respCh:
+		return &resp, nil
+	case <-ctx.Done(): // Timeout
+		return nil, errors.New(fmt.Sprintf("WaitForContainer timeout exceeded for container %s", containerID))
+	}
 }
 
 // Create a new service from an exiting image

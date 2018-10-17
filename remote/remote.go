@@ -1,9 +1,8 @@
 package remote
 
 import (
-	"github.com/harrisonturton/hydra-daemon/container"
-	"github.com/harrisonturton/hydra-daemon/types"
-	"io"
+	"github.com/harrisonturton/submission-control/daemon/container"
+	"github.com/harrisonturton/submission-control/daemon/types"
 	"log"
 )
 
@@ -12,14 +11,12 @@ type RemoteServer struct {
 	logger *log.Logger
 }
 
-// Create a new remote server instance
-func NewRemoteServer(version string, logOut io.Writer) (*RemoteServer, error) {
-	client, err := container.NewClient(version)
-	logger := log.New(logOut, "", 0)
-	if err != nil {
-		return nil, err
+// Create a new remote server attached to a daemon instance.
+func NewRemoteServer(client *container.Client, logger *log.Logger) *RemoteServer {
+	return &RemoteServer{
+		client: client,
+		logger: logger,
 	}
-	return &RemoteServer{client, logger}, nil
 }
 
 // Handle an RPC call to create a service
