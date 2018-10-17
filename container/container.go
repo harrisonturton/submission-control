@@ -28,9 +28,10 @@ func NewClient(version string) (*Client, error) {
 }
 
 // Create a new container from an existing image.
-func (client *Client) CreateContainer(fromImageID string) (container.ContainerCreateCreatedBody, error) {
+func (client *Client) CreateContainer(fromImageID string, commands []string) (container.ContainerCreateCreatedBody, error) {
 	return client.Instance.ContainerCreate(client.Context, &container.Config{
 		Image: fromImageID,
+		Cmd:   commands,
 	}, nil, nil, "")
 }
 

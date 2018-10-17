@@ -13,7 +13,6 @@ var wg sync.WaitGroup
 
 func main() {
 	flag.Parse()
-	fmt.Println(*port)
 	instance, err := daemon.NewDaemon("1.38", "localhost:"+*port, os.Stdout)
 	panicError(err)
 
@@ -22,6 +21,11 @@ func main() {
 	go func() {
 		defer wg.Done()
 		fmt.Println("Woohoo!")
+		instance.AddEnvironment("hello-world", []string{})
+		if err := instance.Run("hello-world"); err != nil {
+			fmt.Println("Error running hello-world")
+			fmt.Println(err.Error())
+		}
 	}()
 	wg.Wait()
 	fmt.Println("Finishing...")
