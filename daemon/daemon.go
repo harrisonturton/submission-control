@@ -51,16 +51,18 @@ func (daemon *Daemon) ServeRPC(wg *sync.WaitGroup) {
 func (daemon *Daemon) AddEnvironment(baseImage string, commands []string) {
 	env := environment.NewEnvironment(baseImage, commands, daemon.Client, daemon.Logger)
 	daemon.Environments[baseImage] = env
-	log.Printf("Added environment with image " + baseImage)
+	daemon.Logger.Printf("Added environment with image " + baseImage)
 }
 
 // Launch a container for an environment. This is blocking
 func (daemon *Daemon) Run(baseImage string) error {
 	if env, ok := daemon.Environments[baseImage]; ok {
-		if err := env.Run(); err != nil {
+		daemon.Logger.Printf("Running environment " + baseImage)
+		id, err := env.Run()
+		if err != nil {
 			return err
 		}
-		daemon.Logger.Printf("Running environment " + baseImage)
+		daemon.Logger.Printf("Successfully ran container with image %s and ID %s", baseImage, *id)
 		return nil
 	}
 	return errors.New("Environment " + baseImage + " could not be found.")

@@ -39,14 +39,16 @@ func (client *Client) CreateContainer(fromImageID string, commands []string) (co
 func (client *Client) WaitForContainer(containerID string, timeout int) (*container.ContainerWaitOKBody, error) {
 	ctx, cancel := context.WithTimeout(client.Context, time.Second*10)
 	defer cancel()
-	respCh, errCh := client.Instance.ContainerWait(client.Context, containerID, container.WaitConditionNextExit)
+	respCh, errCh := client.Instance.ContainerWait(
+		client.Context, containerID, container.WaitConditionNotRunning)
 	select {
 	case err := <-errCh:
 		return nil, err
 	case resp := <-respCh:
 		return &resp, nil
 	case <-ctx.Done(): // Timeout
-		return nil, errors.New(fmt.Sprintf("WaitForContainer timeout exceeded for container %s", containerID))
+		return nil, errors.New(
+			fmt.Sprintf("WaitForContainer timeout exceeded for container %s", containerID))
 	}
 }
 

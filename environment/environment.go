@@ -26,16 +26,16 @@ func NewEnvironment(baseImage string, commands []string, client *container.Clien
 	}
 }
 
-func (env *Environment) Run() error {
+func (env *Environment) Run() (*string, error) {
 	resp, err := env.Client.CreateContainer(env.BaseImage, env.Commands)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	env.Running = append(env.Running, resp.ID)
 	_, err = env.Client.WaitForContainer(resp.ID, env.Timeout)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	env.Logger.Printf(fmt.Sprintf("Container [%s] finished!", resp.ID))
-	return nil
+	env.Logger.Printf(fmt.Sprintf("Container exited: %s", resp.ID))
+	return &resp.ID, nil
 }
