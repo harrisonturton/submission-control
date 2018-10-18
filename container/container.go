@@ -8,6 +8,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/docker/docker/client"
+	"io"
 	"time"
 )
 
@@ -35,8 +36,20 @@ func (client *Client) CreateContainer(fromImageID string, commands []string) (co
 	}, nil, nil, "")
 }
 
+// Read the logs from a container instance that ran
+func (client *Client) ReadContainerLogs(containerID string, readStdout bool, readStderr bool) (io.ReadCloser, error) {
+	return client.Instance.ContainerLogs(client.Context, containerID, types.ContainerLogsOptions{
+		ShowStdout: readStdout,
+		ShowStderr: readStderr,
+	})
+}
+
 // Wait for the next exit state of a container, with timeout (in seconds)
 func (client *Client) WaitForContainer(containerID string, timeout int) (*container.ContainerWaitOKBody, error) {
+	err := client.StartContainer(containerID)
+	if err != nil {
+		return nil, err
+	}
 	ctx, cancel := context.WithTimeout(client.Context, time.Second*10)
 	defer cancel()
 	respCh, errCh := client.Instance.ContainerWait(

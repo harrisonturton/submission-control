@@ -58,11 +58,16 @@ func (daemon *Daemon) AddEnvironment(baseImage string, commands []string) {
 func (daemon *Daemon) Run(baseImage string) error {
 	if env, ok := daemon.Environments[baseImage]; ok {
 		daemon.Logger.Printf("Running environment " + baseImage)
-		id, err := env.Run()
+		logs, err := env.RunWithLogs(true, true)
 		if err != nil {
 			return err
 		}
-		daemon.Logger.Printf("Successfully ran container with image %s and ID %s", baseImage, *id)
+		daemon.Logger.Printf("Successfully ran container with image %s.", baseImage)
+		if logs != "" {
+			daemon.Logger.Printf("Logs: %s", logs)
+		} else {
+			daemon.Logger.Printf("No logs.")
+		}
 		return nil
 	}
 	return errors.New("Environment " + baseImage + " could not be found.")

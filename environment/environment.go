@@ -3,7 +3,10 @@ package environment
 import (
 	"fmt"
 	"github.com/harrisonturton/submission-control/daemon/container"
+	"io"
+	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Environment struct {
@@ -38,4 +41,23 @@ func (env *Environment) Run() (*string, error) {
 	}
 	env.Logger.Printf(fmt.Sprintf("Container exited: %s", resp.ID))
 	return &resp.ID, nil
+}
+
+func (env *Environment) RunWithLogs(showStdout bool, showStderr bool) (string, error) {
+	id, err := env.Run()
+	if err != nil {
+		return "", err
+	}
+	logReader, err := env.Client.ReadContainerLogs(*id, showStdout, showStderr)
+	if err != nil {
+		return "", err
+	}
+	defer logReader.Close()
+	io.Copy(os.Stdout, logReader)
+	data, err := ioutil.ReadAll(logReader)
+	if err != nil && err != io.EOF {
+		return "", err
+	}
+	fmt.Printf("Data: %s\n", string(data))
+	return string(data), nil
 }
