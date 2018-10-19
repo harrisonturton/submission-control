@@ -18,7 +18,7 @@ type Environment struct {
 }
 
 // Create a new Environment instance.
-func NewEnvironment(baseImage string, commands []string, client *client.Client, logger *log.Logger) *Environment {
+func New(baseImage string, commands []string, client *client.Client, logger *log.Logger) *Environment {
 	return &Environment{
 		Client:    client,
 		BaseImage: baseImage,

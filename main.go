@@ -3,32 +3,37 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/harrisonturton/submission-control/daemon/balancer"
+	"github.com/harrisonturton/submission-control/daemon/server"
 	"os"
 	"sync"
+	"time"
 )
 
 var port = flag.String("port", "3000", "The port to run the local RPC server on")
 var wg sync.WaitGroup
+var done chan bool
 
 func main() {
 	flag.Parse()
-	instance, err := balancer.NewBalancer("1.38", "localhost:"+*port, os.Stdout)
+	instance, err := server.New(
+		"1.38", "localhost:"+*port, []string{"hello-world"}, os.Stdout)
 	panicError(err)
 
+	done := make(chan bool)
 	wg.Add(2)
-	go instance.ServeRPC(&wg)
+	go instance.Serve(done, &wg)
 	go func() {
-		fmt.Println("Attempting to add new environment...")
 		defer wg.Done()
-		instance.AddEnvironment("hello-world", []string{})
-		if err := instance.Run("hello-world"); err != nil {
-			fmt.Println("Error running hello-world")
-			fmt.Println(err.Error())
+		time.Sleep(time.Second * 2)
+		for i, _ := range []int{0, 0, 0, 0, 0, 0} {
+			fmt.Printf("\rStopping in %d", 5-i)
+			time.Sleep(time.Second)
 		}
+		fmt.Printf("\n")
+		close(done)
 	}()
 	wg.Wait()
-	fmt.Println("Finishing...")
+	fmt.Println("Finished.")
 }
 
 func panicError(err error) {
