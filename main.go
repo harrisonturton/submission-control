@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/harrisonturton/submission-control/daemon/server"
+	"github.com/harrisonturton/submission-control/worker/server"
 	"os"
 	"sync"
 	"time"

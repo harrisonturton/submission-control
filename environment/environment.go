@@ -3,7 +3,7 @@ package environment
 import (
 	"bytes"
 	"fmt"
-	"github.com/harrisonturton/submission-control/daemon/client"
+	"github.com/harrisonturton/submission-control/worker/client"
 	"log"
 	"time"
 )

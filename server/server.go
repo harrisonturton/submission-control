@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/harrisonturton/submission-control/daemon/client"
-	"github.com/harrisonturton/submission-control/daemon/environment"
+	"github.com/harrisonturton/submission-control/worker/client"
+	"github.com/harrisonturton/submission-control/worker/environment"
 	"io"
 	"log"
 	"net/http"
@@ -19,7 +19,7 @@ type Server struct {
 	Environments map[string]*environment.Environment
 }
 
-// NewServer creates a new load server instance. If the Docker daemon API version
+// NewServer creates a new load server instance. If the Docker worker API version
 // is incompatible with the Go SDK, try passing in a different version number.
 func New(version string, addr string, images []string, logOut io.Writer) (Server, error) {
 	client, err := client.NewClient(version)
