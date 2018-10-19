@@ -1,6 +1,7 @@
 package main
 
 import (
+<<<<<<< HEAD
 	"bytes"
 	"flag"
 	"github.com/harrisonturton/submission-control/worker/client"
@@ -82,5 +83,23 @@ func handleMessage(client *client.Client, msg string) {
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
+=======
+	"fmt"
+	"github.com/harrisonturton/hydra-cli/handlers"
+	"net/rpc"
+	"os"
+)
+
+func main() {
+	client, err := rpc.DialHTTP("tcp", ":3000")
+	panicError(err)
+	err = handlers.RunCommand(os.Args, client)
+	panicError(err)
+}
+
+func panicError(err error) {
+	if err != nil {
+		fmt.Println(err.Error())
+>>>>>>> 53f405fc1f5594fd337c0f518392b6655a7c851a
 	}
 }
