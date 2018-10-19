@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"github.com/harrisonturton/submission-control/ci/worker/worker"
 	"os"
+	"os/signal"
 	"sync"
-	"time"
+	"syscall"
 )
 
 const (
@@ -20,15 +21,18 @@ func main() {
 	}
 
 	var wg sync.WaitGroup
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGINT)
 	done := make(chan bool)
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		time.Sleep(time.Second * 10)
+		<-sig
+		fmt.Println("Finishing...")
 		close(done)
 	}()
 	go worker.Run(done, &wg)
 	wg.Wait()
 
-	fmt.Println("Finishing.")
+	fmt.Println("Finished.")
 }
