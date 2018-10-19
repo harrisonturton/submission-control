@@ -19,13 +19,11 @@ func New(name string, addr string) (*Queue, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
 	// Try to open a unique server channel
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, err
 	}
-	defer ch.Close()
 	// Declare the queue
 	queue, err := ch.QueueDeclare(
 		name,
@@ -45,7 +43,9 @@ func New(name string, addr string) (*Queue, error) {
 	}, nil
 }
 
-// Message will put a message on the queue
+// Message will put a message on the queue. It will not
+// close the Connection or Channel, so you must do it
+// manually after you've finished messaging.
 func (queue *Queue) Message(msg string) error {
 	return queue.Channel.Publish(
 		"",               // Exhange
@@ -59,8 +59,14 @@ func (queue *Queue) Message(msg string) error {
 	)
 }
 
+// Consume will continually take mssages from the queue, and give it to the handler function.
+// If the done channel is closed during the processing of a message, it will wait until the
+// message has finished processing before finishing.
+// The queue Connection and Channel will be closed after this function.
 func (queue *Queue) Consume(wg *sync.WaitGroup, done chan bool, handler func(message string)) error {
 	defer wg.Done()
+	defer queue.Connection.Close()
+	defer queue.Channel.Close()
 	msgs, err := queue.Channel.Consume(
 		queue.Queue.Name, // Queue
 		"",               // Consumer
@@ -83,4 +89,10 @@ func (queue *Queue) Consume(wg *sync.WaitGroup, done chan bool, handler func(mes
 		}
 	}
 	return nil
+}
+
+// Close manually closes the Connection and Channel.
+func (queue *Queue) Close() {
+	queue.Connection.Close()
+	queue.Channel.Close()
 }
