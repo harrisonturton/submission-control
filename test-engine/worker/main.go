@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
-	"github.com/harrisonturton/submission-control/worker/client"
+	"github.com/harrisonturton/submission-control/test-engine/worker/client"
 	"github.com/streadway/amqp"
 	"log"
 	"time"
