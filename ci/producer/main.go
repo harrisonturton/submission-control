@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/harrisonturton/submission-control/test-engine/producer/listener"
-	"github.com/harrisonturton/submission-control/test-engine/producer/server"
+	"github.com/harrisonturton/submission-control/ci/producer/listener"
+	"github.com/harrisonturton/submission-control/ci/producer/server"
 	"os"
 	"sync"
 	"time"

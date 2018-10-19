@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/harrisonturton/submission-control/test-engine/queue"
+	"github.com/harrisonturton/submission-control/ci/queue"
 	"io"
 	"io/ioutil"
 	"log"

@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"github.com/harrisonturton/submission-control/test-engine/queue"
+	"github.com/harrisonturton/submission-control/ci/queue"
 	"io"
 	"log"
 	"sync"

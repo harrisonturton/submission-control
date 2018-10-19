@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/harrisonturton/submission-control/test-engine/worker/worker"
+	"github.com/harrisonturton/submission-control/ci/worker/worker"
 	"os"
 	"sync"
 	"time"
