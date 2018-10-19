@@ -1,4 +1,4 @@
-# Hydra Daemon
+# ANU Submission Control
 
 This service powers the automated building & testing of student projects. Though it is intended to be run non-interactively, it publishes an RPC server which can be communicated with via `hydra-cli`. This allows us to manually start/remove/scale individual swarm services.
 
@@ -16,7 +16,7 @@ We need to build & test projects in a variety of languages and environments. It 
 We are running unverified user code! This is very dangerous, whether or not malicious code is uploaded. Suppose a student uploads a kernel exploit – how do we protect against this? What if they inadvertently change the testing environment? We need to be secure, but also log everything so that we can find the source if anything does happen.
 
 **Reliability**
-If a testing environment goes down (i.e. through malicious code or otherwise), we cannot let this influene other environments. Ideally, the failure of one node will not influence the failure of the platform as a whole. 
+If a testing environment goes down (i.e. through malicious code or otherwise), we cannot let this influene other environments. Ideally, the failure of one node will not influence the failure of the platform as a whole.
 
 For example, if COMP2310 experiences an outage, this shouldn't affect COMP1130. At a finer level of granularity, `assignment-3-comp2310` outages should not effect `assignment-1-comp2310`.
 
