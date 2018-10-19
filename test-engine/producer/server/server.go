@@ -13,15 +13,13 @@ import (
 )
 
 type Server struct {
-	Server      *http.Server
-	Logger      *log.Logger
-	JobQueue    *queue.Queue
-	ResultQueue *queue.Queue
+	Server   *http.Server
+	Logger   *log.Logger
+	JobQueue *queue.Queue
 }
 
 const (
-	JobQueue    = "job_queue"
-	ResultQueue = "result_queue"
+	JobQueue = "job_queue"
 )
 
 // New creates a new Server instance. It will return and error
@@ -45,12 +43,7 @@ func New(logOut io.Writer, addr string) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	resultQueue, err := queue.New(ResultQueue, "amqp://guest:guest@localhost:5672/")
-	if err != nil {
-		return nil, err
-	}
 	server.JobQueue = jobQueue
-	server.ResultQueue = resultQueue
 	return server, nil
 }
 
