@@ -2,42 +2,64 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"github.com/harrisonturton/submission-control/worker/server"
-	"os"
-	"sync"
-	"time"
+	"github.com/streadway/amqp"
+	"log"
 )
 
-var port = flag.String("port", "3000", "The port to run the local RPC server on")
-var wg sync.WaitGroup
-var done chan bool
+const (
+	QueueName = "job_queue"
+)
+
+var queueAddr = flag.String("addr", "amqp://guest:guest@localhost:5672/", "Job queue address")
 
 func main() {
 	flag.Parse()
-	instance, err := server.New(
-		"1.38", "localhost:"+*port, []string{"hello-world"}, os.Stdout)
-	panicError(err)
 
-	done := make(chan bool)
-	wg.Add(2)
-	go instance.Serve(done, &wg)
+	log.Println("Attempting to connect to " + *queueAddr)
+	conn, err := amqp.Dial(*queueAddr)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel.")
+	defer ch.Close()
+
+	queue, err := ch.QueueDeclare(
+		QueueName, // Name
+		false,     // Durable
+		false,     // Delete when unused
+		false,     // Exclusive
+		false,     // No-wait
+		nil,       // Arguments
+	)
+	failOnError(err, "Failed to declare queue: "+QueueName)
+
+	msgs, err := ch.Consume(
+		queue.Name, // Queue
+		"",         // Consumer
+		true,       // Auto-Ack
+		false,      // Exclusive
+		false,      // No-local
+		false,      // No-Wait
+		nil,        // Args
+	)
+	failOnError(err, "Failed to register a consumer")
+
+	// Handle messages forever
+	forever := make(chan bool)
 	go func() {
-		defer wg.Done()
-		time.Sleep(time.Second * 2)
-		for i, _ := range []int{0, 0, 0, 0, 0, 0} {
-			fmt.Printf("\rStopping in %d", 5-i)
-			time.Sleep(time.Second)
+		for d := range msgs {
+			log.Printf("Recieved message: %s", d.Body)
 		}
-		fmt.Printf("\n")
-		close(done)
 	}()
-	wg.Wait()
-	fmt.Println("Finished.")
+	log.Printf("[*] Waiting for messages. To exit press CTRL+C")
+	<-forever
 }
 
-func panicError(err error) {
+// failOnError will print the error & message before
+// exiting with exit code 1.
+func failOnError(err error, msg string) {
 	if err != nil {
-		panic(err)
+		log.Fatalf("%s: %s", msg, err)
 	}
 }
