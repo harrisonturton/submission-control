@@ -6,8 +6,9 @@ import (
 	"github.com/harrisonturton/submission-control/ci/producer/listener"
 	"github.com/harrisonturton/submission-control/ci/producer/server"
 	"os"
+	"os/signal"
 	"sync"
-	"time"
+	"syscall"
 )
 
 var port = flag.String("port", "8080", "Port for the server to listen on.")
@@ -22,6 +23,9 @@ func main() {
 	listener, err := listener.New(os.Stdout, ResultQueue, *addr)
 	panicError(err)
 
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT)
+
 	done := make(chan bool)
 	var wg sync.WaitGroup
 	wg.Add(3)
@@ -29,7 +33,7 @@ func main() {
 	go listener.Run(done, &wg)
 	go func() {
 		defer wg.Done()
-		time.Sleep(time.Second * 100)
+		<-sig
 		fmt.Println("Stopping...")
 		close(done)
 	}()
