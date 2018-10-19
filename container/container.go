@@ -12,14 +12,15 @@ import (
 	"time"
 )
 
+// Client is an interface to the Docker daemon. It abstracts all the library
+// calls under one unifying interface.
 type Client struct {
 	Instance *client.Client
 	Context  context.Context
 }
 
-// Create a new Instance of a Docker client.
-// If the Go SDK version is incompatible with the
-// Docker client service, specify a lower version no.
+// NewClient creates a new interface to the Docker daemon. If the GO SDK version
+// is incompatible with the API version, try specifying a lower version number.
 func NewClient(version string) (*Client, error) {
 	cli, err := client.NewClientWithOpts(client.WithVersion(version))
 	if err != nil {
@@ -28,7 +29,8 @@ func NewClient(version string) (*Client, error) {
 	return &Client{cli, context.Background()}, nil
 }
 
-// Create a new container from an existing image.
+// CreateContainer creates a new container from an existing image. Note, this does
+// NOT run the container.
 func (client *Client) CreateContainer(fromImageID string, commands []string) (container.ContainerCreateCreatedBody, error) {
 	return client.Instance.ContainerCreate(client.Context, &container.Config{
 		Image: fromImageID,
@@ -36,36 +38,41 @@ func (client *Client) CreateContainer(fromImageID string, commands []string) (co
 	}, nil, nil, "")
 }
 
-// Read the logs from a container instance that ran
-func (client *Client) ReadContainerLogs(containerID string, readStdout bool, readStderr bool) (io.ReadCloser, error) {
-	return client.Instance.ContainerLogs(client.Context, containerID, types.ContainerLogsOptions{
-		ShowStdout: readStdout,
-		ShowStderr: readStderr,
-	})
+// StartContainer launches a non-running container.
+func (client *Client) StartContainer(containerID string) error {
+	return client.Instance.ContainerStart(
+		client.Context, containerID, types.ContainerStartOptions{})
 }
 
-// Wait for the next exit state of a container, with timeout (in seconds)
-func (client *Client) WaitForContainer(containerID string, timeout int) (*container.ContainerWaitOKBody, error) {
-	err := client.StartContainer(containerID)
-	if err != nil {
-		return nil, err
+// ReadContainerLogs returns the Stdout or Stderr (or both) of a container.
+func (client *Client) ReadContainerLogs(containerID string, showStdout bool, showStderr bool) (io.ReadCloser, error) {
+	return client.Instance.ContainerLogs(
+		client.Context, containerID, types.ContainerLogsOptions{
+			ShowStdout: showStdout,
+			ShowStderr: showStderr,
+		})
+}
+
+// WaitForContainer will start a container, and block until it either finishes,
+// or the runtime surpasses the timeout.
+func (client *Client) WaitForContainer(containerID string, timeout time.Duration) error {
+	if err := client.StartContainer(containerID); err != nil {
+		return err
 	}
-	ctx, cancel := context.WithTimeout(client.Context, time.Second*10)
+	ctx, cancel := context.WithTimeout(client.Context, timeout)
 	defer cancel()
-	respCh, errCh := client.Instance.ContainerWait(
-		client.Context, containerID, container.WaitConditionNotRunning)
+	respCh, errCh := client.Instance.ContainerWait(client.Context, containerID, container.WaitConditionNotRunning)
 	select {
 	case err := <-errCh:
-		return nil, err
-	case resp := <-respCh:
-		return &resp, nil
+		return err
+	case <-respCh:
+		return nil
 	case <-ctx.Done(): // Timeout
-		return nil, errors.New(
-			fmt.Sprintf("WaitForContainer timeout exceeded for container %s", containerID))
+		return errors.New(fmt.Sprintf("WaitForContainer timeout exceeded: ", containerID))
 	}
 }
 
-// Create a new service from an exiting image
+// CreateService creates a new service from an existing image
 func (client *Client) CreateService(fromImageID string, replicas uint64, command []string) (types.ServiceCreateResponse, error) {
 	return client.Instance.ServiceCreate(client.Context, swarm.ServiceSpec{
 		TaskTemplate: swarm.TaskSpec{
@@ -82,12 +89,13 @@ func (client *Client) CreateService(fromImageID string, replicas uint64, command
 	}, types.ServiceCreateOptions{})
 }
 
-// Remove an existing service
+// RemoveService stops the replicas of an en existing service, and removes it from the
+// docker daemon.
 func (client *Client) RemoveService(serviceID string) error {
 	return client.Instance.ServiceRemove(client.Context, serviceID)
 }
 
-// Change the number of replicas on a service
+// ScaleService changes the number of replicas on a service.
 func (client *Client) ScaleService(serviceID string, replicas uint64) error {
 	// Need to make sure *Spec and Version numbers match
 	inspectResp, _, err := client.Instance.ServiceInspectWithRaw(client.Context, serviceID, types.ServiceInspectOptions{})
@@ -98,21 +106,4 @@ func (client *Client) ScaleService(serviceID string, replicas uint64) error {
 	spec.Mode.Replicated.Replicas = &replicas
 	_, err = client.Instance.ServiceUpdate(client.Context, serviceID, inspectResp.Meta.Version, spec, types.ServiceUpdateOptions{})
 	return err
-}
-
-// Start a container. Can start a stopped container, or a container that hasn't
-// been run yet.
-func (client *Client) StartContainer(ID string) error {
-	return client.Instance.ContainerStart(client.Context, ID, types.ContainerStartOptions{})
-}
-
-// Check if the files in the container have changed since it has been run.
-// After we run & clean up user code, check this to make sure no side-effects have
-// occured. If they have, restart the container and flag the user's submission.
-func (client *Client) ContainerEnvHasChanged(containerID string) (bool, error) {
-	changes, err := client.Instance.ContainerDiff(client.Context, containerID)
-	if err != nil {
-		return false, err
-	}
-	return len(changes) > 0, nil
 }

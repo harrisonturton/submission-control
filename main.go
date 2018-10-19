@@ -19,8 +19,8 @@ func main() {
 	wg.Add(2)
 	go instance.ServeRPC(&wg)
 	go func() {
+		fmt.Println("Attempting to add new environment...")
 		defer wg.Done()
-		fmt.Println("Woohoo!")
 		instance.AddEnvironment("hello-world", []string{})
 		if err := instance.Run("hello-world"); err != nil {
 			fmt.Println("Error running hello-world")

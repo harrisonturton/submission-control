@@ -1,12 +1,11 @@
 package environment
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/harrisonturton/submission-control/daemon/container"
-	"io"
-	"io/ioutil"
 	"log"
-	"os"
+	"time"
 )
 
 type Environment struct {
@@ -29,20 +28,22 @@ func NewEnvironment(baseImage string, commands []string, client *container.Clien
 	}
 }
 
+// RunWithLogs creates & runs a new container.
 func (env *Environment) Run() (*string, error) {
 	resp, err := env.Client.CreateContainer(env.BaseImage, env.Commands)
 	if err != nil {
 		return nil, err
 	}
 	env.Running = append(env.Running, resp.ID)
-	_, err = env.Client.WaitForContainer(resp.ID, env.Timeout)
-	if err != nil {
+	if err = env.Client.WaitForContainer(resp.ID, time.Second*10); err != nil {
 		return nil, err
 	}
 	env.Logger.Printf(fmt.Sprintf("Container exited: %s", resp.ID))
 	return &resp.ID, nil
 }
 
+// RunWithLogs creates & runs a new container, but also optionally returns the STDOUT
+// and STDERR.
 func (env *Environment) RunWithLogs(showStdout bool, showStderr bool) (string, error) {
 	id, err := env.Run()
 	if err != nil {
@@ -53,11 +54,7 @@ func (env *Environment) RunWithLogs(showStdout bool, showStderr bool) (string, e
 		return "", err
 	}
 	defer logReader.Close()
-	io.Copy(os.Stdout, logReader)
-	data, err := ioutil.ReadAll(logReader)
-	if err != nil && err != io.EOF {
-		return "", err
-	}
-	fmt.Printf("Data: %s\n", string(data))
-	return string(data), nil
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(logReader)
+	return buf.String(), nil
 }
