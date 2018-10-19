@@ -21,7 +21,7 @@ type Client struct {
 
 // NewClient creates a new interface to the Docker daemon. If the GO SDK version
 // is incompatible with the API version, try specifying a lower version number.
-func NewClient(version string) (*Client, error) {
+func New(version string) (*Client, error) {
 	cli, err := client.NewClientWithOpts(client.WithVersion(version))
 	if err != nil {
 		return nil, err
