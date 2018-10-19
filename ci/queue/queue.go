@@ -79,7 +79,6 @@ func (queue *Queue) Consume(wg *sync.WaitGroup, done chan bool, handler func(mes
 	if err != nil {
 		return err
 	}
-
 	for {
 		select {
 		case <-done:
