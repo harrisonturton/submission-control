@@ -80,11 +80,11 @@ func (queue *Queue) Consume(wg *sync.WaitGroup, done chan bool, handler func(mes
 		return err
 	}
 
-	for msg := range msgs {
+	for {
 		select {
 		case <-done:
 			return nil
-		default:
+		case msg := <-msgs:
 			handler(string(msg.Body))
 		}
 	}
