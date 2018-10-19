@@ -3,22 +3,22 @@ package environment
 import (
 	"bytes"
 	"fmt"
-	"github.com/harrisonturton/submission-control/daemon/container"
+	"github.com/harrisonturton/submission-control/daemon/client"
 	"log"
 	"time"
 )
 
 type Environment struct {
-	Client    *container.Client // The docker client
-	BaseImage string            // The docker image
-	Running   []string          // IDs of containers currently running
-	Timeout   int               // In seconds
+	Client    *client.Client // The docker client
+	BaseImage string         // The docker image
+	Running   []string       // IDs of clients currently running
+	Timeout   int            // In seconds
 	Logger    *log.Logger
 	Commands  []string
 }
 
 // Create a new Environment instance.
-func NewEnvironment(baseImage string, commands []string, client *container.Client, logger *log.Logger) *Environment {
+func NewEnvironment(baseImage string, commands []string, client *client.Client, logger *log.Logger) *Environment {
 	return &Environment{
 		Client:    client,
 		BaseImage: baseImage,
@@ -28,7 +28,7 @@ func NewEnvironment(baseImage string, commands []string, client *container.Clien
 	}
 }
 
-// RunWithLogs creates & runs a new container.
+// RunWithLogs creates & runs a new client.
 func (env *Environment) Run() (*string, error) {
 	resp, err := env.Client.CreateContainer(env.BaseImage, env.Commands)
 	if err != nil {
@@ -42,7 +42,7 @@ func (env *Environment) Run() (*string, error) {
 	return &resp.ID, nil
 }
 
-// RunWithLogs creates & runs a new container, but also optionally returns the STDOUT
+// RunWithLogs creates & runs a new client, but also optionally returns the STDOUT
 // and STDERR.
 func (env *Environment) RunWithLogs(showStdout bool, showStderr bool) (string, error) {
 	id, err := env.Run()

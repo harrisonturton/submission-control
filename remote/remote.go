@@ -1,18 +1,18 @@
 package remote
 
 import (
-	"github.com/harrisonturton/submission-control/daemon/container"
+	"github.com/harrisonturton/submission-control/daemon/client"
 	"github.com/harrisonturton/submission-control/daemon/types"
 	"log"
 )
 
 type RemoteServer struct {
-	client *container.Client
+	client *client.Client
 	logger *log.Logger
 }
 
 // Create a new remote server attached to a daemon instance.
-func NewRemoteServer(client *container.Client, logger *log.Logger) *RemoteServer {
+func NewRemoteServer(client *client.Client, logger *log.Logger) *RemoteServer {
 	return &RemoteServer{
 		client: client,
 		logger: logger,

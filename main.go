@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/harrisonturton/submission-control/daemon/daemon"
+	"github.com/harrisonturton/submission-control/daemon/balancer"
 	"os"
 	"sync"
 )
@@ -13,7 +13,7 @@ var wg sync.WaitGroup
 
 func main() {
 	flag.Parse()
-	instance, err := daemon.NewDaemon("1.38", "localhost:"+*port, os.Stdout)
+	instance, err := balancer.NewBalancer("1.38", "localhost:"+*port, os.Stdout)
 	panicError(err)
 
 	wg.Add(2)
