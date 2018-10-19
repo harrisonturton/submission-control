@@ -1,20 +1,26 @@
 package worker
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/harrisonturton/submission-control/ci/queue"
+	"github.com/harrisonturton/submission-control/ci/worker/client"
 	"io"
 	"log"
 	"sync"
+	"time"
 )
 
 type Worker struct {
 	Jobs    *queue.Queue
 	Results *queue.Queue
+	Client  *client.Client
 	Logger  *log.Logger
 }
 
-// New tries to connect to both the job and result queues. If successful,
-// it will return a Worker instance. Otherwise, it will fail with an error.
+// New tries to connect to the job queue, the result queue, and to the docker
+// daemon. If any of these fail, an error is returned. Otherwise it returns a
+// new Worker instance.
 func New(logOut io.Writer, jobQueueName, resultQueueName, addr string) (*Worker, error) {
 	jobs, err := queue.New(jobQueueName, addr)
 	if err != nil {
@@ -24,9 +30,14 @@ func New(logOut io.Writer, jobQueueName, resultQueueName, addr string) (*Worker,
 	if err != nil {
 		return nil, err
 	}
+	client, err := client.New("1.38")
+	if err != nil {
+		return nil, err
+	}
 	return &Worker{
 		Jobs:    jobs,
 		Results: results,
+		Client:  client,
 		Logger:  log.New(logOut, "", log.LstdFlags),
 	}, nil
 }
@@ -42,5 +53,20 @@ func (worker *Worker) Run(done chan bool, wg *sync.WaitGroup) {
 // queue.
 func (worker *Worker) handleJob(msg string) {
 	worker.Logger.Printf("Recieved job: %s", msg)
-	worker.Results.Message("Handled " + msg)
+
+	resp, err := worker.Client.CreateContainer(msg, []string{})
+	if err != nil {
+		worker.Logger.Printf("Error on create container: %s", err)
+		return
+	}
+	err = worker.Client.WaitForContainer(resp.ID, time.Second*15)
+	if err != nil {
+		worker.Logger.Printf("Error on wait for container: %s", err)
+		return
+	}
+	logReader, err := worker.Client.ReadContainerLogs(resp.ID, true, true)
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(logReader)
+	worker.Logger.Printf("Container Logs: %s", buf.String())
+	worker.Results.Message(fmt.Sprintf("\n%s:\n%s", resp.ID, buf.String()))
 }
