@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"flag"
+	"github.com/harrisonturton/submission-control/worker/client"
 	"github.com/streadway/amqp"
 	"log"
+	"time"
 )
 
 const (
@@ -45,15 +48,33 @@ func main() {
 	)
 	failOnError(err, "Failed to register a consumer")
 
+	client, err := client.New("1.38")
+	failOnError(err, "Failed to create Docker client.")
+
 	// Handle messages forever
 	forever := make(chan bool)
 	go func() {
 		for d := range msgs {
-			log.Printf("Recieved message: %s", d.Body)
+			handleMessage(client, string(d.Body))
 		}
 	}()
 	log.Printf("[*] Waiting for messages. To exit press CTRL+C")
 	<-forever
+}
+
+func handleMessage(client *client.Client, msg string) {
+	log.Printf("Recieved message: %s", msg)
+	resp, err := client.CreateContainer(msg, []string{})
+	if err != nil {
+		log.Printf("Failed to create container: %s", err)
+		return
+	}
+
+	client.WaitForContainer(resp.ID, time.Second*30)
+	logReader, err := client.ReadContainerLogs(resp.ID, true, true)
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(logReader)
+	log.Printf("Result: %s", buf.String())
 }
 
 // failOnError will print the error & message before
