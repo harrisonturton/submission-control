@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/swarm"
 	"github.com/docker/docker/client"
 	"time"
 )
@@ -82,6 +81,6 @@ func (client *Docker) Wait(containerID string, timeout time.Duration) error {
 	case <-respCh:
 		return nil
 	case <-ctx.Done(): // Timeout
-		return fmt.Errorf("WaitForContainer timeout exceeded: ", containerID)
+		return fmt.Errorf("WaitForContainer timeout exceeded: %s", containerID)
 	}
 }
