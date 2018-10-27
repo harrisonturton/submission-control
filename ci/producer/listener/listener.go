@@ -7,8 +7,12 @@ import (
 	"sync"
 )
 
+// Listener represents the process that takes test requests (through
+// a port), and puts them on the job queue. It also listens to the
+// result queue, and evalutates whether the testing was successful
+// or not.
 type Listener struct {
-	Results *queue.Queue
+	Results queue.Queue
 	Logger  *log.Logger
 }
 
@@ -28,7 +32,7 @@ func New(logOut io.Writer, resultQueueName, addr string) (*Listener, error) {
 // Run will continuouslly pop messages off the result queue,
 // and handle them with listener.handleResult
 func (listener *Listener) Run(done chan bool, wg *sync.WaitGroup) {
-	listener.Logger.Printf("Waiting for results on queue %s", listener.Results.Queue.Name)
+	listener.Logger.Printf("Waiting for results on queue %s", listener.Results.Name())
 	listener.Results.Consume(wg, done, listener.handleResult)
 }
 

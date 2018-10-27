@@ -12,14 +12,17 @@ import (
 	"time"
 )
 
+// Server represents the goroutine that listens
+// for test requests over the web, and puts them
+// on the job queue.
 type Server struct {
 	Server   *http.Server
 	Logger   *log.Logger
-	JobQueue *queue.Queue
+	JobQueue queue.Queue
 }
 
 const (
-	JobQueue = "job_queue"
+	jobQueueName = "job_queue"
 )
 
 // New creates a new Server instance. It will return and error
@@ -39,7 +42,7 @@ func New(logOut io.Writer, addr string) (*Server, error) {
 	router := http.NewServeMux()
 	router.HandleFunc("/", server.handleRequest)
 	server.Server.Handler = router
-	jobQueue, err := queue.New(JobQueue, "amqp://guest:guest@localhost:5672/")
+	jobQueue, err := queue.New(jobQueueName, "amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		return nil, err
 	}
