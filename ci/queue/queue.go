@@ -8,6 +8,7 @@ import (
 // Queue is the interface that RabbitMQ must conform to.
 // We use this for mocking.
 type Queue interface {
+	Name() string
 	Message(msg string) error
 	Consume(wg *sync.WaitGroup, done chan bool, handler func(msg string)) error
 }
@@ -49,6 +50,11 @@ func New(name string, addr string) (*RabbitMQ, error) {
 		Channel:    ch,
 		Queue:      &queue,
 	}, nil
+}
+
+// Name will return the name of the queue
+func (queue *RabbitMQ) Name() string {
+	return queue.Queue.Name
 }
 
 // Message will put a message on the queue. It will not
