@@ -16,18 +16,17 @@ import (
 // for test requests over the web, and puts them
 // on the job queue.
 type Server struct {
-	Server   *http.Server
-	Logger   *log.Logger
-	JobQueue queue.Queue
+	Server *http.Server
+	Logger *log.Logger
+	Jobs   queue.Queue
 }
 
 const (
-	jobQueueName = "job_queue"
+	jobQueue = "job_queue"
 )
 
-// New creates a new Server instance. It will return and error
-// if it cannot connect to the RabbitMQ queues.
-func New(logOut io.Writer, addr string) (*Server, error) {
+// New creates a new Server instance.
+func New(logOut io.Writer, jobs queue.Queue, addr string) *Server {
 	logger := log.New(logOut, "", log.LstdFlags)
 	server := &Server{
 		Server: &http.Server{
@@ -38,28 +37,25 @@ func New(logOut io.Writer, addr string) (*Server, error) {
 			IdleTimeout:  15 * time.Second,
 		},
 		Logger: logger,
+		Jobs:   jobs,
 	}
 	router := http.NewServeMux()
 	router.HandleFunc("/", server.handleRequest)
-	server.Server.Handler = router
-	jobQueue, err := queue.New(jobQueueName, "amqp://guest:guest@localhost:5672/")
-	if err != nil {
-		return nil, err
-	}
-	server.JobQueue = jobQueue
-	return server, nil
+	server.Server.Handler = withLogging(logger, router)
+	return server
 }
 
-// Serve will listen for requests on the Server address. It will exit
-// with exit code 1 if it encouters an error.
+// Serve will continuously listen for requests, and handle them
+// with server.handleRequest.
 func (server *Server) Serve(done chan bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 	go func() {
 		<-done
+		// Force shutdown if couldn't gracefully shutdown within the timeout
 		server.Logger.Println("Attempting to shutdown server...")
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
-
+		// Attempt to gracefully shutdown
 		err := server.Server.Shutdown(ctx)
 		if err != nil {
 			server.Logger.Fatalf("Could not gracefully shutdown the server. %s\n", err.Error())
@@ -83,4 +79,13 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "Handled!")
 	}
+}
+
+func withLogging(logger *log.Logger, handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger.Printf("%s: %s", r.Method, r.URL.Path)
+		logger.Printf("From: %s", r.RemoteAddr)
+		logger.Printf("As: %s", r.UserAgent())
+		handler.ServeHTTP(w, r)
+	})
 }
