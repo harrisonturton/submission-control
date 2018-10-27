@@ -5,7 +5,15 @@ import (
 	"sync"
 )
 
-type Queue struct {
+// Queue is the interface that RabbitMQ must conform to.
+// We use this for mocking.
+type Queue interface {
+	Message(msg string) error
+	Consume(wg *sync.WaitGroup, done chan bool, handler func(msg string)) error
+}
+
+// RabbitMQ contains the various connections to RabbitMQ
+type RabbitMQ struct {
 	Connection *amqp.Connection
 	Channel    *amqp.Channel
 	Queue      *amqp.Queue
@@ -13,7 +21,7 @@ type Queue struct {
 
 // New tries to connect to RabbitMQ on the given address,
 // and also creates (if it doesn't already exist) a queue.
-func New(name string, addr string) (*Queue, error) {
+func New(name string, addr string) (*RabbitMQ, error) {
 	// Attempt to connect
 	conn, err := amqp.Dial(addr)
 	if err != nil {
@@ -36,7 +44,7 @@ func New(name string, addr string) (*Queue, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Queue{
+	return &RabbitMQ{
 		Connection: conn,
 		Channel:    ch,
 		Queue:      &queue,
@@ -46,7 +54,7 @@ func New(name string, addr string) (*Queue, error) {
 // Message will put a message on the queue. It will not
 // close the Connection or Channel, so you must do it
 // manually after you've finished messaging.
-func (queue *Queue) Message(msg string) error {
+func (queue *RabbitMQ) Message(msg string) error {
 	return queue.Channel.Publish(
 		"",               // Exhange
 		queue.Queue.Name, // Routing key
@@ -62,13 +70,13 @@ func (queue *Queue) Message(msg string) error {
 // Consume will continually take mssages from the queue, and give it to the handler function.
 // If the done channel is closed during the processing of a message, it will wait until the
 // message has finished processing before finishing.
-// The queue Connection and Channel will be closed after this function.
-func (queue *Queue) Consume(wg *sync.WaitGroup, done chan bool, handler func(message string)) error {
+// The queue Connection and Channel will be closed automatically.
+func (queue *RabbitMQ) Consume(wg *sync.WaitGroup, done chan bool, handler func(message string)) error {
 	defer wg.Done()
 	defer queue.Connection.Close()
 	defer queue.Channel.Close()
 	msgs, err := queue.Channel.Consume(
-		queue.Queue.Name, // Queue
+		queue.Queue.Name, // RabbitMQ
 		"",               // Consumer
 		true,             // Auto-Ack
 		false,            // Exclusive
@@ -91,7 +99,7 @@ func (queue *Queue) Consume(wg *sync.WaitGroup, done chan bool, handler func(mes
 }
 
 // Close manually closes the Connection and Channel.
-func (queue *Queue) Close() {
+func (queue *RabbitMQ) Close() {
 	queue.Connection.Close()
 	queue.Channel.Close()
 }
