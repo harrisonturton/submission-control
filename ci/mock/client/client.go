@@ -1,7 +1,6 @@
-package mock
+package client
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"time"
@@ -16,7 +15,10 @@ type Client struct {
 
 // New creates a new instance of the mocked client.
 func New(version string) (*Client, error) {
-	return &Client{[]string{}}, nil
+	return &Client{
+		Containers: []string{},
+		Running:    map[string]bool{},
+	}, nil
 }
 
 // Create creates a new mock container, and returns an random ID.

@@ -1,4 +1,4 @@
-package mock
+package queue
 
 import (
 	"errors"
@@ -8,8 +8,8 @@ import (
 // Queue is a mocked instance of our RabbitMQ
 // connection.
 type Queue struct {
-	Name     string
-	Messages chan string
+	QueueName string
+	Messages  chan string
 }
 
 // New creates a new mocked Queue instance.
@@ -19,7 +19,7 @@ func New(name string, addr string) (*Queue, error) {
 
 // Name will return the name of the queue
 func (queue *Queue) Name() string {
-	return queue.Name
+	return queue.QueueName
 }
 
 // Message will send a dummy message to the queue. If
