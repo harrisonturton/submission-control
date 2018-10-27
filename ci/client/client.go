@@ -85,39 +85,3 @@ func (client *Docker) Wait(containerID string, timeout time.Duration) error {
 		return fmt.Errorf("WaitForContainer timeout exceeded: ", containerID)
 	}
 }
-
-// CreateService creates a new service from an existing image
-func (client *Docker) CreateService(fromImageID string, replicas uint64, command []string) (types.ServiceCreateResponse, error) {
-	return client.Instance.ServiceCreate(client.Context, swarm.ServiceSpec{
-		TaskTemplate: swarm.TaskSpec{
-			ContainerSpec: &swarm.ContainerSpec{
-				Image:   fromImageID,
-				Command: command,
-			},
-		},
-		Mode: swarm.ServiceMode{
-			Replicated: &swarm.ReplicatedService{
-				Replicas: &replicas,
-			},
-		},
-	}, types.ServiceCreateOptions{})
-}
-
-// RemoveService stops the replicas of an en existing service, and removes it from the
-// docker daemon.
-func (client *Docker) RemoveService(serviceID string) error {
-	return client.Instance.ServiceRemove(client.Context, serviceID)
-}
-
-// ScaleService changes the number of replicas on a service.
-func (client *Docker) ScaleService(serviceID string, replicas uint64) error {
-	// Need to make sure *Spec and Version numbers match
-	inspectResp, _, err := client.Instance.ServiceInspectWithRaw(client.Context, serviceID, types.ServiceInspectOptions{})
-	if err != nil {
-		return err
-	}
-	spec := inspectResp.Spec
-	spec.Mode.Replicated.Replicas = &replicas
-	_, err = client.Instance.ServiceUpdate(client.Context, serviceID, inspectResp.Meta.Version, spec, types.ServiceUpdateOptions{})
-	return err
-}
