@@ -5,35 +5,43 @@ import (
 	"sync"
 )
 
-// Queue is the interface that RabbitMQ must conform to.
-// We use this for mocking.
-type Queue interface {
-	Name() string
-	Message(msg string) error
-	Consume(wg *sync.WaitGroup, done chan bool, handler func(msg string)) error
+// WriteCloser is the interface that wraps the Push
+// function, which pushes data onto the queue.
+type WriteCloser interface {
+	Push(data []byte) error
+	Close() error
+}
+
+// ReadCloser is the interface that wraps the Stream
+// function, which is a channel of items on the
+// queue.
+type ReadCloser interface {
+	Stream() <-chan []byte
+	Close() error
 }
 
 // RabbitMQ contains the various connections to RabbitMQ
 type RabbitMQ struct {
-	Connection *amqp.Connection
-	Channel    *amqp.Channel
-	Queue      *amqp.Queue
+	connection *amqp.Connection
+	channel    *amqp.Channel
+	queue      *amqp.Queue
+	messages   chan []byte
+	wg         sync.WaitGroup
+	done       chan bool
 }
 
-// New tries to connect to RabbitMQ on the given address,
-// and also creates (if it doesn't already exist) a queue.
+// New will create a new RabbitMQ queue instance. It will
+// declare the queue, which creates a new instance if one
+// doesn't already exist.
 func New(name string, addr string) (*RabbitMQ, error) {
-	// Attempt to connect
 	conn, err := amqp.Dial(addr)
 	if err != nil {
 		return nil, err
 	}
-	// Try to open a unique server channel
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, err
 	}
-	// Declare the queue
 	queue, err := ch.QueueDeclare(
 		name,
 		false, // Durable
@@ -45,67 +53,69 @@ func New(name string, addr string) (*RabbitMQ, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RabbitMQ{
-		Connection: conn,
-		Channel:    ch,
-		Queue:      &queue,
-	}, nil
+	result := &RabbitMQ{
+		connection: conn,
+		channel:    ch,
+		queue:      &queue,
+		messages:   make(chan []byte),
+		done:       make(chan bool),
+	}
+	result.wg.Add(1)
+	go result.listen()
+	return result, nil
 }
 
-// Name will return the name of the queue
-func (queue *RabbitMQ) Name() string {
-	return queue.Queue.Name
-}
-
-// Message will put a message on the queue. It will not
-// close the Connection or Channel, so you must do it
-// manually after you've finished messaging.
-func (queue *RabbitMQ) Message(msg string) error {
-	return queue.Channel.Publish(
+// Push will put an item on the queue.
+func (queue *RabbitMQ) Push(data []byte) error {
+	return queue.channel.Publish(
 		"",               // Exhange
-		queue.Queue.Name, // Routing key
+		queue.queue.Name, // Routing key
 		false,            // Mandatory
 		false,            // Immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(msg),
+			Body:        data,
 		},
 	)
 }
 
-// Consume will continually take mssages from the queue, and give it to the handler function.
-// If the done channel is closed during the processing of a message, it will wait until the
-// message has finished processing before finishing.
-// The queue Connection and Channel will be closed automatically.
-func (queue *RabbitMQ) Consume(wg *sync.WaitGroup, done chan bool, handler func(message string)) error {
-	defer wg.Done()
-	defer queue.Connection.Close()
-	defer queue.Channel.Close()
-	msgs, err := queue.Channel.Consume(
-		queue.Queue.Name, // RabbitMQ
-		"",               // Consumer
-		true,             // Auto-Ack
-		false,            // Exclusive
-		false,            // No-local
-		false,            // No-Wait
-		nil,              // Args
+// Stream will continuously put queue items on the channel.
+func (queue *RabbitMQ) Stream() <-chan []byte {
+	return queue.messages
+}
+
+// Close closes the channel and connection to RabbitMQ.
+// May block indefinitely if queue.Listen never finishes.
+func (queue *RabbitMQ) Close() error {
+	close(queue.done)
+	queue.wg.Wait()
+	return queue.connection.Close()
+}
+
+// Listen will convert incoming queue messages into []byte
+// items, and put them on the messages channel if there is a
+// consumer.
+func (queue *RabbitMQ) listen() error {
+	defer queue.wg.Done()
+	messages, err := queue.channel.Consume(
+		queue.queue.Name,
+		"",    // Consumer
+		false, // Auto-Ack
+		false, // Exclusive
+		false, // No-local
+		false, // No-Wait
+		nil,   // Args
 	)
 	if err != nil {
 		return err
 	}
 	for {
 		select {
-		case <-done:
+		case <-queue.done:
 			return nil
-		case msg := <-msgs:
-			handler(string(msg.Body))
+		case data := <-messages:
+			queue.messages <- data.Body
+			data.Ack(false)
 		}
 	}
-	return nil
-}
-
-// Close manually closes the Connection and Channel.
-func (queue *RabbitMQ) Close() {
-	queue.Connection.Close()
-	queue.Channel.Close()
 }
