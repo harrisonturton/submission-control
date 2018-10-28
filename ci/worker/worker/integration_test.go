@@ -1,4 +1,4 @@
-// +build !unit
+// +build integration
 
 package worker
 
@@ -28,11 +28,11 @@ func TestRun(t *testing.T) {
 	}
 	jobs, err := queue.New(jobQueue, addr)
 	if err != nil {
-		t.Fatalf("%s", err)
+		t.Fatalf("Failed to connect to RabbitMQ: %s", err)
 	}
 	results, err := queue.New(resultQueue, addr)
 	if err != nil {
-		t.Fatalf("%s", err)
+		t.Fatalf("Failed to connect to RabbitMQ: %s", err)
 	}
 	worker := New(jobs, results, client, os.Stdout)
 	// Send test message
