@@ -14,11 +14,16 @@ type Client struct {
 }
 
 // New creates a new instance of the mocked client.
-func New(version string) (*Client, error) {
+func New() *Client {
 	return &Client{
 		Containers: []string{},
 		Running:    map[string]bool{},
-	}, nil
+	}
+}
+
+// Healthy will always return true, because it is mocked.
+func (client *Client) Healthy() bool {
+	return true
 }
 
 // Create creates a new mock container, and returns an random ID.

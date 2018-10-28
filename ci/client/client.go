@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -17,6 +18,7 @@ type Client interface {
 	Start(containerID string) error
 	ReadLogs(containerID string, showStdout bool, showStderr bool) (string, error)
 	Wait(containerID string, timeout time.Duration) error
+	Healthy() bool
 }
 
 // Docker is a connection to the Docker daemon.
@@ -32,7 +34,20 @@ func New(version string) (*Docker, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Docker{cli, context.Background()}, nil
+	instance := &Docker{cli, context.Background()}
+	if !instance.Healthy() {
+		return nil, errors.New("cannot connect to Docker daemon")
+	}
+	return instance, nil
+}
+
+// Healthy will return true if it can connect to the docker daemon.
+func (client *Docker) Healthy() bool {
+	_, err := client.Instance.ContainerList(client.Context, types.ContainerListOptions{})
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 // Create creates a new container from an existing image. Note, this does
