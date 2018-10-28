@@ -7,26 +7,20 @@ import (
 	"sync"
 )
 
-// Listener represents the process that takes test requests (through
-// a port), and puts them on the job queue. It also listens to the
-// result queue, and evalutates whether the testing was successful
-// or not.
+// Listener represents a process that continuously listens
+// for test results on the result queue, and updates the
+// database accordingly.
 type Listener struct {
 	Results queue.Queue
 	Logger  *log.Logger
 }
 
-// New tries to connect to the result queue. If successful, it will return
-// a Listener instance. Otherwise, it will fail with an error.
-func New(logOut io.Writer, resultQueueName, addr string) (*Listener, error) {
-	results, err := queue.New(resultQueueName, addr)
-	if err != nil {
-		return nil, err
-	}
-	return &Listener{
+// New creates a new Listener instance.
+func New(results queue.Queue, logOut io.Writer) Listener {
+	return Listener{
 		Results: results,
 		Logger:  log.New(logOut, "", log.LstdFlags),
-	}, nil
+	}
 }
 
 // Run will continuouslly pop messages off the result queue,

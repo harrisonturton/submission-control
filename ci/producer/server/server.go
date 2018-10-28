@@ -21,10 +21,6 @@ type Server struct {
 	Jobs   queue.Queue
 }
 
-const (
-	jobQueue = "job_queue"
-)
-
 // New creates a new Server instance.
 func New(logOut io.Writer, jobs queue.Queue, addr string) *Server {
 	logger := log.New(logOut, "", log.LstdFlags)
@@ -70,9 +66,6 @@ func (server *Server) Serve(done chan bool, wg *sync.WaitGroup) {
 
 // handleRequest handles every request to come through the server
 func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
-	server.Logger.Printf("%s: %s", r.Method, r.URL.Path)
-	server.Logger.Printf("From: %s", r.RemoteAddr)
-	server.Logger.Printf("As: %s", r.UserAgent())
 	_, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Fprintf(w, "Error processing request body.")
@@ -81,6 +74,8 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// withLogging is middleware that wraps a http Handler. It logs basic info
+// about every request that passes through it.
 func withLogging(logger *log.Logger, handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger.Printf("%s: %s", r.Method, r.URL.Path)
