@@ -14,14 +14,14 @@ import (
 // the test queue, run them in a container, and puts the results
 // on the result queue.
 type Worker struct {
-	Jobs    queue.Queue
-	Results queue.Queue
+	Jobs    queue.ReadCloser
+	Results queue.WriteCloser
 	Client  client.Client
 	Logger  *log.Logger
 }
 
 // New creates a new Worker.
-func New(jobs queue.Queue, results queue.Queue, client client.Client, logOut io.Writer) *Worker {
+func New(jobs queue.ReadCloser, results queue.WriteCloser, client client.Client, logOut io.Writer) *Worker {
 	return &Worker{
 		Jobs:    jobs,
 		Results: results,
@@ -33,8 +33,19 @@ func New(jobs queue.Queue, results queue.Queue, client client.Client, logOut io.
 // Run will continuously pop tasks off the queue, run them inside
 // a container, and push the results onto the result queue.
 func (worker *Worker) Run(done chan bool, wg *sync.WaitGroup) {
-	worker.Logger.Printf("Waiting for jobs on queue %s", worker.Jobs.Name())
-	worker.Jobs.Consume(wg, done, worker.handleJob)
+	defer wg.Done()
+	worker.Logger.Printf("Waiting for jobs ...")
+	jobs := worker.Jobs.Stream()
+	for {
+		select {
+		case <-done:
+			worker.Jobs.Close()
+			worker.Results.Close()
+			return
+		case job := <-jobs:
+			worker.handleJob(string(job))
+		}
+	}
 }
 
 // handleJob is called for every task that is recieved from the
@@ -58,5 +69,5 @@ func (worker *Worker) handleJob(msg string) {
 		return
 	}
 	worker.Logger.Printf("Container Logs: %s", logs)
-	worker.Results.Message(fmt.Sprintf("\n%s:\n%s", id, logs))
+	worker.Results.Push([]byte(fmt.Sprintf("\n%s:\n%s", id, logs)))
 }
