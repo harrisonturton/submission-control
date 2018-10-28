@@ -18,11 +18,11 @@ import (
 type Server struct {
 	Server *http.Server
 	Logger *log.Logger
-	Jobs   queue.Queue
+	Jobs   queue.WriteCloser
 }
 
 // New creates a new Server instance.
-func New(logOut io.Writer, jobs queue.Queue, addr string) *Server {
+func New(logOut io.Writer, jobs queue.WriteCloser, addr string) *Server {
 	logger := log.New(logOut, "", log.LstdFlags)
 	server := &Server{
 		Server: &http.Server{
