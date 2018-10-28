@@ -21,49 +21,46 @@ const (
 )
 
 func TestRun(t *testing.T) {
-	// Create live worker instance
+	// Create a Worker instance
 	client, err := client.New(version)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 	jobs, err := queue.New(jobQueue, addr)
-	failOnError(t, err)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
 	results, err := queue.New(resultQueue, addr)
-	failOnError(t, err)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
 	worker := New(jobs, results, client, os.Stdout)
 	// Send test message
 	err = jobs.Push([]byte(testJob))
-	failOnError(t, err)
-	// Run the worker
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	// Run the test
 	var wg sync.WaitGroup
 	done := make(chan bool)
-	wg.Add(1)
+	wg.Add(2)
 	go worker.Run(done, &wg)
 	go func() {
 		defer wg.Done()
-		time.Sleep(timeout)
-		close(done)
+		// Wait on result queue, or for timeout
+		select {
+		case <-results.Stream():
+			close(done)
+		case <-time.After(timeout):
+			close(done)
+			t.Fatalf("Failed to add result to result queue")
+		}
 	}()
 	wg.Wait()
-	// Check that worker popped the message from the job queue
-	jobStream := jobs.Stream()
+	// Check that messages was removed from job queue
 	select {
-	case <-jobStream:
-		t.Errorf("Failed to remove test message from job queue")
+	case <-jobs.Stream():
+		t.Fatalf("Failed to remove test message from job queue")
 	default:
-	}
-	// Check the worker put result on the result queue
-	resultStream := results.Stream()
-	select {
-	case <-resultStream:
-		break
-	default:
-		t.Errorf("Failed to add result to result queue")
-	}
-}
-
-func failOnError(t *testing.T, err error) {
-	if err != nil {
-		t.Errorf("Failed %s", err)
 	}
 }

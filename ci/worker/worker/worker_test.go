@@ -8,6 +8,7 @@ import (
 )
 
 func TestHandleJob(t *testing.T) {
+	t.Parallel()
 	// Create worker
 	client := client.New()
 	jobs := queue.New(5)
