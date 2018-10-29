@@ -39,5 +39,8 @@ func Test(t *testing.T) {
 			t.Fatalf("Recieved unexpected message: %s", string(response))
 		}
 	})
-	queue.Close()
+	err = queue.Close()
+	if err != nil {
+		t.Error("Failed to close the connection")
+	}
 }

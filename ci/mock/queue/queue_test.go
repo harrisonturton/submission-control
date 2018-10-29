@@ -24,4 +24,9 @@ func TestNew(t *testing.T) {
 	default:
 		t.Errorf("Could not pop message off the queue.")
 	}
+
+	err = queue.Close()
+	if err != nil {
+		t.Error("Failed to close the queue")
+	}
 }
