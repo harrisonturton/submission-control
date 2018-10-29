@@ -4,34 +4,44 @@ package types
 // test configurations, and the test commands for
 // each test.
 type TestConfig struct {
-	Defaults TestCase
-	Tests    []TestCase
+	Version string       `json:"version"`
+	Env     *Environment `json:"environment"`
 }
 
-// TestCase is the configuration for a single test.
-type TestCase struct {
-	Command    string
-	Expect     Expectation
-	Weight     float32
-	StopOnFail bool
+// Environment ...
+type Environment struct {
+	Image string            `json:"image"`
+	Vars  map[string]string `json:"vars"`
 }
 
-// EnvConfig is the configuration for the testing
-// environment inside the Docker container.
-type EnvConfig struct {
-	Image string
-	Vars  map[string]string
+// Compare determines if the two configurations
+// are the same.
+func (a TestConfig) Compare(b TestConfig) bool {
+	if a.Version != b.Version {
+		return false
+	}
+	if (a.Env == nil) != (b.Env == nil) {
+		return false
+	}
+	if a.Env == nil && b.Env == nil {
+		return true
+	}
+	return a.Env.Compare(*b.Env)
 }
 
-// Expectation is the expected behaviour of the
-// outcome of a test.
-type Expectation struct {
-	ExitCode    int
-	Duration    string
-	Contains    string
-	ContainsAll []string
-	AtLeastOne  []string
-	Not         *Expectation
-	And         *Expectation
-	Or          *Expectation
+// Compare two environment configs
+func (a Environment) Compare(b Environment) bool {
+	if a.Image != b.Image {
+		return false
+	}
+	for keyA, valA := range a.Vars {
+		valB, ok := b.Vars[keyA]
+		if !ok {
+			return false
+		}
+		if valA != valB {
+			return false
+		}
+	}
+	return true
 }
