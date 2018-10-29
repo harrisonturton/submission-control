@@ -14,7 +14,8 @@ import (
 const (
 	jobQueueName    = "job_queue"
 	resultQueueName = "result_queue"
-	queueAddr       = "amqp://guest:guest@localhost:5672/"
+	host            = "rabbitmq"
+	queueAddr       = "amqp://guest:guest@" + host + ":5672/"
 	dockerVersion   = "1.38"
 )
 
@@ -26,6 +27,8 @@ func main() {
 	resultQueue, err := queue.New(resultQueueName, queueAddr)
 	exitError(err)
 	worker := worker.New(jobQueue, resultQueue, client, os.Stdout)
+
+	fmt.Println("WORKER RUNNING")
 
 	var wg sync.WaitGroup
 	sig := make(chan os.Signal)
