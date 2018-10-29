@@ -13,7 +13,7 @@ import (
 )
 
 var port = flag.String("port", "8080", "Port for the server to listen on")
-var addr = flag.String("addr", "amqp://guest:guest@localhost:5672/", "Address to RabbitMQ service")
+var addr = flag.String("addr", "amqp://guest:guest@rabbitmq:5672/", "Address to RabbitMQ service")
 
 const (
 	jobQueue    = "job_queue"
