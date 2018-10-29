@@ -8,7 +8,8 @@ type TestConfig struct {
 	Env     *Environment `json:"environment"`
 }
 
-// Environment ...
+// Environment is the configuration for the testing
+// environment in general, within the container
 type Environment struct {
 	Image string            `json:"image"`
 	Vars  map[string]string `json:"vars"`
