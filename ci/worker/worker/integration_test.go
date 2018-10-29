@@ -1,5 +1,3 @@
-// +build integration
-
 package worker
 
 import (
@@ -21,6 +19,9 @@ const (
 )
 
 func TestRun(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 	// Create a Worker instance
 	client, err := client.New(version)
 	if err != nil {

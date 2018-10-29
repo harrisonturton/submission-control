@@ -14,6 +14,9 @@ const (
 )
 
 func Test(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 	// Setup queue
 	queue, err := New(queueName, queueAddr)
 	if err != nil {
