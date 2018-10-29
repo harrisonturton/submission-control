@@ -7,12 +7,10 @@ import (
 )
 
 const (
-	jobQueue   = "result_queue"
-	queueAddr  = "amqp://guest:guest@localhost:5672/"
 	serverAddr = "localhost:8080"
 )
 
 func TestServe(t *testing.T) {
-	jobs, _ := queue.New(jobQueue, queueAddr)
+	jobs := queue.New(5)
 	New(os.Stdout, jobs, serverAddr)
 }

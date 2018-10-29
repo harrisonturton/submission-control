@@ -5,6 +5,7 @@ import (
 	"os"
 	"sync"
 	"testing"
+	"time"
 )
 
 const (
@@ -14,19 +15,20 @@ const (
 
 func TestRun(t *testing.T) {
 	// Setup listener
-	queue, _ := queue.New(resultQueue, queueAddr)
+	queue := queue.New(5)
 	list := New(queue, os.Stdout)
 	// Begin testing
 	var wg sync.WaitGroup
 	wg.Add(1)
 	done := make(chan bool)
-	queue.Message("Test")
+	queue.Push([]byte("Test"))
 	go list.Run(done, &wg)
+	time.Sleep(time.Second * 3)
 	close(done)
 	wg.Wait()
 	// Check results
 	select {
-	case <-queue.Messages:
+	case <-queue.Stream():
 		t.Errorf("failed to pop off result queue")
 	default:
 		return
