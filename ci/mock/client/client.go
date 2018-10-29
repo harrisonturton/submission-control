@@ -38,6 +38,7 @@ func (client *Client) Start(containerID string) error {
 	if client.Running[containerID] {
 		return fmt.Errorf("container %s already running", containerID)
 	}
+	client.Running[containerID] = true
 	return nil
 }
 

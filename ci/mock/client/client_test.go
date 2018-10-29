@@ -1,6 +1,9 @@
 package client
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 const (
 	imageID = "test_image_id"
@@ -22,12 +25,22 @@ func TestCreate(t *testing.T) {
 		t.Error("Error starting container")
 	}
 
+	err = client.Start(id)
+	if err == nil {
+		t.Error("Expected error when trying to start running container, but recieved none!")
+	}
+
 	logs, err := client.ReadLogs(id, true, true)
 	if err != nil {
 		t.Error("Error reading container logs")
 	}
 	if logs == "" {
 		t.Error("Container logs are blank")
+	}
+
+	err = client.Wait(id, time.Second*5)
+	if err != nil {
+		t.Error("Container wait returned an error")
 	}
 
 	if !client.Healthy() {
