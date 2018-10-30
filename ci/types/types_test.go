@@ -1,3 +1,4 @@
+// +build unit
 package types
 
 import "testing"

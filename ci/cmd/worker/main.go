@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/harrisonturton/submission-control/ci/client"
 	"github.com/harrisonturton/submission-control/ci/queue"
-	"github.com/harrisonturton/submission-control/ci/worker/worker"
+	"github.com/harrisonturton/submission-control/ci/worker"
 	"os"
 	"os/signal"
 	"sync"
