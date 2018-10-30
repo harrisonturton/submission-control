@@ -25,7 +25,8 @@ test-unit:
 # Run integration tests
 test-integration:
 	docker run -d --rm -p 5672:5672 --name rabbitmq rabbitmq
-	go test -tags=integration ./...
+	-go test -tags=integration ./...
+	@echo "\033[4mStopping RabbitMQ container. This may take a few seconds...\033[0m"
 	docker stop rabbitmq
 
 # Get unit test coverage
