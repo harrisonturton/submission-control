@@ -21,7 +21,7 @@ services:
   # The process that takes jobs, runs code in
   # containers, and puts it on the result queue
   worker:
-    image: worker
+    build: ./cmd/worker
     restart: on-failure
     depends_on:
       - rabbitmq
@@ -33,7 +33,7 @@ services:
   # put on the job queue, and caches results to
   # serve to the client.
   producer:
-    image: producer
+    build: ./cmd/producer
     restart: on-failure
     depends_on:
       - rabbitmq
