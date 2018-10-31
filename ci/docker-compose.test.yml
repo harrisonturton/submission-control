@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+
+  # Queueing service
+  rabbitmq:
+    image: rabbitmq
+    command: rabbitmq-server
+    ports:
+      - 5672:5672

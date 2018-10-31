@@ -24,10 +24,11 @@ test-unit:
 
 # Run integration tests
 test-integration:
-	docker run -d --rm -p 5672:5672 --name rabbitmq rabbitmq
+	@echo "\033[4mLaunching test containers...\033[0m"
+	docker-compose --project-name test-integration -f docker-compose.test.yml up -d
 	-go test -tags=integration ./...
-	@echo "\033[4mStopping RabbitMQ container. This may take a few seconds...\033[0m"
-	docker stop rabbitmq
+	@echo "\033[4mStopping test containers. This may take a few seconds...\033[0m"
+	docker-compose --project-name test-integration down
 
 # Get unit test coverage
 test-cover:
