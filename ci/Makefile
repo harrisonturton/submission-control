@@ -15,8 +15,12 @@ clean:
 	@echo "Cleaned."
 
 # Run unit and integration tests
-test-all: test-unit test-integration
-	@echo "Finished."
+test:
+	@echo "\033[4mLaunching test containers...\033[0m"
+	docker-compose --project-name test-integration -f docker-compose.test.yml up -d
+	-go test -tags="unit integration" ./...
+	@echo "\033[4mStopping test containers. This may take a few seconds...\033[0m"
+	docker-compose --project-name test-integration down
 
 # Run unit tests
 test-unit:
@@ -30,7 +34,7 @@ test-integration:
 	@echo "\033[4mStopping test containers. This may take a few seconds...\033[0m"
 	docker-compose --project-name test-integration down
 
-# Get unit test coverage
+# Unit test coverage
 test-cover:
 	go test -coverprofile=coverage.out -tags=unit ./... > /dev/null 
 	go tool cover -func=coverage.out 
