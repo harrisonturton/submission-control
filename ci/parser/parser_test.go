@@ -3,87 +3,47 @@
 package parser
 
 import (
-	"errors"
-	"github.com/harrisonturton/submission-control/ci/types"
 	"strings"
 	"testing"
 )
 
-type tableTest struct {
-	input    string
-	expected types.TestConfig
+const (
+	noImage = `{"environment":{"vars":{"k":"v"}}}`  // Fail
+	noVars  = `{"environment":{"image":"haskell"}}` // Pass
+	noEnv   = `{"version":"1"}`                     // Fail
+)
+
+var (
+	str       = "string"
+	kv        = make(map[string]string)
+	stringPtr = &str
+	mapPtr    = &kv
+)
+
+func TestFailures(t *testing.T) {
+	testMissingField := func(err error, testCase string) {
+		if err == nil {
+			t.Errorf("Failed to reject bad data: %s", testCase)
+		}
+	}
+	// Test missing env field
+	reader := strings.NewReader(noEnv)
+	_, err := ParseConfig(reader)
+	testMissingField(err, noEnv)
+	// Test missing env.image field
+	reader = strings.NewReader(noImage)
+	_, err = ParseConfig(reader)
+	testMissingField(err, noImage)
 }
 
-func TestParse(t *testing.T) {
-	compare := func(input string, expected types.TestConfig) error {
-		reader := strings.NewReader(input)
-		config, err := ParseConfig(reader)
+func TestPassing(t *testing.T) {
+	testPresentField := func(err error, testCase string) {
 		if err != nil {
-			return err
-		}
-		if !expected.Compare(config) {
-			return errors.New("actual and expected config is different")
-		}
-		return nil
-	}
-
-	testAll(t, configTests, compare)
-}
-
-func testAll(t *testing.T, table []tableTest, compare func(actual string, expected types.TestConfig) error) {
-	for i, testCase := range table {
-		if err := compare(testCase.input, testCase.expected); err != nil {
-			t.Errorf("Failed on table test %d: %s", i, err)
+			t.Errorf("Failed to parse good data: %s", testCase)
 		}
 	}
-}
-
-var configTests = []tableTest{
-	{
-		input: `
-{
-	"version": "1"
-}
-`,
-		expected: types.TestConfig{
-			Version: "1",
-			Env:     nil,
-		},
-	},
-	{
-		input: `
-{
-	"version": "1",
-	"environment": {}
-}
-`,
-		expected: types.TestConfig{
-			Version: "1",
-			Env:     &types.Environment{},
-		},
-	},
-	{
-		input: `
-{
-	"version": "1",
-	"environment": {
-		"image": "haskell",
-		"vars": {
-			"user": "Ubuntu",
-			"length": "30"
-		}
-	}
-}
-`,
-		expected: types.TestConfig{
-			Version: "1",
-			Env: &types.Environment{
-				Image: "haskell",
-				Vars: map[string]string{
-					"user":   "Ubuntu",
-					"length": "30",
-				},
-			},
-		},
-	},
+	// Test missing vars
+	reader := strings.NewReader(noVars)
+	_, err := ParseConfig(reader)
+	testPresentField(err, noImage)
 }
