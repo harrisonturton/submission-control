@@ -5,19 +5,12 @@ import (
 	"sync"
 )
 
-// WriteCloser is the interface that wraps the Push
-// function, which pushes data onto the queue.
-type WriteCloser interface {
+// Queue represents a connection to RabbitMQ.
+type Queue interface {
 	Push(data []byte) error
-	Close() error
-}
-
-// ReadCloser is the interface that wraps the Stream
-// function, which is a channel of items on the
-// queue.
-type ReadCloser interface {
 	Stream() <-chan []byte
 	Close() error
+	Length() int
 }
 
 // RabbitMQ contains the various connections to RabbitMQ
@@ -90,6 +83,11 @@ func (queue *RabbitMQ) Close() error {
 	close(queue.done)
 	queue.wg.Wait()
 	return queue.connection.Close()
+}
+
+// Length is the number of items in the queue.
+func (queue *RabbitMQ) Length() int {
+	return queue.queue.Messages
 }
 
 // Listen will convert incoming queue messages into []byte

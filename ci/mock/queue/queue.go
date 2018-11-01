@@ -37,6 +37,11 @@ func (queue *Queue) Stream() <-chan []byte {
 	return queue.Messages
 }
 
+// Length is the number of items in the queue
+func (queue *Queue) Length() int {
+	return len(Messages)
+}
+
 // Close the queue
 func (queue *Queue) Close() error {
 	queue.Closed = true

@@ -14,14 +14,14 @@ import (
 // the test queue, run them in a container, and puts the results
 // on the result queue.
 type Worker struct {
-	Jobs    queue.ReadCloser
-	Results queue.WriteCloser
+	Jobs    queue.Queue
+	Results queue.Queue
 	Client  client.Client
 	Logger  *log.Logger
 }
 
 // New creates a new Worker.
-func New(jobs queue.ReadCloser, results queue.WriteCloser, client client.Client, logOut io.Writer) *Worker {
+func New(jobs queue.Queue, results queue.Queue, client client.Client, logOut io.Writer) *Worker {
 	return &Worker{
 		Jobs:    jobs,
 		Results: results,
