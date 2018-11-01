@@ -71,11 +71,7 @@ func (server *Server) Serve(done chan bool, wg *sync.WaitGroup) {
 
 // handleRequest handles every request to come through the server
 func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		break
-	default:
-		w.Write([]byte("404: Endpoint not found"))
+	if r.Method != http.MethodPost {
 		return
 	}
 	defer r.Body.Close()
