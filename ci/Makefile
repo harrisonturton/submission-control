@@ -36,6 +36,7 @@ test-unit:
 
 # Run integration tests
 test-integration:
+	@echo "\033[33mNote: hello-world container must exist. Get it with docker pull hello-world\033[0m"
 	@echo "\033[4mLaunching test containers...\033[0m"
 	docker-compose --project-name test-integration -f $(TEST_CONFIG) up -d
 	-go test -tags=integration ./...
