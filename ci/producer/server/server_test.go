@@ -3,9 +3,11 @@
 package server
 
 import (
+	"github.com/harrisonturton/submission-control/ci/cache"
 	"github.com/harrisonturton/submission-control/ci/mock/queue"
 	"os"
 	"testing"
+	"time"
 )
 
 const (
@@ -14,5 +16,6 @@ const (
 
 func TestServe(t *testing.T) {
 	jobs := queue.New(5)
-	New(os.Stdout, jobs, serverAddr)
+	cache := cache.New(5, time.Hour*10)
+	New(os.Stdout, jobs, cache, serverAddr)
 }

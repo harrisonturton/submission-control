@@ -3,9 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/harrisonturton/submission-control/ci/cache"
+	"github.com/harrisonturton/submission-control/ci/parser"
 	"github.com/harrisonturton/submission-control/ci/queue"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
@@ -19,10 +20,13 @@ type Server struct {
 	Server *http.Server
 	Logger *log.Logger
 	Jobs   queue.WriteCloser
+	Cache  *cache.Cache
 }
 
+const shutdownTimeout = 15 * time.Second
+
 // New creates a new Server instance.
-func New(logOut io.Writer, jobs queue.WriteCloser, addr string) *Server {
+func New(logOut io.Writer, jobs queue.WriteCloser, cache *cache.Cache, addr string) *Server {
 	logger := log.New(logOut, "", log.LstdFlags)
 	server := &Server{
 		Server: &http.Server{
@@ -34,6 +38,7 @@ func New(logOut io.Writer, jobs queue.WriteCloser, addr string) *Server {
 		},
 		Logger: logger,
 		Jobs:   jobs,
+		Cache:  cache,
 	}
 	router := http.NewServeMux()
 	router.HandleFunc("/", server.handleRequest)
@@ -41,15 +46,15 @@ func New(logOut io.Writer, jobs queue.WriteCloser, addr string) *Server {
 	return server
 }
 
-// Serve will continuously listen for requests, and handle them
-// with server.handleRequest.
+// Serve will continuously serve requests, either responding with
+// test results or putting new jobs on the queue.
 func (server *Server) Serve(done chan bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 	go func() {
 		<-done
-		// Force shutdown if couldn't gracefully shutdown within the timeout
+		// Force shutdown if couldn't gracefully shutdown before the timeout
 		server.Logger.Println("Attempting to shutdown server...")
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
 		// Attempt to gracefully shutdown
 		err := server.Server.Shutdown(ctx)
@@ -66,12 +71,20 @@ func (server *Server) Serve(done chan bool, wg *sync.WaitGroup) {
 
 // handleRequest handles every request to come through the server
 func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
-	_, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Fprintf(w, "Error processing request body.")
-	} else {
-		fmt.Fprintf(w, "Handled!")
+	switch r.Method {
+	case http.MethodPost:
+		break
+	default:
+		w.Write([]byte("404: Endpoint not found"))
+		return
 	}
+	config, err := parser.ParseConfig(r.Body)
+	if err != nil {
+		server.Logger.Printf("Failed to unmarshal request body: %s\n", err)
+		return
+	}
+	w.Write([]byte(fmt.Sprintf("Got job with config version %s and image %s\n", *config.Version, *config.Env.Image)))
+	server.Logger.Printf("Got job with config version %s and image %s\n", *config.Version, *config.Env.Image)
 }
 
 // withLogging is middleware that wraps a http Handler. It logs basic info
