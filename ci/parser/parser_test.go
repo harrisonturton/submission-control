@@ -3,6 +3,8 @@
 package parser
 
 import (
+	"github.com/harrisonturton/submission-control/ci/types"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -11,13 +13,6 @@ const (
 	noImage = `{"environment":{"vars":{"k":"v"}}}`  // Fail
 	noVars  = `{"environment":{"image":"haskell"}}` // Pass
 	noEnv   = `{"version":"1"}`                     // Fail
-)
-
-var (
-	str       = "string"
-	kv        = make(map[string]string)
-	stringPtr = &str
-	mapPtr    = &kv
 )
 
 func TestFailures(t *testing.T) {
@@ -46,4 +41,27 @@ func TestPassing(t *testing.T) {
 	reader := strings.NewReader(noVars)
 	_, err := ParseConfig(reader)
 	testPresentField(err, noImage)
+}
+
+func TestSerialization(t *testing.T) {
+	version := "1"
+	image := "haskell"
+	config := types.TestConfig{
+		Version: &version,
+		Env: &types.Environment{
+			Image: &image,
+		},
+	}
+	data, err := SerializeConfig(config)
+	if err != nil {
+		t.Fatalf("Failed to serialize config: %s", err)
+	}
+
+	result, err := DeserializeConfig(data)
+	if err != nil {
+		t.Fatalf("Failed to serialize config: %s", err)
+	}
+	if !reflect.DeepEqual(config, result) {
+		t.Errorf("Serialization changes the config - bad!")
+	}
 }
