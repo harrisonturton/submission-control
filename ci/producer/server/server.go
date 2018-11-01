@@ -78,6 +78,7 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404: Endpoint not found"))
 		return
 	}
+	defer r.Body.Close()
 	config, err := parser.ParseConfig(r.Body)
 	if err != nil {
 		server.Logger.Printf("Failed to unmarshal request body: %s\n", err)
