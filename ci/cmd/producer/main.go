@@ -1,43 +1,34 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"github.com/harrisonturton/submission-control/ci/producer/listener"
+	"github.com/harrisonturton/submission-control/ci/cache"
 	"github.com/harrisonturton/submission-control/ci/producer/server"
 	"github.com/harrisonturton/submission-control/ci/queue"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
-var port = flag.String("port", "8080", "Port for the server to listen on")
-var addr = flag.String("addr", "amqp://guest:guest@rabbitmq:5672/", "Address to RabbitMQ service")
-
 const (
+	serverAddr  = "localhost:8080"
+	queueAddr   = "amqp://guest:guest@localhost:5672/"
 	jobQueue    = "job_queue"
 	resultQueue = "result_queue"
 )
 
 func main() {
-	flag.Parse()
-	// Create server & queues
-	jobs, err := queue.New(jobQueue, *addr)
-	exitError(err)
-	results, err := queue.New(resultQueue, *addr)
-	exitError(err)
-	server := server.New(os.Stdout, jobs, "localhost:"+*port)
-	list := listener.New(results, os.Stdout)
-	// Listen for SIGINT, CTRL+C
+	server := createServer()
+	// Get notified upon SIGINT
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT)
-	// Run
+	// Run server
 	var wg sync.WaitGroup
 	done := make(chan bool)
-	wg.Add(3)
+	wg.Add(2)
 	go server.Serve(done, &wg)
-	go list.Run(done, &wg)
 	go func() {
 		defer wg.Done()
 		<-sig
@@ -45,7 +36,16 @@ func main() {
 		close(done)
 	}()
 	wg.Wait()
-	fmt.Println("Exiting!")
+	fmt.Println("Exiting")
+}
+
+func createServer() *server.Server {
+	// Declare queues
+	jobs, err := queue.New(jobQueue, queueAddr)
+	exitError(err)
+	// Create server
+	cache := cache.New(15, time.Hour*5)
+	return server.New(os.Stdout, jobs, cache, serverAddr)
 }
 
 func exitError(err error) {
