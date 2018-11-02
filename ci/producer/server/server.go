@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"github.com/harrisonturton/submission-control/ci/cache"
 	"github.com/harrisonturton/submission-control/ci/queue"
 	"github.com/harrisonturton/submission-control/ci/types"
@@ -79,25 +78,23 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	err := config.UnmarshalJSON(r.Body)
 	if err != nil {
 		server.Logger.Printf("Failed to unmarshal request body: %s\n", err)
-		w.Write([]byte(fmt.Sprintf("Failed to unmarshal request: %s\n", err)))
+		types.ResponseBadRequest(w)
 		return
 	}
 	server.Logger.Printf("Got job with config version %s and image %s\n", *config.Version, *config.Env.Image)
 	bytes, err := config.Serialize()
 	if err != nil {
 		server.Logger.Printf("Failed to serialize job")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Failed to serialize request: %s\n", err)))
+		types.ResponseInternalServerError(w)
 		return
 	}
 	err = server.Jobs.Push(bytes)
 	if err != nil {
 		server.Logger.Printf("Failed to push job to job queue.")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Server error."))
+		types.ResponseInternalServerError(w)
 		return
 	}
-	w.Write([]byte("Got the job!\n"))
+	types.ResponseAccepted(w)
 }
 
 // withLogging is middleware that wraps a http Handler. It logs basic info
