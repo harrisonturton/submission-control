@@ -1,0 +1,9 @@
+{
+	"version": "1",
+	"environment": {
+		"image": "hello-world",
+		"vars": {
+			"key": "value"
+		}
+	}
+}
