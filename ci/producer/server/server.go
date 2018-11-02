@@ -86,12 +86,14 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	bytes, err := config.Serialize()
 	if err != nil {
 		server.Logger.Printf("Failed to serialize job")
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("Failed to serialize request: %s\n", err)))
 		return
 	}
 	err = server.Jobs.Push(bytes)
 	if err != nil {
 		server.Logger.Printf("Failed to push job to job queue.")
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Server error."))
 		return
 	}
