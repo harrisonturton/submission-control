@@ -1,14 +1,15 @@
 package types
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 )
 
 // Meta holds metadata about each job.
 type Meta struct {
-	ID        string
-	Timestamp time.Time
+	ID        string    `json:"id"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // AcceptJob is returned when a job is successfully
@@ -20,7 +21,7 @@ type AcceptJob struct {
 // RejectJob is returned when a job cannot be
 // marshelled, serialized, or put on the job queue.
 type RejectJob struct {
-	Message string
+	Message string `json:"message"`
 }
 
 // ProcessingJob is returned when a
@@ -31,29 +32,45 @@ type ProcessingJob struct {
 // JobResult asda
 type JobResult struct {
 	Meta
-	Output string
+	Output string `json:"output"`
 }
 
-// ResponseCreated will write a Status 201 response
-func ResponseCreated(w http.ResponseWriter) {
+// Write will write a response corresponding to the
+// AcceptJob instance.
+func (a AcceptJob) Write(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"status_code":201,"status":"201 CREATED"}`))
+	return json.NewEncoder(w).Encode(a)
 }
 
-// ResponseAccepted will write a Status 202 response
-func ResponseAccepted(w http.ResponseWriter) {
+// Write will write a response corresponding to the
+// ProcessingJob instance.
+func (a ProcessingJob) Write(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte(`{"status_code":202,"status":"202 ACCEPTED"}`))
+	return json.NewEncoder(w).Encode(a)
 }
 
-// ResponseBadRequest will write a Status 400 response
-func ResponseBadRequest(w http.ResponseWriter) {
+// Write will write a response corresponding to the
+// RejectJob instance.
+func (a RejectJob) Write(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte(`{"status_code":400,"status":"400 BAD REQUEST"}`))
+	return json.NewEncoder(w).Encode(a)
 }
 
-// ResponseInternalServerError will write a Status 500 response
-func ResponseInternalServerError(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte(`{"status_code":500,"status":"500 INTERNAL SERVER ERROR"}`))
+// WriteWith will write a response corresponding to the
+// RejectJob instance, with a custom status code.
+func (a RejectJob) WriteWith(w http.ResponseWriter, statusCode int) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	return json.NewEncoder(w).Encode(a)
+}
+
+// Write will write a response corresponding to the
+// JobResult instance.
+func (a JobResult) Write(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	return json.NewEncoder(w).Encode(a)
 }

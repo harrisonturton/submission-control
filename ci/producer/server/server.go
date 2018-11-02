@@ -78,23 +78,28 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	err := config.UnmarshalJSON(r.Body)
 	if err != nil {
 		server.Logger.Printf("Failed to unmarshal request body: %s\n", err)
-		types.ResponseBadRequest(w)
+		types.RejectJob{err.Error()}.Write(w)
 		return
 	}
 	server.Logger.Printf("Got job with config version %s and image %s\n", *config.Version, *config.Env.Image)
 	bytes, err := config.Serialize()
 	if err != nil {
 		server.Logger.Printf("Failed to serialize job")
-		types.ResponseInternalServerError(w)
+		types.RejectJob{err.Error()}.WriteWith(w, http.StatusInternalServerError)
 		return
 	}
 	err = server.Jobs.Push(bytes)
 	if err != nil {
 		server.Logger.Printf("Failed to push job to job queue.")
-		types.ResponseInternalServerError(w)
+		types.RejectJob{err.Error()}.WriteWith(w, http.StatusInternalServerError)
 		return
 	}
-	types.ResponseAccepted(w)
+	types.AcceptJob{
+		Meta: types.Meta{
+			ID:        "23413412342",
+			Timestamp: time.Now(),
+		},
+	}.Write(w)
 }
 
 // withLogging is middleware that wraps a http Handler. It logs basic info
