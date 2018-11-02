@@ -39,7 +39,7 @@ func (queue *Queue) Stream() <-chan []byte {
 
 // Length is the number of items in the queue
 func (queue *Queue) Length() int {
-	return len(Messages)
+	return len(queue.Messages)
 }
 
 // Close the queue
