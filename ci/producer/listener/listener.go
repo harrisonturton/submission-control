@@ -11,12 +11,12 @@ import (
 // for test results on the result queue, and updates the
 // database accordingly.
 type Listener struct {
-	Results queue.ReadCloser
+	Results queue.Queue
 	Logger  *log.Logger
 }
 
 // New creates a new Listener instance.
-func New(results queue.ReadCloser, logOut io.Writer) Listener {
+func New(results queue.Queue, logOut io.Writer) Listener {
 	return Listener{
 		Results: results,
 		Logger:  log.New(logOut, "", log.LstdFlags),
