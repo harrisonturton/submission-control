@@ -24,6 +24,7 @@ func TestStatusCodes(t *testing.T) {
 		resp, err := http.Post(addr, encoding, reader)
 		if err != nil {
 			t.Errorf("Failed to post: %s", err)
+			return
 		}
 		if resp.StatusCode != statusCode {
 			t.Errorf("Expected status code %d, but got %d", statusCode, resp.StatusCode)
