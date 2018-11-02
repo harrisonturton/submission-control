@@ -8,3 +8,18 @@ services:
     command: rabbitmq-server
     ports:
       - 5672:5672
+    expose:
+      - 5672
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 15s
+      retries: 1
+
+  producer:
+    build: ./cmd/producer
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    ports:
+      - 8080:8080

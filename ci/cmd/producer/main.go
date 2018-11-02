@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	serverAddr  = "localhost:8080"
-	queueAddr   = "amqp://guest:guest@localhost:5672/"
+	serverAddr  = "0.0.0.0:8080"
+	queueAddr   = "amqp://guest:guest@rabbitmq:5672/"
 	jobQueue    = "job_queue"
 	resultQueue = "result_queue"
 )
