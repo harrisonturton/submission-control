@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/harrisonturton/submission-control/ci/cache"
-	"github.com/harrisonturton/submission-control/ci/parser"
 	"github.com/harrisonturton/submission-control/ci/queue"
+	"github.com/harrisonturton/submission-control/ci/types"
 	"io"
 	"log"
 	"net/http"
@@ -75,7 +75,8 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	config, err := parser.ParseConfig(r.Body)
+	config := types.TestConfig{}
+	err := config.UnmarshalJSON(r.Body)
 	if err != nil {
 		server.Logger.Printf("Failed to unmarshal request body: %s\n", err)
 		return
