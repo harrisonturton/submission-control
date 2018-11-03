@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/harrisonturton/submission-control/ci/client"
 	"github.com/harrisonturton/submission-control/ci/queue"
+	"github.com/harrisonturton/submission-control/ci/types"
 	"io"
 	"log"
 	"sync"
@@ -42,8 +43,14 @@ func (worker *Worker) Run(done chan bool, wg *sync.WaitGroup) {
 			worker.Jobs.Close()
 			worker.Results.Close()
 			return
-		case job := <-jobs:
-			worker.handleJob(string(job))
+		case jobGob := <-jobs:
+			config := types.TestConfig{}
+			err := config.Deserialize(jobGob)
+			if err != nil {
+				worker.Logger.Println("Failed to deserialize TestConfig gob.")
+				return
+			}
+			worker.handleJob(config)
 		}
 	}
 }
@@ -51,11 +58,12 @@ func (worker *Worker) Run(done chan bool, wg *sync.WaitGroup) {
 // handleJob is called for every task that is recieved from the
 // job queue. It runs the code inside a container, and puts the
 // STDOUT on the results queue.
-func (worker *Worker) handleJob(msg string) {
-	worker.Logger.Printf("Recieved job: %s", msg)
-	id, err := worker.Client.Create(msg)
+func (worker *Worker) handleJob(config types.TestConfig) {
+	worker.Logger.Printf("Recieved TestConfig with image: %s\n", *config.Env.Image)
+	id, err := worker.Client.Create(*config.Env.Image)
 	if err != nil {
 		worker.Logger.Printf("Error on create container: %s", err)
+		worker.Logger.Print(*config.Env.Image)
 		return
 	}
 	err = worker.Client.Wait(id, time.Second*5)
