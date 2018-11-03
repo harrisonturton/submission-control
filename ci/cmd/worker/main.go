@@ -14,8 +14,7 @@ import (
 const (
 	jobQueueName    = "job_queue"
 	resultQueueName = "result_queue"
-	host            = "rabbitmq"
-	queueAddr       = "amqp://guest:guest@" + host + ":5672/"
+	queueAddr       = "amqp://guest:guest@rabbitmq:5672/"
 	dockerVersion   = "1.38"
 )
 
