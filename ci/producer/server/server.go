@@ -82,7 +82,11 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	server.Logger.Printf("Got job with config version %s and image %s\n", *config.Version, *config.Env.Image)
-	bytes, err := config.Serialize()
+	testJob := types.TestJob{
+		Timestamp: time.Now(),
+		Config:    config,
+	}
+	bytes, err := testJob.Serialize()
 	if err != nil {
 		server.Logger.Printf("Failed to serialize job")
 		types.RejectJob{err.Error()}.WriteWith(w, http.StatusInternalServerError)

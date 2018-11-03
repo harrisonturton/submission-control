@@ -44,13 +44,13 @@ func (worker *Worker) Run(done chan bool, wg *sync.WaitGroup) {
 			worker.Results.Close()
 			return
 		case jobGob := <-jobs:
-			config := types.TestConfig{}
-			err := config.Deserialize(jobGob)
+			job := types.TestJob{}
+			err := job.Deserialize(jobGob)
 			if err != nil {
 				worker.Logger.Println("Failed to deserialize TestConfig gob.")
 				return
 			}
-			worker.handleJob(config)
+			worker.handleJob(job)
 		}
 	}
 }
@@ -58,12 +58,12 @@ func (worker *Worker) Run(done chan bool, wg *sync.WaitGroup) {
 // handleJob is called for every task that is recieved from the
 // job queue. It runs the code inside a container, and puts the
 // STDOUT on the results queue.
-func (worker *Worker) handleJob(config types.TestConfig) {
-	worker.Logger.Printf("Recieved TestConfig with image: %s\n", *config.Env.Image)
-	id, err := worker.Client.Create(*config.Env.Image)
+func (worker *Worker) handleJob(job types.TestJob) {
+	worker.Logger.Printf("Recieved TestConfig with image: %s\n", *job.Config.Env.Image)
+	id, err := worker.Client.Create(*job.Config.Env.Image)
 	if err != nil {
 		worker.Logger.Printf("Error on create container: %s", err)
-		worker.Logger.Print(*config.Env.Image)
+		worker.Logger.Print(*job.Config.Env.Image)
 		return
 	}
 	err = worker.Client.Wait(id, time.Second*5)

@@ -13,8 +13,8 @@ import (
 // TestJob is the object that holds metadata
 // about the test job we recieve.
 type TestJob struct {
-	Timestamp  time.Time
-	TestConfig TestConfig
+	Timestamp time.Time
+	Config    TestConfig
 }
 
 // TestConfig is the type that holds the default
@@ -56,17 +56,18 @@ func (config *TestConfig) UnmarshalJSON(data io.Reader) error {
 	return nil
 }
 
-// Serialize will convert a TestConfig into bytes
-func (config *TestConfig) Serialize() ([]byte, error) {
+// Serialize will convert a TestJob into bytes
+func (job *TestJob) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	encoder := gob.NewEncoder(buf)
-	err := encoder.Encode(config)
+	err := encoder.Encode(job)
 	return buf.Bytes(), err
 }
 
-// Deserialize will populate the TestConfig fields with
+// Deserialize will populate the TestJob fields with
 // data from the serialization.
-func (config *TestConfig) Deserialize(data []byte) error {
-	decoder := gob.NewDecoder(bytes.NewReader(data))
-	return decoder.Decode(config)
+func (job *TestJob) Deserialize(data []byte) error {
+	reader := bytes.NewReader(data)
+	decoder := gob.NewDecoder(reader)
+	return decoder.Decode(job)
 }

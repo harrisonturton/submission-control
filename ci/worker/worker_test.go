@@ -8,6 +8,7 @@ import (
 	"github.com/harrisonturton/submission-control/ci/types"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestHandleJob(t *testing.T) {
@@ -19,14 +20,17 @@ func TestHandleJob(t *testing.T) {
 	// Create job
 	version := "1"
 	image := "hello-world"
-	testConfig := types.TestConfig{
-		Version: &version,
-		Env: &types.Environment{
-			Image: &image,
+	testJob := types.TestJob{
+		Timestamp: time.Now(),
+		Config: types.TestConfig{
+			Version: &version,
+			Env: &types.Environment{
+				Image: &image,
+			},
 		},
 	}
 	// Test job
-	worker.handleJob(testConfig)
+	worker.handleJob(testJob)
 	// Ensure something is placed on result queue
 	if results.Length() != 1 {
 		t.Errorf("Expected queue length to be %d, but got %d", 1, results.Length())
