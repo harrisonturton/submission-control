@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"fmt"
 	"github.com/harrisonturton/submission-control/ci/client"
 	"github.com/harrisonturton/submission-control/ci/queue"
 	"github.com/harrisonturton/submission-control/ci/types"
@@ -71,11 +70,30 @@ func (worker *Worker) handleJob(job types.TestJob) {
 		worker.Logger.Printf("Error on wait for container: %s", err)
 		return
 	}
-	logs, err := worker.Client.ReadLogs(id, true, true)
+	stdout, err := worker.Client.ReadLogs(id, true, false)
 	if err != nil {
-		worker.Logger.Printf("Error on fetching container logs: %s", err)
+		worker.Logger.Printf("Error on fetching container stdout: %s", err)
 		return
 	}
-	worker.Logger.Printf("Container Logs: %s", logs)
-	worker.Results.Push([]byte(fmt.Sprintf("\n%s:\n%s", id, logs)))
+	stderr, err := worker.Client.ReadLogs(id, false, true)
+	if err != nil {
+		worker.Logger.Printf("Error on fetching container stderr: %s", err)
+		return
+	}
+	worker.Logger.Printf("Container STDOUT: %s", stdout)
+	result := types.TestResult{
+		Stdout:    stdout,
+		Stderr:    stderr,
+		Timestamp: time.Now(),
+	}
+	data, err := result.Serialize()
+	if err != nil {
+		worker.Logger.Printf("Could not serialize test result")
+		return
+	}
+	err = worker.Results.Push(data)
+	if err != nil {
+		worker.Logger.Printf("Could not push test result to results queue")
+		return
+	}
 }

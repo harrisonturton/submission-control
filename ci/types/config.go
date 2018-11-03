@@ -32,6 +32,14 @@ type TestEnv struct {
 	Vars  map[string]string `json:"vars"`
 }
 
+// TestResult is the results from running a
+// container.
+type TestResult struct {
+	Stdout    string    `json:"stdout"`
+	Stderr    string    `json:"stderr"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
 var defaultConfig = TestConfig{
 	Version: "1",
 	Env: TestEnv{
@@ -55,6 +63,11 @@ func (config *TestConfig) UnmarshalJSON(data io.Reader) error {
 	return nil
 }
 
+// MarshalJSON will convert a TestResult into JSON.
+func (result *TestResult) MarshalJSON(w io.Writer) error {
+	return json.NewEncoder(w).Encode(result)
+}
+
 // Serialize will convert a TestJob into bytes
 func (job *TestJob) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
@@ -69,4 +82,20 @@ func (job *TestJob) Deserialize(data []byte) error {
 	reader := bytes.NewReader(data)
 	decoder := gob.NewDecoder(reader)
 	return decoder.Decode(job)
+}
+
+// Serialize will convert a TestResult into bytes
+func (result *TestResult) Serialize() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	encoder := gob.NewEncoder(buf)
+	err := encoder.Encode(result)
+	return buf.Bytes(), err
+}
+
+// Deserialize will populate the TestResult fields with
+// data from the serialization.
+func (result *TestResult) Deserialize(data []byte) error {
+	reader := bytes.NewReader(data)
+	decoder := gob.NewDecoder(reader)
+	return decoder.Decode(result)
 }

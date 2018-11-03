@@ -2,6 +2,7 @@ package listener
 
 import (
 	"github.com/harrisonturton/submission-control/ci/queue"
+	"github.com/harrisonturton/submission-control/ci/types"
 	"io"
 	"log"
 	"sync"
@@ -16,7 +17,7 @@ type Listener struct {
 }
 
 // New creates a new Listener instance.
-func New(results queue.Queue, logOut io.Writer) Listener {
+func New(logOut io.Writer, results queue.Queue) Listener {
 	return Listener{
 		Results: results,
 		Logger:  log.New(logOut, "", log.LstdFlags),
@@ -32,14 +33,19 @@ func (listener *Listener) Run(done chan bool, wg *sync.WaitGroup) {
 		select {
 		case <-done:
 			return
-		case message := <-listener.Results.Stream():
-			listener.handleResult(string(message))
+		case resultGob := <-listener.Results.Stream():
+			result := types.TestResult{}
+			err := result.Deserialize(resultGob)
+			if err != nil {
+				listener.Logger.Println("Failed to deserialize TestResult gob.")
+			}
+			listener.handleResult(result)
 		}
 	}
 }
 
 // handleResult processes every message that the server recieves
 // from the result queue.
-func (listener *Listener) handleResult(message string) {
-	listener.Logger.Printf("Recieved result: %s", message)
+func (listener *Listener) handleResult(result types.TestResult) {
+	listener.Logger.Printf("Recieved result with stdout: %s\nstderr: %s", result.Stdout, result.Stderr)
 }
