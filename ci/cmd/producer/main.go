@@ -39,13 +39,18 @@ func main() {
 	fmt.Println("Exiting")
 }
 
+// Will continuously try and connect until success
 func createServer() *server.Server {
-	// Declare queues
-	jobs, err := queue.New(jobQueue, queueAddr)
-	exitError(err)
-	// Create server
-	cache := cache.New(15, time.Hour*5)
-	return server.New(os.Stdout, jobs, cache, serverAddr)
+	for {
+		jobs, err := queue.New(jobQueue, queueAddr)
+		if err != nil {
+			fmt.Println("%s\nTrying again in 5 seconds...", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		cache := cache.New(15, time.Hour*5)
+		return server.New(os.Stdout, jobs, cache, serverAddr)
+	}
 }
 
 func exitError(err error) {

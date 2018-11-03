@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
 const (
@@ -19,14 +20,7 @@ const (
 )
 
 func main() {
-	client, err := client.New(dockerVersion)
-	exitError(err)
-	jobQueue, err := queue.New(jobQueueName, queueAddr)
-	exitError(err)
-	resultQueue, err := queue.New(resultQueueName, queueAddr)
-	exitError(err)
-	worker := worker.New(jobQueue, resultQueue, client, os.Stdout)
-
+	worker := createWorker()
 	fmt.Println("WORKER RUNNING")
 
 	var wg sync.WaitGroup
@@ -45,33 +39,33 @@ func main() {
 	fmt.Println("Finished")
 }
 
+func createWorker() *worker.Worker {
+	for {
+		client, err := client.New(dockerVersion)
+		if err != nil {
+			fmt.Println("Worker sleeping for 5 seconds: %s", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		jobQueue, err := queue.New(jobQueueName, queueAddr)
+		if err != nil {
+			fmt.Println("Worker sleeping for 5 seconds: %s", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		resultQueue, err := queue.New(resultQueueName, queueAddr)
+		if err != nil {
+			fmt.Println("Worker sleeping for 5 seconds: %s", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return worker.New(jobQueue, resultQueue, client, os.Stdout)
+	}
+}
+
 func exitError(err error) {
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }
-
-/*
-func main() {
-	worker, err := worker.New(os.Stdout, jobQueue, resultQueue, "amqp://guest:guest@localhost:5672/")
-	if err != nil {
-		panic(err)
-	}
-
-	var wg sync.WaitGroup
-	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT)
-	done := make(chan bool)
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		<-sig
-		fmt.Println("Finishing...")
-		close(done)
-	}()
-	go worker.Run(done, &wg)
-	wg.Wait()
-
-	fmt.Println("Finished.")
-}*/
