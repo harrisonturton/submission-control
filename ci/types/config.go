@@ -5,53 +5,52 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"time"
 )
 
-// TestJob is the object that holds metadata
-// about the test job we recieve.
+// TestJob holds metadata around a TestConfig. It is
+// the datastructure that is passed around internally.
 type TestJob struct {
-	Timestamp time.Time
 	Config    TestConfig
+	Timestamp time.Time
 }
 
-// TestConfig is the type that holds the default
-// test configurations, and the test commands for
-// each test.
+// TestConfig is the configuration of the testing
+// environment. It gives the information on what
+// images to use, and what tests to run.
 type TestConfig struct {
-	Version *string      `json:"version"`
-	Env     *Environment `json:"environment"`
+	Version string  `json:"version"`
+	Env     TestEnv `json:"environment"`
 }
 
-// Environment is the configuration for the testing
-// environment in general, within the container
-type Environment struct {
-	Image *string            `json:"image"`
-	Vars  *map[string]string `json:"vars"`
+// TestEnv is the environment within the Docker
+// containers, and the image the container is
+// built from.
+type TestEnv struct {
+	Image string            `json:"image"`
+	Vars  map[string]string `json:"vars"`
 }
 
-// UnmarshalJSON will populate the TestJob fields by
-// reading JSON data.
+var defaultConfig = TestConfig{
+	Version: "1",
+	Env: TestEnv{
+		Image: "",
+		Vars:  map[string]string{},
+	},
+}
+
+// UnmarshalJSON will populate the TestJob using JSON
+// data. It will return errors on malformed input and
+// missing fields.
 func (config *TestConfig) UnmarshalJSON(data io.Reader) error {
+	*config = defaultConfig
 	err := json.NewDecoder(data).Decode(config)
 	if err != nil {
-		return fmt.Errorf("could not parse config: %s", err)
+		return errors.New("could not decode json: " + err.Error())
 	}
-	if config.Version == nil {
-		version := "1"
-		config.Version = &version
-	}
-	if config.Env == nil {
-		return errors.New("could not parse config: missing environment field")
-	}
-	if config.Env.Image == nil {
-		return errors.New("could not parse config: missing environment.image field")
-	}
-	if config.Env.Vars == nil {
-		vars := make(map[string]string)
-		config.Env.Vars = &vars
+	if config.Env.Image == "" {
+		return errors.New("field environment.image cannot be blank")
 	}
 	return nil
 }

@@ -18,14 +18,12 @@ func TestHandleJob(t *testing.T) {
 	results := queue.New(5)
 	worker := New(jobs, results, client, os.Stdout)
 	// Create job
-	version := "1"
-	image := "hello-world"
 	testJob := types.TestJob{
 		Timestamp: time.Now(),
 		Config: types.TestConfig{
-			Version: &version,
-			Env: &types.Environment{
-				Image: &image,
+			Version: "1",
+			Env: types.TestEnv{
+				Image: "hello-world",
 			},
 		},
 	}

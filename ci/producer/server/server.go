@@ -81,7 +81,7 @@ func (server *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 		types.RejectJob{err.Error()}.Write(w)
 		return
 	}
-	server.Logger.Printf("Got job with config version %s and image %s\n", *config.Version, *config.Env.Image)
+	server.Logger.Printf("Got job with config version %s and image %s\n", config.Version, config.Env.Image)
 	testJob := types.TestJob{
 		Timestamp: time.Now(),
 		Config:    config,

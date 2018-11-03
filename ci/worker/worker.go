@@ -59,11 +59,11 @@ func (worker *Worker) Run(done chan bool, wg *sync.WaitGroup) {
 // job queue. It runs the code inside a container, and puts the
 // STDOUT on the results queue.
 func (worker *Worker) handleJob(job types.TestJob) {
-	worker.Logger.Printf("Recieved TestConfig with image: %s\n", *job.Config.Env.Image)
-	id, err := worker.Client.Create(*job.Config.Env.Image)
+	worker.Logger.Printf("Recieved TestConfig with image: %s\n", job.Config.Env.Image)
+	id, err := worker.Client.Create(job.Config.Env.Image)
 	if err != nil {
 		worker.Logger.Printf("Error on create container: %s", err)
-		worker.Logger.Print(*job.Config.Env.Image)
+		worker.Logger.Print(job.Config.Env.Image)
 		return
 	}
 	err = worker.Client.Wait(id, time.Second*5)
