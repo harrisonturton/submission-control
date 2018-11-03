@@ -43,19 +43,19 @@ func createWorker() *worker.Worker {
 	for {
 		client, err := client.New(dockerVersion)
 		if err != nil {
-			fmt.Println("Worker sleeping for 5 seconds: %s", err)
+			fmt.Println("Cannot connect to docker. Sleeping...")
 			time.Sleep(5 * time.Second)
 			continue
 		}
 		jobQueue, err := queue.New(jobQueueName, queueAddr)
 		if err != nil {
-			fmt.Println("Worker sleeping for 5 seconds: %s", err)
+			fmt.Println("Cannot connect to job queue. Sleeping...")
 			time.Sleep(5 * time.Second)
 			continue
 		}
 		resultQueue, err := queue.New(resultQueueName, queueAddr)
 		if err != nil {
-			fmt.Println("Worker sleeping for 5 seconds: %s", err)
+			fmt.Println("Cannot connect to result queue. Sleeping...")
 			time.Sleep(5 * time.Second)
 			continue
 		}

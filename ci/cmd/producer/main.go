@@ -44,7 +44,7 @@ func createServer() *server.Server {
 	for {
 		jobs, err := queue.New(jobQueue, queueAddr)
 		if err != nil {
-			fmt.Println("%s\nTrying again in 5 seconds...", err)
+			fmt.Println("Cannot connect to job queue. Sleeping...")
 			time.Sleep(5 * time.Second)
 			continue
 		}
