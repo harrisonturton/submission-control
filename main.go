@@ -2,42 +2,31 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	api "github.com/harrisonturton/submission-control/server"
 	"log"
-	"net/http"
+	"os"
+	"sync"
 	"time"
 )
 
-var (
-	// Commandline args
-	port = flag.String("port", "80", "the port to run the server on")
-
-	// Server config
-	readTimeout  = 10 * time.Second
-	writeTimeout = 10 * time.Second
-)
+// Commandline args
+var port = flag.String("port", "80", "the port to run the server on")
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"users":["harry","tim","connor"]}`)
-	})
-	mux.HandleFunc("/tutors", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"tutors":["harry"]}`)
-	})
-	mux.HandleFunc("/students", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"students":["tim","connor"]}`)
-	})
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"status":404}`)
-	})
-
-	s := &http.Server{
-		Addr:         ":" + *port,
-		Handler:      mux,
-		ReadTimeout:  readTimeout,
-		WriteTimeout: writeTimeout,
-	}
-
-	log.Fatal(s.ListenAndServe())
+	logger := log.New(os.Stdout, "[server] ", log.LstdFlags)
+	logger.Println("Starting...")
+	server := api.NewServer(*port)
+	// Boilerplate for graceful shutdown
+	var wg sync.WaitGroup
+	done := make(chan struct{})
+	// Run the server
+	wg.Add(2)
+	go server.Serve(logger, &wg, done)
+	go func() {
+		defer wg.Done()
+		time.Sleep(5 * time.Second)
+		close(done)
+	}()
+	wg.Wait()
+	logger.Println("Exiting.")
 }
