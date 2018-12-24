@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -24,12 +23,10 @@ var (
 // NewServer creates a new instance of Server, but
 // does not begin running it.
 func NewServer(port string) *Server {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", rootHandler)
 	return &Server{
 		Server: &http.Server{
 			Addr:         ":" + port,
-			Handler:      mux,
+			Handler:      makeMux(),
 			ReadTimeout:  readTimeout,
 			WriteTimeout: writeTimeout,
 		},
@@ -59,6 +56,11 @@ func (server *Server) Serve(logger *log.Logger, wg *sync.WaitGroup, done chan st
 	logger.Println("Server stopped.")
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Response")
+func makeMux() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/users", usersHandler)
+	mux.HandleFunc("/tutors", tutorsHandler)
+	mux.HandleFunc("/students", studentsHandler)
+	mux.HandleFunc("/", notFoundHandler)
+	return mux
 }
