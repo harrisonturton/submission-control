@@ -5,8 +5,8 @@ import (
 	api "github.com/harrisonturton/submission-control/server"
 	"log"
 	"os"
+	"os/signal"
 	"sync"
-	"time"
 )
 
 // Commandline args
@@ -20,13 +20,18 @@ func main() {
 	var wg sync.WaitGroup
 	done := make(chan struct{})
 	// Run the server
-	wg.Add(2)
+	wg.Add(1)
 	go server.Serve(logger, &wg, done)
+	// Kill server on SIGINT
+	wg.Add(1)
+	killChan := make(chan os.Signal, 1)
+	signal.Notify(killChan, os.Interrupt)
 	go func() {
 		defer wg.Done()
-		time.Sleep(5 * time.Second)
+		<-killChan
 		close(done)
 	}()
+	// Wait till killed
 	wg.Wait()
 	logger.Println("Exiting.")
 }
