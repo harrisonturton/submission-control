@@ -8,10 +8,12 @@ import (
 	"time"
 )
 
-// Server handles all API requests and passes
-// the data to the correct handlers.
+// Server represents the HTTP server, with added
+// graceful shutdown and middleware & tracing functionality.
 type Server struct {
-	Server *http.Server
+	logger     *log.Logger
+	httpServer *http.Server
+	middleware []func(http.Handler) http.Handler
 }
 
 var (
@@ -20,47 +22,71 @@ var (
 	shutdownTimeout = 15 * time.Second
 )
 
-// NewServer creates a new instance of Server, but
-// does not begin running it.
-func NewServer(port string) *Server {
+// NewServer creates a new Server instance,
+// and attaches all required tracing.
+func NewServer(port string, logger *log.Logger) *Server {
 	return &Server{
-		Server: &http.Server{
+		logger: logger,
+		httpServer: &http.Server{
 			Addr:         ":" + port,
-			Handler:      makeMux(),
+			Handler:      traceRoutes(logger),
 			ReadTimeout:  readTimeout,
 			WriteTimeout: writeTimeout,
 		},
 	}
 }
 
-// Serve will run the server and output any errors
-// to the logger.
-func (server *Server) Serve(logger *log.Logger, wg *sync.WaitGroup, done chan struct{}) {
+// Serve will listen for requests on the given port. It will output
+// any errors to the logger.
+func (server *Server) Serve(wg *sync.WaitGroup, done chan struct{}) {
 	defer wg.Done()
-	go func() {
-		<-done
-		// Force shutdown if couldn't gracefully shutdown
-		logger.Println("Attempting to shutdown...")
-		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
-		// Attempt to gracefully shutdown
-		if err := server.Server.Shutdown(ctx); err != nil {
-			logger.Fatalf("Could not gracefully shutdown: %s\n", err.Error())
-		}
-	}()
-	logger.Printf("Server starting on %s\n", server.Server.Addr)
-	err := server.Server.ListenAndServe()
+	go server.waitForShutdown(done)
+	server.logger.Printf("Server starting on %s\n", server.httpServer.Addr)
+	err := server.httpServer.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		logger.Fatalf("Server failed: %s\n", err.Error())
+		server.logger.Fatalf("Server failed: %s\n", err.Error())
 	}
-	logger.Println("Server stopped.")
+	server.logger.Println("Server stopped.")
 }
 
-func makeMux() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/users", usersHandler)
-	mux.HandleFunc("/tutors", tutorsHandler)
-	mux.HandleFunc("/students", studentsHandler)
-	mux.HandleFunc("/", notFoundHandler)
-	return mux
+// waitForShutdown will wait until the done channel is closed,
+// and attempt to gracefully shutdown the server. If it doesn't
+// shutdown within the shutdownTimeout, it will forcefully shutdown.
+// Graceful shutdown waits for all outstanding requests to be handled.
+func (server *Server) waitForShutdown(done chan struct{}) {
+	<-done
+	server.logger.Println("Attempting to shutdown...")
+	// Forcefully shutdown after shutdownTimeout
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+	// Attempt to gracefully shutdown
+	err := server.httpServer.Shutdown(ctx)
+	if err != nil {
+		server.logger.Fatalf("Could not gracefully shutdown: %s\n", err.Error())
+	}
+}
+
+// traceRoutes builds the routes (a http.Handler) with
+// some tracing to log important info about each request.
+func traceRoutes(logger *log.Logger) http.Handler {
+	routes := makeRoutes(logger)
+	return trace(logger, routes)
+}
+
+// trace will intercept each request, log some information about it,
+// and then pass it along to the proper handlers.
+func trace(logger *log.Logger, nextHandler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		printRequest(logger, r)
+		nextHandler.ServeHTTP(w, r)
+	})
+}
+
+func printRequest(logger *log.Logger, r *http.Request) {
+	if r.URL != nil {
+		logger.Printf("[%s] %s\n", r.Method, r.URL)
+	} else {
+		logger.Printf("[%s] [no url]\n", r.Method)
+	}
+	logger.Printf("Content Length: %d\n", r.ContentLength)
 }
