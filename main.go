@@ -1,37 +1,41 @@
 package main
 
 import (
-	"flag"
-	api "github.com/harrisonturton/submission-control/server"
+	"database/sql"
+	"fmt"
+	dbStore "github.com/harrisonturton/submission-control/db"
+	_ "github.com/lib/pq"
 	"log"
 	"os"
-	"os/signal"
-	"sync"
 )
 
-// Commandline args
-var port = flag.String("port", "80", "the port to run the server on")
+const (
+	dbUser    = "harrisonturton"
+	dbName    = "submission_control"
+	dbSslMode = "disable"
+)
 
 func main() {
-	logger := log.New(os.Stdout, "[server] ", log.LstdFlags)
-	logger.Println("Starting...")
-	server := api.NewServer(*port)
-	// Boilerplate for graceful shutdown
-	var wg sync.WaitGroup
-	done := make(chan struct{})
-	// Run the server
-	wg.Add(1)
-	go server.Serve(logger, &wg, done)
-	// Kill server on SIGINT
-	wg.Add(1)
-	killChan := make(chan os.Signal, 1)
-	signal.Notify(killChan, os.Interrupt)
-	go func() {
-		defer wg.Done()
-		<-killChan
-		close(done)
-	}()
-	// Wait till killed
-	wg.Wait()
-	logger.Println("Exiting.")
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+	store, err := createDb(dbUser, dbName, dbSslMode)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	defer store.Close()
+	// Now do some work with the database
+	user, err := store.GetUser("u6386433")
+	if err != nil {
+		logger.Fatal(err)
+	}
+	logger.Printf("UID: %s, Name: %s, Roles: %v\n", user.UID, user.Name, user.Roles)
+	logger.Println("Done!")
+}
+
+func createDb(dbUser, dbName, dbSslMode string) (*dbStore.Store, error) {
+	connStr := fmt.Sprintf("user=%s dbname=%s sslmode=%s", dbUser, dbName, dbSslMode)
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, err
+	}
+	return dbStore.NewStore(db)
 }
