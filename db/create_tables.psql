@@ -1,0 +1,32 @@
+
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
+
+CREATE TYPE role AS ENUM ('student', 'tutor', 'convenor', 'admin');
+
+-- This stores the basic account information
+-- for every user, regardless of their role.
+CREATE TABLE users (
+	id       SERIAL PRIMARY KEY,
+	email    VARCHAR(254) NOT NULL,
+	password VARCHAR(80)  NOT NULL, -- Include salt in here, hash salt:password
+	uid      VARCHAR(20)  NOT NULL
+);
+
+-- This contains the roles for each user. A
+-- single user may have multiple roles.
+CREATE TABLE roles (
+	id SERIAL,
+	role role,
+	PRIMARY KEY (id, role),
+	FOREIGN KEY (id) REFERENCES users(id)
+);
+
+INSERT INTO users (email, password, uid) VALUES
+	('harrisonturton@gmail.com', 'JDJhJDEwJHEzMHRXL0RseUVSdjQuMDgydlA2enVHTlhtZ1VZcENBQUlmQVlSSy9IRzNrNFJxUGNNZ1cy', 'u6386433');
+
+INSERT INTO roles (id, role) VALUES
+	(1, 'admin'),
+	(1, 'convenor'),
+	(1, 'tutor'),
+	(1, 'student');
