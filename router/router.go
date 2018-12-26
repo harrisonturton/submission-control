@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"github.com/harrisonturton/submission-control/db"
 	"log"
 	"net/http"
 )
@@ -10,12 +11,13 @@ import (
 // route individual requests to the nearest handler.
 type Router struct {
 	logger *log.Logger
+	store  *db.Store
 	mux    *http.ServeMux
 }
 
 // NewRouter creates a new instance of Router attached
 // to a Logger instance.
-func NewRouter(logger *log.Logger) *Router {
+func NewRouter(logger *log.Logger, store *db.Store) *Router {
 	router := &Router{}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/auth", router.authHandler)
@@ -23,6 +25,7 @@ func NewRouter(logger *log.Logger) *Router {
 	mux.HandleFunc("/", router.notFoundHandler)
 	router.mux = mux
 	router.logger = logger
+	router.store = store
 	return router
 }
 

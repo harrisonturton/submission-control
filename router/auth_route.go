@@ -28,4 +28,11 @@ func (router *Router) authHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	router.logger.Printf("Email: %s // Password: %s\n", login.Email, login.Password)
+	account, err := router.store.GetAccountByEmail(login.Email)
+	if err != nil {
+		router.logger.Printf("Cannot find user: %v\n", err)
+		http.Error(w, "request failed", http.StatusBadRequest)
+		return
+	}
+	router.logger.Printf("Uid for %s is %s\n", account.Firstname, account.UID)
 }
