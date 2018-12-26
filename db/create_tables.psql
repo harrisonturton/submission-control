@@ -7,10 +7,12 @@ CREATE TYPE role AS ENUM ('student', 'tutor', 'convenor', 'admin');
 -- This stores the basic account information
 -- for every user, regardless of their role.
 CREATE TABLE users (
-	id       SERIAL PRIMARY KEY,
-	email    VARCHAR(254) NOT NULL,
-	password VARCHAR(80)  NOT NULL, -- Include salt in here, hash salt:password
-	uid      VARCHAR(20)  NOT NULL
+	id        SERIAL PRIMARY KEY,
+	firstname VARCHAR(100) NOT NULL,
+	lastname  VARCHAR(100) NOT NULL,
+	email     VARCHAR(254) NOT NULL,
+	password  VARCHAR(80)  NOT NULL, -- Include salt in here, hash salt:password
+	uid       VARCHAR(20)  NOT NULL
 );
 
 -- This contains the roles for each user. A
@@ -22,8 +24,8 @@ CREATE TABLE roles (
 	FOREIGN KEY (id) REFERENCES users(id)
 );
 
-INSERT INTO users (email, password, uid) VALUES
-	('harrisonturton@gmail.com', 'JDJhJDEwJHEzMHRXL0RseUVSdjQuMDgydlA2enVHTlhtZ1VZcENBQUlmQVlSSy9IRzNrNFJxUGNNZ1cy', 'u6386433');
+INSERT INTO users (id, firstname, lastname, email, password, uid) VALUES
+	(1, 'Harrison', 'Turton', 'harrisonturton@gmail.com', 'JDJhJDEwJHEzMHRXL0RseUVSdjQuMDgydlA2enVHTlhtZ1VZcENBQUlmQVlSSy9IRzNrNFJxUGNNZ1cy', 'u6386433');
 
 INSERT INTO roles (id, role) VALUES
 	(1, 'admin'),
