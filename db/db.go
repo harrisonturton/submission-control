@@ -1,30 +1,17 @@
 package db
 
-// User represents a user in the database.
-// It can be a student, tutor, convenor or
-// admin.
+// Account represents the login and account
+// information that is required for every user.
+type Account struct {
+	Email    string
+	Name     string
+	Password string
+	UID      string
+}
+
+// User represents a user with account information,
+// and a set of roles.
 type User struct {
-	Name  string
-	UID   string
+	Account
 	Roles []string
-}
-
-// Student represents a student in the database.
-// It is guaranteed to contain a "student" role.
-type Student struct {
-	User
-}
-
-// Reader is the interface for read-only interactions
-// with the database. It is implemented by Store.
-type Reader interface {
-	GetUser(uid string) (User, error)
-	//GetStudent(uid string) (Student, error)
-}
-
-// Writer is the interface for write-only interactions
-// with the database. It is implemented by Store.
-type Writer interface {
-	//CreateUser(user User) error
-	//SetUser(user User) error
 }
