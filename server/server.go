@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/harrisonturton/submission-control/router"
 	"log"
 	"net/http"
 	"sync"
@@ -69,7 +70,7 @@ func (server *Server) waitForShutdown(done chan struct{}) {
 // traceRoutes builds the routes (a http.Handler) with
 // some tracing to log important info about each request.
 func traceRoutes(logger *log.Logger) http.Handler {
-	router := NewRouter(logger)
+	router := router.NewRouter(logger)
 	return trace(logger, router)
 }
 
