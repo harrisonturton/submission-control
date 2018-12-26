@@ -4,9 +4,22 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"time"
 )
+
+var jwtTimeout = time.Minute * 5
+
+var signingKey = []byte("asdgasdfglhjasbfjhkagsdlvgy gasdyfg")
+
+// Claims is the data passed with the JWT for
+// authentication
+type Claims struct {
+	Email string
+	jwt.StandardClaims
+}
 
 /*
 1) On client, ask for username and password
@@ -45,8 +58,13 @@ func (router *Router) authHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if result {
+		token, err := generateToken(account.Email)
+		if err != nil {
+			http.Error(w, "authentication failed", http.StatusBadRequest)
+			return
+		}
 		router.logger.Printf("Successfully authenticated %s (%s)\n", account.Firstname, account.UID)
-		fmt.Fprintf(w, "Authenticated!")
+		fmt.Fprintf(w, token)
 	} else {
 		router.logger.Printf("Failed to authenticate %s (%s)\n", account.Firstname, account.UID)
 		fmt.Fprintf(w, "Failed to authenticate...")
@@ -60,4 +78,15 @@ func checkPassword(attempt string, hash string) (bool, error) {
 	}
 	err = bcrypt.CompareHashAndPassword(bytes, []byte(attempt))
 	return err == nil, nil
+}
+
+func generateToken(email string) (string, error) {
+	claims := Claims{
+		email,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(jwtTimeout).Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(signingKey)
 }
