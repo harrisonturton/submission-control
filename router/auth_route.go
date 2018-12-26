@@ -1,7 +1,10 @@
 package router
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -35,4 +38,26 @@ func (router *Router) authHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	router.logger.Printf("Uid for %s is %s\n", account.Firstname, account.UID)
+	result, err := checkPassword(login.Password, account.Password)
+	if err != nil {
+		router.logger.Printf("Failed to check password: %v\n", err)
+		http.Error(w, "request failed", http.StatusBadRequest)
+		return
+	}
+	if result {
+		router.logger.Printf("Successfully authenticated %s (%s)\n", account.Firstname, account.UID)
+		fmt.Fprintf(w, "Authenticated!")
+	} else {
+		router.logger.Printf("Failed to authenticate %s (%s)\n", account.Firstname, account.UID)
+		fmt.Fprintf(w, "Failed to authenticate...")
+	}
+}
+
+func checkPassword(attempt string, hash string) (bool, error) {
+	bytes, err := hex.DecodeString(hash)
+	if err != nil {
+		return false, err
+	}
+	err = bcrypt.CompareHashAndPassword(bytes, []byte(attempt))
+	return err == nil, nil
 }
