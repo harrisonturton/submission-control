@@ -10,9 +10,9 @@ CREATE TABLE users (
 	id        SERIAL PRIMARY KEY,
 	firstname VARCHAR(100) NOT NULL,
 	lastname  VARCHAR(100) NOT NULL,
-	email     VARCHAR(254) NOT NULL,
+	email     VARCHAR(254) UNIQUE NOT NULL,
 	password  VARCHAR(80)  NOT NULL, -- Include salt in here, hash salt:password
-	uid       VARCHAR(20)  NOT NULL
+	uid       VARCHAR(20)  UNIQUE NOT NULL
 );
 
 -- This contains the roles for each user. A

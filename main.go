@@ -2,10 +2,15 @@ package main
 
 import (
 	"flag"
-	"github.com/harrisonturton/submission-control/db"
-	"github.com/harrisonturton/submission-control/server"
+	"fmt"
 	"log"
 	"os"
+
+	"database/sql"
+	"github.com/harrisonturton/submission-control/store"
+	_ "github.com/lib/pq"
+
+	"github.com/harrisonturton/submission-control/server"
 	"os/signal"
 	"sync"
 )
@@ -18,18 +23,40 @@ var (
 
 func main() {
 	logger := log.New(os.Stdout, "[server] ", log.LstdFlags)
-	// Create store & server
-	store, err := db.NewStore(db.Config{
-		User:    *dbUser,
-		DbName:  *dbName,
-		SslMode: "disable",
-	})
-	failOnError(logger, err)
+	store := createStore(logger)
 	srv := server.NewServer(*port, logger, store)
+	runServer(srv)
+	logger.Println("Exiting.")
+}
+
+// createStore will create a database connection and
+// a store around that.
+func createStore(logger *log.Logger) *store.Store {
+	db, err := createDatabase()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	store, err := store.NewStore(db)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	return store
+}
+
+// createDatabase will try and open a new connection to the
+// database (but potentially re-uses an old one, due to
+// connection pooling)
+func createDatabase() (*sql.DB, error) {
+	conn := fmt.Sprintf("user=%s dbname=%s sslmode=disable", *dbUser, *dbName)
+	return sql.Open("postgres", conn)
+}
+
+// runServer will run the server until an interrupt is sent
+func runServer(srv *server.Server) {
 	// Boilerplate for graceful shutdown
 	var wg sync.WaitGroup
 	done := make(chan struct{})
-	// Run the server
+	// Run server
 	wg.Add(1)
 	go srv.Serve(&wg, done)
 	// Kill server on SIGINT
@@ -43,11 +70,4 @@ func main() {
 	}()
 	// Wait till killed
 	wg.Wait()
-	logger.Println("Exiting.")
-}
-
-func failOnError(logger *log.Logger, err error) {
-	if err != nil {
-		log.Fatalf("%v\n", err)
-	}
 }

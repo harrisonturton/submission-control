@@ -2,8 +2,8 @@ package server
 
 import (
 	"context"
-	"github.com/harrisonturton/submission-control/db"
 	"github.com/harrisonturton/submission-control/router"
+	"github.com/harrisonturton/submission-control/store"
 	"log"
 	"net/http"
 	"sync"
@@ -15,7 +15,7 @@ import (
 type Server struct {
 	logger     *log.Logger
 	httpServer *http.Server
-	store      *db.Store
+	store      *store.Store
 	middleware []func(http.Handler) http.Handler
 }
 
@@ -27,7 +27,7 @@ var (
 
 // NewServer creates a new Server instance,
 // and attaches all required tracing.
-func NewServer(port string, logger *log.Logger, store *db.Store) *Server {
+func NewServer(port string, logger *log.Logger, store *store.Store) *Server {
 	return &Server{
 		logger: logger,
 		store:  store,
@@ -72,7 +72,7 @@ func (server *Server) waitForShutdown(done chan struct{}) {
 
 // traceRoutes builds the routes (a http.Handler) with
 // some tracing to log important info about each request.
-func traceRoutes(logger *log.Logger, store *db.Store) http.Handler {
+func traceRoutes(logger *log.Logger, store *store.Store) http.Handler {
 	router := router.NewRouter(logger, store)
 	return trace(logger, router)
 }

@@ -1,4 +1,4 @@
-package db
+package store
 
 // Account represents the login and account
 // information that is required for every user.
