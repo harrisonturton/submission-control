@@ -69,8 +69,8 @@ func (server *Server) waitForShutdown(done chan struct{}) {
 // traceRoutes builds the routes (a http.Handler) with
 // some tracing to log important info about each request.
 func traceRoutes(logger *log.Logger) http.Handler {
-	routes := makeRoutes(logger)
-	return trace(logger, routes)
+	router := NewRouter(logger)
+	return trace(logger, router)
 }
 
 // trace will intercept each request, log some information about it,
