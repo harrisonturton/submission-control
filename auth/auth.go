@@ -14,11 +14,16 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// SigningKey ...
-const SigningKey = "signing-key"
+var (
+	// SigningKey is the key used to sign each JWT token, proving
+	// that it was given by this server. KEEP PRIVATE!
+	SigningKey = "signing-key"
 
-// TokenTimeout ...
-var TokenTimeout = time.Minute * 5
+	// TokenTimeout is the duration a client can use the token to
+	// access authenticated resources, after which it will be
+	// rejected.
+	TokenTimeout = time.Minute * 5
+)
 
 // Authenticate will try and verify the JWT token.
 func Authenticate(rawToken string) bool {
