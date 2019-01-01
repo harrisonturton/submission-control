@@ -4,11 +4,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/harrisonturton/submission-control/auth"
+	"github.com/harrisonturton/submission-control/request"
 	"golang.org/x/crypto/bcrypt"
-	"io"
 	"net/http"
-	"time"
 )
 
 func (router *Router) authHandler(w http.ResponseWriter, r *http.Request) {
@@ -17,7 +16,7 @@ func (router *Router) authHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Decode login request
-	login, err := decodeLoginRequest(r.Body)
+	login, err := decodeLoginRequest(request.GetBody(r))
 	if err != nil {
 		router.logger.Printf("Error decoding login request: %v\n", err)
 		http.Error(w, "cannot decode body", http.StatusBadRequest)
@@ -37,29 +36,18 @@ func (router *Router) authHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Generate new token
-	token, err := generateToken(account.Email)
+	token, err := auth.GenerateToken(account.Email)
 	if err != nil {
 		router.logger.Printf("Error generating token for %s: %v\n", account.Firstname, err)
 		http.Error(w, "request failed", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, token)
+	fmt.Fprintf(w, token+"\n")
 }
 
-func generateToken(email string) (string, error) {
-	claims := Claims{
-		email,
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(TokenTimeout).Unix(),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(SigningKey)
-}
-
-func decodeLoginRequest(body io.Reader) (*LoginRequest, error) {
+func decodeLoginRequest(body []byte) (*LoginRequest, error) {
 	var login LoginRequest
-	err := json.NewDecoder(body).Decode(&login)
+	err := json.Unmarshal(body, &login)
 	return &login, err
 }
 
