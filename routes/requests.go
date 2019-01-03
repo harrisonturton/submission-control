@@ -1,4 +1,4 @@
-package router
+package routes
 
 // LoginRequest is a POST request sent to the /auth
 // endpoint. The server responds with a time-limited

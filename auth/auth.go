@@ -1,8 +1,11 @@
 package auth
 
 import (
+	"encoding/hex"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/harrisonturton/submission-control/store"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"
 )
@@ -25,8 +28,8 @@ var (
 	TokenTimeout = time.Minute * 5
 )
 
-// Authenticate will try and verify the JWT token.
-func Authenticate(rawToken string) bool {
+// VerifyToken will try and verify the JWT token.
+func VerifyToken(rawToken string) bool {
 	var claims Claims
 	token, err := jwt.ParseWithClaims(rawToken, &claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -54,4 +57,21 @@ func GenerateToken(email string) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(SigningKey))
+}
+
+// Authenticate will verify a login attempt.
+func Authenticate(store *store.Store, email string, passwordAttempt string) (bool, error) {
+	// Get account data
+	account, err := store.GetAccountByEmail(email)
+	if err != nil {
+		return false, err
+	}
+	// password hash is read as a hex string from the database (where it
+	// is stored in binary), but bcrypt expects a []byte
+	passwordHashBytes, err := hex.DecodeString(account.PasswordHash)
+	if err != nil {
+		return false, err
+	}
+	err = bcrypt.CompareHashAndPassword(passwordHashBytes, []byte(passwordAttempt))
+	return err == nil, err
 }

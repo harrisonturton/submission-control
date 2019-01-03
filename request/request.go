@@ -29,7 +29,7 @@ func NewContextWithAuth(ctx context.Context, req *http.Request) context.Context 
 		return context.WithValue(ctx, AuthKey, false)
 	}
 	log.Printf("%v", tokenHeader[0])
-	ok := auth.Authenticate(tokenHeader[0])
+	ok := auth.VerifyToken(tokenHeader[0])
 	return context.WithValue(ctx, AuthKey, ok)
 }
 
@@ -44,11 +44,11 @@ func NewContextWithBody(ctx context.Context, req *http.Request) context.Context 
 	return context.WithValue(ctx, BodyKey, body)
 }
 
-// GetAuth will return true or false depending on whether the request was
+// IsAuthorized will return true or false depending on whether the request was
 // authenticated with the JWT token.
 // It assumes the "auth" key has already been added to the context. This will
 // crash if not true.
-func GetAuth(r *http.Request) bool {
+func IsAuthorized(r *http.Request) bool {
 	return r.Context().Value(AuthKey).(bool)
 }
 

@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/harrisonturton/submission-control/router"
+	"github.com/harrisonturton/submission-control/routes"
 	"github.com/harrisonturton/submission-control/store"
 	"log"
 	"net/http"
@@ -27,9 +27,9 @@ var (
 
 // NewServer creates a new Server instance.
 func NewServer(port string, logger *log.Logger, store *store.Store) *Server {
-	router := router.NewRouter(logger, store)
+	mux := routes.CreateMux(store)
 	handler := addMiddleware(
-		router,
+		mux,
 		logAll(logger),
 		attachContext(),
 	)
