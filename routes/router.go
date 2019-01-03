@@ -15,7 +15,7 @@ func CreateMux(store *store.Store) *http.ServeMux {
 	}
 	mux := http.NewServeMux()
 	for route, handler := range handlers {
-		mux.HandleFunc(route, handler)
+		mux.Handle(route, handler)
 	}
 	return mux
 }

@@ -9,6 +9,21 @@ import (
 	"net/http"
 )
 
+// These are the handlers called for each route, as specified in
+// routes/router.go
+//
+// http.ServeMux expects a http.Handler, which is an interface for types
+// with a ServeHTTP(http.ResponseWriter, *http.Request) function.
+// Since this does not give any space to add extra dependencies (e.g.
+// logger and database instances), I've manipulated closures to give the
+// handler access to these.
+//
+// I could have implemented a custom Router{} type, with fields for various
+// database and logger instances, but this is slightly cleaner and (hopefully)
+// easier to test.
+
+// authHandler is called on the /auth route to request a new JWT token.
+// It will authenticate the LoginRequest and generate a new token.
 func authHandler(store *store.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Reject if not POST
@@ -49,6 +64,8 @@ func usersHandler(store *store.Store) http.HandlerFunc {
 	})
 }
 
+// notFoundHandler is called on other routes. It will return
+// a 404 message.
 func notFoundHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "404\n")
