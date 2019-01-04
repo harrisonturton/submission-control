@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./Header.css";
-import chevronDown from "./chevron-down.png";
+import chevronDown from "../assets/chevron-down.png";
 
 export default class Header extends Component {
 	// Header expects an array `courses` of course names
@@ -23,7 +23,7 @@ export default class Header extends Component {
 			<header
 				className={isExpanded ? "expanded" : ""}
 				style={{
-					height: isExpanded ? courses.length * 45 : 15
+					height: isExpanded ? courses.length * 40 + 10 : 15
 				}}
 			>
 				<span class="current" onClick={this.onClick}>
