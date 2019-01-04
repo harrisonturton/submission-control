@@ -2,8 +2,8 @@ package server
 
 import (
 	"context"
-	"github.com/harrisonturton/submission-control/routes"
-	"github.com/harrisonturton/submission-control/store"
+	"github.com/harrisonturton/submission-control/backend/routes"
+	"github.com/harrisonturton/submission-control/backend/store"
 	"log"
 	"net/http"
 	"sync"

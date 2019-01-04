@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/harrisonturton/submission-control/request"
+	"github.com/harrisonturton/submission-control/backend/request"
 	"log"
 	"net/http"
 )

@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/harrisonturton/submission-control/store"
+	"github.com/harrisonturton/submission-control/backend/store"
 	"net/http"
 )
 
@@ -9,9 +9,10 @@ import (
 // the various dependencies into each handler.
 func CreateMux(store *store.Store) *http.ServeMux {
 	var handlers = map[string]http.HandlerFunc{
-		"/auth":  authHandler(store),
-		"/users": usersHandler(store),
-		"/":      notFoundHandler(),
+		"/auth":    authHandler(store),
+		"/refresh": refreshHandler(store),
+		"/users":   usersHandler(store),
+		"/":        notFoundHandler(),
 	}
 	mux := http.NewServeMux()
 	for route, handler := range handlers {

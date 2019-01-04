@@ -2,7 +2,7 @@ package request
 
 import (
 	"context"
-	"github.com/harrisonturton/submission-control/auth"
+	"github.com/harrisonturton/submission-control/backend/auth"
 	"io/ioutil"
 	"log"
 	"net/http"

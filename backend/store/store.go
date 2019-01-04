@@ -25,7 +25,8 @@ func NewStore(db *sql.DB) (*Store, error) {
 // GetAccountByEmail will return a single account with a
 // matching email address.
 func (store *Store) GetAccountByEmail(email string) (*Account, error) {
-	var firstname, lastname, passwordHash, uid string
+	var firstname, lastname, uid string
+	var passwordHash []byte
 	query := "SELECT firstname, lastname, password, uid FROM users WHERE email = $1"
 	err := store.db.QueryRow(query, email).Scan(&firstname, &lastname, &passwordHash, &uid)
 	if err != nil {
@@ -35,7 +36,7 @@ func (store *Store) GetAccountByEmail(email string) (*Account, error) {
 		Firstname:    firstname,
 		Lastname:     lastname,
 		Email:        email,
-		PasswordHash: passwordHash,
+		PasswordHash: string(passwordHash),
 		UID:          uid,
 	}, nil
 }

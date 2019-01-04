@@ -2,10 +2,10 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/harrisonturton/submission-control/auth"
-	"github.com/harrisonturton/submission-control/request"
-	"github.com/harrisonturton/submission-control/store"
+	"github.com/harrisonturton/submission-control/backend/auth"
+	"github.com/harrisonturton/submission-control/backend/request"
+	"github.com/harrisonturton/submission-control/backend/store"
+	"log"
 	"net/http"
 )
 
@@ -50,7 +50,56 @@ func authHandler(store *store.Store) http.HandlerFunc {
 			http.Error(w, "request failed", http.StatusUnauthorized)
 			return
 		}
-		fmt.Fprintf(w, token+"\n")
+		// Send response
+		resp := LoginResponse{token}
+		respBytes, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "request failed", http.StatusUnauthorized)
+			return
+		}
+		w.Write(respBytes)
+	})
+}
+
+// refreshHandler recieves a RefreshRequest. If the given token is valid,
+// a new token is returned.
+func refreshHandler(store *store.Store) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Reject is not POST
+		if r.Method != http.MethodPost {
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Unmarshal POST data
+		var refresh RefreshRequest
+		err := json.Unmarshal(request.GetBody(r), &refresh)
+		if err != nil {
+			http.Error(w, "unrecognised body", http.StatusBadRequest)
+			log.Println("Unrecognised body")
+			return
+		}
+		// Verify token
+		ok := auth.VerifyToken(refresh.Token)
+		if !ok {
+			http.Error(w, "request failed", http.StatusUnauthorized)
+			log.Printf("Failed to verify login information: %v\n", err)
+			return
+		}
+		// Get claims from the token
+		claims, err := auth.ParseToken(refresh.Token)
+		if err != nil {
+			http.Error(w, "request failed", http.StatusUnauthorized)
+			log.Println("Failed to parse the token")
+			return
+		}
+		// Generate new token
+		token, err := auth.GenerateToken(claims.Email)
+		if err != nil {
+			http.Error(w, "request failed", http.StatusUnauthorized)
+			log.Println("Failed to generate token")
+			return
+		}
+		w.Write([]byte(token + "\n"))
 	})
 }
 
@@ -60,7 +109,7 @@ func usersHandler(store *store.Store) http.HandlerFunc {
 			http.Error(w, "authentication error", http.StatusUnauthorized)
 			return
 		}
-		fmt.Fprintf(w, "users\n")
+		w.Write([]byte("users\n"))
 	})
 }
 
@@ -68,6 +117,6 @@ func usersHandler(store *store.Store) http.HandlerFunc {
 // a 404 message.
 func notFoundHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "404\n")
+		w.Write([]byte("404\n"))
 	})
 }

@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/harrisonturton/submission-control/store"
+	"github.com/harrisonturton/submission-control/backend/store"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"
@@ -27,6 +27,18 @@ var (
 	// rejected.
 	TokenTimeout = time.Minute * 5
 )
+
+// ParseToken parses a token into a Claims instance
+func ParseToken(rawToken string) (*Claims, error) {
+	var claims Claims
+	_, err := jwt.ParseWithClaims(rawToken, &claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(SigningKey), nil
+	})
+	return &claims, err
+}
 
 // VerifyToken will try and verify the JWT token.
 func VerifyToken(rawToken string) bool {

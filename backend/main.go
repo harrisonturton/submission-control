@@ -7,10 +7,10 @@ import (
 	"os"
 
 	"database/sql"
-	"github.com/harrisonturton/submission-control/store"
+	"github.com/harrisonturton/submission-control/backend/store"
 	_ "github.com/lib/pq"
 
-	"github.com/harrisonturton/submission-control/server"
+	"github.com/harrisonturton/submission-control/backend/server"
 	"os/signal"
 	"sync"
 )

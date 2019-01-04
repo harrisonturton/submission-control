@@ -7,12 +7,12 @@ CREATE TYPE role AS ENUM ('student', 'tutor', 'convenor', 'admin');
 -- This stores the basic account information
 -- for every user, regardless of their role.
 CREATE TABLE users (
-	id        SERIAL PRIMARY KEY,
-	firstname VARCHAR(100) NOT NULL,
-	lastname  VARCHAR(100) NOT NULL,
-	email     VARCHAR(254) UNIQUE NOT NULL,
-	password  BYTEA        NOT NULL, -- Include salt in here, hash salt:password
-	uid       VARCHAR(20)  UNIQUE NOT NULL
+	id            SERIAL PRIMARY KEY,
+	firstname     VARCHAR(100)        NOT NULL,
+	lastname      VARCHAR(100)        NOT NULL,
+	email         VARCHAR(254) UNIQUE NOT NULL,
+	password      BYTEA               NOT NULL, -- Include salt in here, hash salt:password
+	uid           VARCHAR(20)  UNIQUE NOT NULL
 );
 
 -- This contains the roles for each user. A
