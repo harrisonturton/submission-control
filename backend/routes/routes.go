@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/harrisonturton/submission-control/backend/auth"
 	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/harrisonturton/submission-control/backend/store"
@@ -22,6 +23,12 @@ import (
 // database and logger instances, but this is slightly cleaner and (hopefully)
 // easier to test.
 
+const (
+	// These are the messages given for various error routes
+	errorNotFoundMessage     = "not found"
+	errorUnauthorizedMessage = "unauthorized"
+)
+
 // authHandler is called on the /auth route to request a new JWT token.
 // It will authenticate the LoginRequest and generate a new token.
 func authHandler(store *store.Store) http.HandlerFunc {
@@ -35,26 +42,29 @@ func authHandler(store *store.Store) http.HandlerFunc {
 		var login LoginRequest
 		err := json.Unmarshal(request.GetBody(r), &login)
 		if err != nil {
-			http.Error(w, "unrecognised body", http.StatusBadRequest)
+			badRequestHandler("unrecognised body").ServeHTTP(w, r)
 			return
 		}
 		// Verify login information
 		ok, err := auth.Authenticate(store, login.Email, login.Password)
 		if !ok || err != nil {
-			http.Error(w, "request failed", http.StatusUnauthorized)
+			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		// Generate new token
 		token, err := auth.GenerateToken(login.Email)
 		if err != nil {
-			http.Error(w, "request failed", http.StatusUnauthorized)
+			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		// Send response
-		resp := LoginResponse{token}
+		resp := TokenResponse{
+			StatusCode: http.StatusOK,
+			Token:      token,
+		}
 		respBytes, err := json.Marshal(resp)
 		if err != nil {
-			http.Error(w, "request failed", http.StatusUnauthorized)
+			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		w.Write(respBytes)
@@ -74,39 +84,48 @@ func refreshHandler(store *store.Store) http.HandlerFunc {
 		var refresh RefreshRequest
 		err := json.Unmarshal(request.GetBody(r), &refresh)
 		if err != nil {
-			http.Error(w, "unrecognised body", http.StatusBadRequest)
-			log.Println("Unrecognised body")
+			badRequestHandler("unrecognised body").ServeHTTP(w, r)
 			return
 		}
 		// Verify token
 		ok := auth.VerifyToken(refresh.Token)
 		if !ok {
-			http.Error(w, "request failed", http.StatusUnauthorized)
 			log.Printf("Failed to verify login information: %v\n", err)
+			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		// Get claims from the token
 		claims, err := auth.ParseToken(refresh.Token)
 		if err != nil {
-			http.Error(w, "request failed", http.StatusUnauthorized)
 			log.Println("Failed to parse the token")
+			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		// Generate new token
 		token, err := auth.GenerateToken(claims.Email)
 		if err != nil {
-			http.Error(w, "request failed", http.StatusUnauthorized)
 			log.Println("Failed to generate token")
+			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
-		w.Write([]byte(token + "\n"))
+		// Send response
+		resp := TokenResponse{
+			StatusCode: http.StatusOK,
+			Token:      token,
+		}
+		respBytes, err := json.Marshal(resp)
+		if err != nil {
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		w.Write(respBytes)
 	})
 }
 
 func usersHandler(store *store.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !request.IsAuthorized(r) {
-			http.Error(w, "authentication error", http.StatusUnauthorized)
+			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		w.Write([]byte("users\n"))
@@ -117,6 +136,26 @@ func usersHandler(store *store.Store) http.HandlerFunc {
 // a 404 message.
 func notFoundHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("404\n"))
+		resp := fmt.Sprintf(
+			`{"status":%d,"message":"%s"}`, http.StatusNotFound, errorNotFoundMessage)
+		http.Error(w, resp, http.StatusNotFound)
+	})
+}
+
+// unauthorizedHandler responds with a status unauthorized message
+func unauthorizedHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := fmt.Sprintf(
+			`{"status":%d,"message":"%s"}`, http.StatusUnauthorized, errorUnauthorizedMessage)
+		http.Error(w, resp, http.StatusUnauthorized)
+	})
+}
+
+// badRequestHandler responds with a bad request code and a custom message
+func badRequestHandler(message string) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := fmt.Sprintf(
+			`{"status":%d,"message":"%s"}`, http.StatusBadRequest, message)
+		http.Error(w, resp, http.StatusBadRequest)
 	})
 }

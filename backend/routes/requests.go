@@ -1,5 +1,11 @@
 package routes
 
+// FailedResponse is a common response for failed API requests.
+type FailedResponse struct {
+	StatusCode int    `json:"status"`
+	Message    string `json:"message"`
+}
+
 // LoginRequest is a POST request sent to the /auth
 // endpoint. The server responds with a time-limited
 // JWT access token, which must be attached to the
@@ -9,15 +15,16 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-// LoginResponse is the data sent in response to a login
-// request.
-type LoginResponse struct {
-	Token string `json:"token"`
-}
-
 // RefreshRequest is a POST request sent to the /refresh
 // endpoint. If the client has a valid JWT token, it allows
 // them to refresh it, allowing for persistent logins.
 type RefreshRequest struct {
-	Token string `json:"token"`
+	StatusCode int    `json:"status"`
+	Token      string `json:"token"`
+}
+
+// TokenResponse responds with a JWT token.
+type TokenResponse struct {
+	StatusCode int    `json:"status"`
+	Token      string `json:"token"`
 }
