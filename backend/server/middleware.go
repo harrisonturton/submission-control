@@ -44,7 +44,7 @@ func logAll(log *log.Logger) Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			request := displayRequest(r)
-			log.Println(request)
+			log.Printf(request)
 			h.ServeHTTP(w, r)
 		})
 	}
@@ -54,13 +54,16 @@ func logAll(log *log.Logger) Middleware {
 // It expects the request body to be already read and put into the request
 // context.
 func displayRequest(r *http.Request) (result string) {
-	if r.URL != nil {
-		result += fmt.Sprintf("%s %s\n", r.Method, r.URL.Path)
-	} else {
-		result += fmt.Sprintf("%s [no url]\n", r.Method)
+	result += fmt.Sprintf("Recieved %s request\n", r.Method)
+	result += fmt.Sprintf("%s %s\n", r.Method, r.RequestURI)
+	result += fmt.Sprintf("From: %s\n", r.RemoteAddr)
+	if contentType, ok := r.Header["Content-Type"]; ok {
+		result += fmt.Sprintf("Content-Type: %s\n", contentType)
 	}
-	result += fmt.Sprintf("Content Length: %d\n", r.ContentLength)
-	body := request.GetBody(r)
-	result += string(body) + "\n"
+	if r.ContentLength > 0 {
+		result += fmt.Sprintf("Content Length: %d\n", r.ContentLength)
+		body := request.GetBody(r)
+		result += string(body)
+	}
 	return
 }
