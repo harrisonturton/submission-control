@@ -21,6 +21,11 @@ var (
 	dbName = flag.String("dbname", "submission_control", "the database name")
 )
 
+const (
+	certFile = "server.crt"
+	keyFile  = "server.key"
+)
+
 func main() {
 	logger := log.New(os.Stdout, "[server] ", log.LstdFlags)
 	store := createStore(logger)
@@ -58,7 +63,7 @@ func runServer(srv *server.Server) {
 	done := make(chan struct{})
 	// Run server
 	wg.Add(1)
-	go srv.Serve(&wg, done)
+	go srv.ServeTLS(certFile, keyFile, &wg, done)
 	// Kill server on SIGINT
 	wg.Add(1)
 	kill := make(chan os.Signal, 1)

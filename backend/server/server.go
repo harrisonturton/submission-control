@@ -58,6 +58,19 @@ func (server *Server) Serve(wg *sync.WaitGroup, done chan struct{}) {
 	server.logger.Println("Server stopped.")
 }
 
+// ServeTLS will start running the server in HTTPS, starting to listen for requests on
+// the given port. It will gracefully shutdown when the done channel is closed.
+func (server *Server) ServeTLS(certFile string, keyFile string, wg *sync.WaitGroup, done chan struct{}) {
+	defer wg.Done()
+	go server.waitForShutdown(done)
+	server.logger.Printf("Server starting on %s\n", server.server.Addr)
+	err := server.server.ListenAndServeTLS(certFile, keyFile)
+	if err != nil && err != http.ErrServerClosed {
+		server.logger.Fatalf("Server failed: %v\n", err)
+	}
+	server.logger.Println("Server stopped.")
+}
+
 // waitForShutdown will wait until the done channel is closed,
 // and attempt to gracefully shutdown the server. It will try to
 // serve all remaining requests before stopping.
