@@ -67,6 +67,7 @@ func authHandler(store *store.Store) http.HandlerFunc {
 			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
+		log.Println(string(respBytes))
 		w.Write(respBytes)
 	})
 }
@@ -129,6 +130,17 @@ func usersHandler(store *store.Store) http.HandlerFunc {
 			return
 		}
 		w.Write([]byte("users\n"))
+	})
+}
+
+func addPreflightHeaders(h http.Handler) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			log.Println("Handling OPTIONS request")
+			w.WriteHeader(http.StatusOK)
+		} else {
+			h.ServeHTTP(w, r)
+		}
 	})
 }
 

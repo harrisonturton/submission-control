@@ -38,6 +38,18 @@ func attachContext() Middleware {
 	}
 }
 
+// addHeaders adds headers to allow CORS requests.
+func addHeaders() Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("Access-Control-Allow-Headers", "content-type")
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
 // logAll will log information about all incoming requests. It expects the
 // request body to be already read & stored in the request context.
 func logAll(log *log.Logger) Middleware {

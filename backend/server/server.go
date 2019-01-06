@@ -31,6 +31,7 @@ func NewServer(port string, logger *log.Logger, store *store.Store) *Server {
 	handler := addMiddleware(
 		mux,
 		logAll(logger),
+		addHeaders(),
 		attachContext(),
 	)
 	return &Server{

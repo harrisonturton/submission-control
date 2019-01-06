@@ -63,7 +63,8 @@ func runServer(srv *server.Server) {
 	done := make(chan struct{})
 	// Run server
 	wg.Add(1)
-	go srv.ServeTLS(certFile, keyFile, &wg, done)
+	//go srv.ServeTLS(certFile, keyFile, &wg, done)
+	go srv.Serve(&wg, done)
 	// Kill server on SIGINT
 	wg.Add(1)
 	kill := make(chan os.Signal, 1)
