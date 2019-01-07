@@ -133,17 +133,6 @@ func usersHandler(store *store.Store) http.HandlerFunc {
 	})
 }
 
-func addPreflightHeaders(h http.Handler) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			log.Println("Handling OPTIONS request")
-			w.WriteHeader(http.StatusOK)
-		} else {
-			h.ServeHTTP(w, r)
-		}
-	})
-}
-
 // notFoundHandler is called on other routes. It will return
 // a 404 message.
 func notFoundHandler() http.HandlerFunc {

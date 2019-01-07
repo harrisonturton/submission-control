@@ -38,14 +38,20 @@ func attachContext() Middleware {
 	}
 }
 
-// addHeaders adds headers to allow CORS requests.
-func addHeaders() Middleware {
+// addPreflightHeaders will add the required headers to allow CORS requests.
+// It adds the same headers to all responses.
+// If a HTTP OPTIONS request comes through, it will finish here.
+func addPreflightHeaders() Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.Header().Set("Access-Control-Allow-Headers", "content-type")
-			h.ServeHTTP(w, r)
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusOK)
+			} else {
+				h.ServeHTTP(w, r)
+			}
 		})
 	}
 }
