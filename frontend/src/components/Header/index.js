@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import "./Header.css";
-import chevronDown from "../assets/chevron-down.png";
+import chevronDown from "assets/chevron-down.png";
+import "./style.css";
 
 export default class Header extends Component {
 	// Header expects an array `courses` of course names

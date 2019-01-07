@@ -1,0 +1,62 @@
+.login-wrapper {
+	background-color: green;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+}
+
+.image {
+	width: 100%;
+	background-color: #333333;
+}
+
+.form-wrapper {
+	width: 500px;
+	background-color: white;
+	padding: 60px;
+	border-left: 10px solid transparent;
+	border-image: url("../../assets/header-border.png") 30% round;
+}
+
+.form-wrapper h1, p {
+	color: #2F3334;
+}
+
+.form-wrapper h1 {
+	font-size: 20px;
+	margin-bottom: 10px;
+}
+
+.form-wrapper p {
+	font-size: 14px;
+	line-height: 18px;
+}
+
+.form-wrapper form {
+	padding-top: 15px;
+	display: flex;
+	flex-direction: column;
+}
+
+input[type=text], input[type=email], input[type=password] {
+	font-size: 14px;
+	color: #2F3334;
+	margin-bottom: 5px;
+	border-radius: 2px;
+	padding: 7px;
+	padding-left: 15px;
+	background-color: #F1F1F1;
+}
+
+input[type=submit] {
+	font-size: 14px;
+	width: 80px;
+	color: white;
+	margin-bottom: 5px;
+	border-radius: 2px;
+	align-self: flex-end;
+	padding: 10px;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	background-color: #4C6E78;
+}
