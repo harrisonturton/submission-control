@@ -53,8 +53,7 @@ func VerifyToken(rawToken string) bool {
 		log.Printf("%v\n", err)
 		return false
 	}
-	c, ok := token.Claims.(*Claims)
-	log.Println(c.Email)
+	_, ok := token.Claims.(*Claims)
 	return ok && token.Valid
 }
 
