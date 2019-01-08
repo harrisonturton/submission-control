@@ -5,6 +5,11 @@
 	display: flex;
 }
 
+button {
+	background-color: grey;
+	color: black;
+}
+
 .image {
 	width: 100%;
 	background-color: #333333;
