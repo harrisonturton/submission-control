@@ -19,8 +19,7 @@ type LoginRequest struct {
 // endpoint. If the client has a valid JWT token, it allows
 // them to refresh it, allowing for persistent logins.
 type RefreshRequest struct {
-	StatusCode int    `json:"status"`
-	Token      string `json:"token"`
+	Token string `json:"token"`
 }
 
 // TokenResponse responds with a JWT token.

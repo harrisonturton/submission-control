@@ -92,6 +92,7 @@ func refreshHandler(store *store.Store) http.HandlerFunc {
 		ok := auth.VerifyToken(refresh.Token)
 		if !ok {
 			log.Printf("Failed to verify login information: %v\n", err)
+			log.Println(refresh.Token)
 			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
@@ -120,6 +121,7 @@ func refreshHandler(store *store.Store) http.HandlerFunc {
 			return
 		}
 		w.Write(respBytes)
+		log.Println(string(respBytes))
 	})
 }
 
@@ -140,6 +142,7 @@ func notFoundHandler() http.HandlerFunc {
 		resp := fmt.Sprintf(
 			`{"status":%d,"message":"%s"}`, http.StatusNotFound, errorNotFoundMessage)
 		http.Error(w, resp, http.StatusNotFound)
+		log.Println(resp)
 	})
 }
 
@@ -149,6 +152,7 @@ func unauthorizedHandler() http.HandlerFunc {
 		resp := fmt.Sprintf(
 			`{"status":%d,"message":"%s"}`, http.StatusUnauthorized, errorUnauthorizedMessage)
 		http.Error(w, resp, http.StatusUnauthorized)
+		log.Println(resp)
 	})
 }
 
@@ -158,5 +162,6 @@ func badRequestHandler(message string) http.HandlerFunc {
 		resp := fmt.Sprintf(
 			`{"status":%d,"message":"%s"}`, http.StatusBadRequest, message)
 		http.Error(w, resp, http.StatusBadRequest)
+		log.Println(resp)
 	})
 }
