@@ -50,21 +50,28 @@ export default class LoginScreen extends Component {
 			);
 		}
 		return (
-			<form onSubmit={this.handleSubmit}>
-				<input
-					name="email"
-					type="email"
-					onChange={this.handleEmailChange}
-					value={this.state.email}
-				/>
-				<input
-					name="password"
-					type="password"
-					onChange={this.handlePasswordChange}
-					value={this.state.password}
-				/>
-				<input type="submit" value="Submit"/>
-			</form>
+			<div className="login-wrapper">
+				<div className="image"></div>
+				<div className="form-wrapper">
+					<h1>Submission Control</h1>
+					<p>This website is where you can view & submit assignments, labs, and give feedback on your course.</p>
+					<form onSubmit={this.handleSubmit}>
+						<input
+							name="email"
+							type="email"
+							onChange={this.handleEmailChange}
+							value={this.state.email}
+						/>
+						<input
+							name="password"
+							type="password"
+							onChange={this.handlePasswordChange}
+							value={this.state.password}
+						/>
+						<input type="submit" value="Submit"/>
+					</form>
+				</div>
+			</div>
 		);
 	}
 }

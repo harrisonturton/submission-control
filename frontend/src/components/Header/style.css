@@ -18,6 +18,10 @@ header > * {
 	color: white;
 }
 
+.course-name {
+	color: white;
+}
+
 header {
 	position: absolute;
 	height: 130px;
@@ -37,6 +41,7 @@ header > ul {
 }
 
 header > ul > li {
+	color: white;
 	user-select: none;
 	padding-bottom: 8px;
 	padding-top: 8px;

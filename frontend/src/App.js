@@ -1,13 +1,7 @@
 import React, { Component } from "react";
 import Auth from "auth";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { PrivateRoute, LoginScreen } from "containers";
-
-const Home = () => (
-	<div>
-		<p>Home!</p>
-	</div>
-);
+import { PrivateRoute, HomeScreen, LoginScreen } from "containers";
 
 const Course = ({ match }) => (
 	<div>
@@ -20,6 +14,14 @@ export default class App extends Component {
 		super(props);
 		this.state = { auth: new Auth() };
 	}
+	async componentDidMount() {
+		let { auth } = this.state;
+		let token = await auth.refresh(auth.token);
+		if (token === null) {
+			console.log("Could not verify...")	
+		}
+		this.forceUpdate();
+	}
 	render() {
 		let { auth } = this.state;
 		return (
@@ -31,7 +33,7 @@ export default class App extends Component {
 					/>
 					<PrivateRoute
 						exact path="/"
-						component={Home}
+						component={HomeScreen}
 						auth={auth}
 					/>
 					<PrivateRoute

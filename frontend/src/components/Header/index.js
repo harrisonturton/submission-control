@@ -3,9 +3,9 @@ import chevronDown from "assets/chevron-down.png";
 import "./style.css";
 
 export default class Header extends Component {
-	// Header expects an array `courses` of course names
-	// the student is enrolled in, and a single prop
-	// `currentCourse` which is the title of the current page.
+	// props:
+	//   courses: array of human-readable course names
+	//   currentCourse: the course to display in the header
 	constructor(props) {
 		super(props);
 		this.state = { isExpanded: false };
@@ -32,7 +32,7 @@ export default class Header extends Component {
 				</span>
 				<ul>
 					{courses.map((course, i) => (
-						<li><a href="">{course}</a></li>	
+						<li className="course-name"><a href="">{course}</a></li>	
 					))}
 				</ul>
 			</header>
