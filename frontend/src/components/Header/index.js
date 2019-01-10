@@ -10,10 +10,16 @@ export default class Header extends Component {
 		super(props);
 		this.state = { isExpanded: false };
 		this.onClick = this.onClick.bind(this);
+		this.onMouseLeave = this.onMouseLeave.bind(this);
 	}
 	onClick() {
 		this.setState(prev => ({
 			isExpanded: !prev.isExpanded,
+		}));
+	}
+	onMouseLeave() {
+		this.setState(prev => ({
+			isExpanded: false
 		}));
 	}
 	render() {
@@ -22,6 +28,7 @@ export default class Header extends Component {
 		return (
 			<header
 				className={isExpanded ? "expanded" : ""}
+				onMouseLeave={this.onMouseLeave}
 				style={{
 					height: isExpanded ? courses.length * 40 + 10 : 15
 				}}
