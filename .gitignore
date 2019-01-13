@@ -2,6 +2,10 @@ backend/test/
 backend/*.key
 backend/*.crt
 
+# scss
+*.css.map
+*.css
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies

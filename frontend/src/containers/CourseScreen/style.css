@@ -1,3 +1,14 @@
 .course-wrapper {
-	margin-top: 80px;
-}
+  margin-top: 110px;
+  margin-left: 30px; }
+
+.subtitle {
+  color: #A0162E;
+  font-size: 0.9em;
+  margin-left: 50px;
+  letter-spacing: normal; }
+
+.assignment-wrapper, .tutorial-wrapper {
+  margin-top: 25px; }
+
+/*# sourceMappingURL=style.css.map */

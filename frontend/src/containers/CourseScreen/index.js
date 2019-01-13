@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
-import { Header } from "components";
+import { Link, Redirect } from "react-router-dom";
+import { Header, AssessmentItem } from "components";
 import { hasToken } from "auth";
 import "./style.css";
 
@@ -21,7 +21,29 @@ class Course extends Component {
 						"Programming as Problem Solving",
 					]}
 				/>
-				{this.props.match.params.course_no}
+				<div className="assessment-wrapper">
+					<div className="assignment-wrapper">
+						<span className="subtitle">Upcoming Assignments</span>
+						<Link to="/">
+							<AssessmentItem title="Harmony & Money" due={new Date()} comments="2 submissions with 8 warnings."/>
+						</Link>
+						<Link to="/">
+							<AssessmentItem title="Distributed Server" due={new Date()} comments="2 submissions with 8 warnings on the most recent build."/>
+						</Link>
+						<Link to="/">
+							<AssessmentItem title="Harmony & Money" due={new Date()} comments="1 submission that passes all tests!"/>
+						</Link>
+					</div>
+					<div className="tutorial-wrapper">
+						<span className="subtitle">Upcoming Tutorials</span>
+						<Link to="/">
+							<AssessmentItem title="Distributed Server" due={new Date()} comments="2 submissions with 8 warnings on the most recent build."/>
+						</Link>
+						<Link to="/">
+							<AssessmentItem title="Harmony & Money" due={new Date()} comments="1 submission that passes all tests!"/>
+						</Link>
+					</div>
+				</div>
 			</div>
 		);
 	}

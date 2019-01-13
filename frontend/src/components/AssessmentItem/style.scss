@@ -1,0 +1,44 @@
+@import "../../_partials.scss";
+
+.assessment-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	margin: 10px;
+	padding: 18px 30px 18px 30px;
+	border-radius: 4px;
+	border: 1px solid $border-light;
+	transition: border 200ms ease-out;
+	box-shadow: 0px 0px 12px rgba(0,0,0,0.05);
+	width: 550px;
+
+	&:hover {
+		border: 1px solid $font-colored;
+	}
+}
+
+.title-wrapper, .date-wrapper {
+	display: flex;
+	flex-direction: column;
+}
+
+.date-wrapper {
+	align-items: flex-end;
+}
+
+.title, .due-date {
+	font-family: $font-family;
+	font-size: 0.85em;
+	color: #555C5E;
+	letter-spacing: normal;
+	margin-bottom: 3px;
+}
+
+.comments, .timestamp {
+	font-family: $font-family;
+	color: $font-light;
+	font-size: 0.8em;
+	letter-spacing: normal;
+	opacity: 0.8;
+}
