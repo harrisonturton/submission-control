@@ -5,7 +5,7 @@ import "./style.css";
 const AssessmentItem = ({ title, due, comments }) => (
 	<div className="assessment-item">
 		<div className="title-wrapper">
-			<span className="title">{title}</span>
+			<span className="assessment-title">{title}</span>
 			<span className="comments">{comments}</span>
 		</div>
 		<div className="date-wrapper">

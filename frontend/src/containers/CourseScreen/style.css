@@ -9,6 +9,7 @@
   letter-spacing: normal; }
 
 .assignment-wrapper, .tutorial-wrapper {
-  margin-top: 25px; }
+  margin-top: 25px;
+  width: 45vw; }
 
 /*# sourceMappingURL=style.css.map */

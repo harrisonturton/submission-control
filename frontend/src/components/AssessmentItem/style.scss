@@ -5,16 +5,26 @@
 	justify-content: space-between;
 	align-items: center;
 
-	margin: 10px;
-	padding: 18px 30px 18px 30px;
+	margin-bottom: 10px;
+	padding: 18px 30px 18px 20px;
 	border-radius: 4px;
 	border: 1px solid $border-light;
 	transition: border 200ms ease-out;
 	box-shadow: 0px 0px 12px rgba(0,0,0,0.05);
-	width: 550px;
+	//width: 550px;
 
 	&:hover {
 		border: 1px solid $font-colored;
+	}
+
+	&:after {
+		position: absolute;
+		content: "";
+		height: 10px;
+		width: 10px;
+		border-radius: 50%;
+		background-color: $success;
+		justify-self: flex-start;
 	}
 }
 
@@ -23,11 +33,16 @@
 	flex-direction: column;
 }
 
+.title-wrapper {
+	margin-left: 30px;
+}
+
 .date-wrapper {
+	align-self: flex-end;
 	align-items: flex-end;
 }
 
-.title, .due-date {
+.assessment-title, .due-date {
 	font-family: $font-family;
 	font-size: 0.85em;
 	color: #555C5E;
