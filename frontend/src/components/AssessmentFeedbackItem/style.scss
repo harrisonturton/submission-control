@@ -1,0 +1,36 @@
+@import "../../_partials.scss";
+
+.assessment-feedback-item {
+	display: flex;
+	flex-direction: column;
+	padding: 15px;
+	border-radius: 3px;
+
+	&:hover {
+		background-color: #F6F8F9;
+	}
+}
+
+.feedback-title-wrapper {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.feedback-title {
+	color: $font-colored;
+}
+
+.feedback-due {
+	color: $font-light;
+}
+
+.feedback {
+	font-family: $font-family;
+	letter-spacing: normal;
+	font-size: 0.85em;
+	line-height: 1.5;
+	color: $font-normal;
+	opacity: 0.9;
+}

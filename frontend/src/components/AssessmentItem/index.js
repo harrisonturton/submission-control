@@ -1,16 +1,16 @@
-import React, { Component } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import "./style.css";
 
-const AssessmentItem = ({ title, due, comments }) => (
+const AssessmentItem = ({ title, due_date, comments }) => (
 	<div className="assessment-item">
 		<div className="title-wrapper">
 			<span className="assessment-title">{title}</span>
 			<span className="comments">{comments}</span>
 		</div>
 		<div className="date-wrapper">
-			<span className="due-date">{formatDueDate(due)}</span>
-			<span className="timestamp">{formatTimestamp(due)}</span>
+			<span className="due-date">{formatDueDate(due_date)}</span>
+			<span className="timestamp">{formatTimestamp(due_date)}</span>
 		</div>
 	</div>
 );

@@ -16,6 +16,15 @@ let INITIAL_STATE = {
 		token: null,
 		timestamp: null,
 	},
+	user: {
+		email: null,
+		first_name: null,
+		last_name: null,
+		current_course: null,
+		courses: []
+	},
+	assignments_by_course: {},
+	labs_by_course: {}
 };
 
 let appReducer = (prev_state = INITIAL_STATE, action) => ({

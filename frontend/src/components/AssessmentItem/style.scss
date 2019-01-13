@@ -44,10 +44,14 @@
 
 .assessment-title, .due-date {
 	font-family: $font-family;
-	font-size: 0.85em;
+	font-size: 0.9em;
 	color: #555C5E;
 	letter-spacing: normal;
 	margin-bottom: 3px;
+}
+
+.due-date {
+	font-size: 0.8em;
 }
 
 .comments, .timestamp {
