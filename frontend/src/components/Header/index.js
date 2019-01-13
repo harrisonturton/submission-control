@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import chevronDown from "assets/chevron-down.png";
 import "./style.css";
 
@@ -33,13 +34,15 @@ export default class Header extends Component {
 					height: isExpanded ? courses.length * 40 + 10 : 15
 				}}
 			>
-				<span class="current" onClick={this.onClick}>
+				<span className="current" onClick={this.onClick}>
 					{currentCourse}
-					<img class="chevron" src={chevronDown}/>
+					<img className="chevron" alt={""} src={chevronDown}/>
 				</span>
 				<ul>
 					{courses.map((course, i) => (
-						<li className="course-name"><a href="">{course}</a></li>	
+						<li key={i} className="course-name">
+							<Link to="/course/comp2300">{course}</Link>
+						</li>
 					))}
 				</ul>
 			</header>

@@ -24,6 +24,8 @@ header > * {
 
 header {
 	position: absolute;
+	top: 0px;
+	left: 0px;
 	height: 130px;
 	width: 100vw;
 	display: flex;

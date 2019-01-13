@@ -17,6 +17,9 @@ html, body, * {
 	border: none;
 }
 
+a {
+	color: inherit;
+}
 
 .app {
 	width: 100%;
