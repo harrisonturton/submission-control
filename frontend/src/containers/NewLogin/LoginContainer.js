@@ -1,5 +1,5 @@
 import { connect } from "react-redux";
-import { makeLoginRequest } from "actions";
+import { makeLoginRequest } from "actions/thunks";
 import Login from "containers/NewLogin/Login";
 
 const mapStateToProps = state => ({

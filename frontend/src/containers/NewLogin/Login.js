@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
+import "./style.css";
 
 class Login extends Component {
 	// props:
@@ -43,21 +44,30 @@ class Login extends Component {
 			return <p>Waiting...</p>;
 		}
 		return (
-			<form onSubmit={this.handleSubmit}>
-				<input
-					name="email"
-					type="email"
-					onChange={this.handleEmailChange}
-					value={this.state.email}
-				/>
-				<input
-					name="password"
-					type="password"
-					onChange={this.handlePasswordChange}
-					value={this.state.password}
-				/>
-				<input type="submit" value="Submit"/>
-			</form>
+			<div className="login-wrapper">
+				<div className="login-splash-image"></div>
+				<div className="login-panel-wrapper">
+					<h1>Submission Control</h1>
+					<p>This website is where you can view & submit assignments, and give feedback on lectures.</p>
+					<form onSubmit={this.handleSubmit}>
+						<label>Email</label>
+						<input
+							name="email"
+							type="email"
+							onChange={this.handleEmailChange}
+							value={this.state.email}
+						/>
+						<label>Password</label>
+						<input
+							name="password"
+							type="password"
+							onChange={this.handlePasswordChange}
+							value={this.state.password}
+						/>
+						<input type="submit" value="Login"/>
+					</form>
+				</div>
+			</div>
 		);
 	}
 }
