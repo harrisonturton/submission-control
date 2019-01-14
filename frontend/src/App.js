@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { PrivateRoute, HomeScreen, LoginContainer } from "containers";
+import { PrivateRoute, HomeScreen, LoginScreen } from "containers";
 
 const CourseScreen = ({ match }) => (
 	<p>{match.params.course_code}</p>
@@ -13,7 +13,7 @@ export default class App extends Component {
 				<Switch>
 					<Route
 						path="/login"
-						component={LoginContainer}
+						component={LoginScreen}
 					/>
 					<Route
 						path="/course/:course_code"
