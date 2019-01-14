@@ -48,12 +48,14 @@ func authHandler(store *store.Store) http.HandlerFunc {
 		// Verify login information
 		ok, err := auth.Authenticate(store, login.Email, login.Password)
 		if !ok || err != nil {
+			fmt.Println("Could not verify")
 			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		// Generate new token
 		token, err := auth.GenerateToken(login.Email)
 		if err != nil {
+			fmt.Println("Could not generate token")
 			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}

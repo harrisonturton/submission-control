@@ -22,19 +22,19 @@ func NewStore(db *sql.DB) (*Store, error) {
 	return &Store{db}, nil
 }
 
-// GetAccountByEmail will return a single account with a
+// GetUserByEmail will return a single user with a
 // matching email address.
-func (store *Store) GetAccountByEmail(email string) (*Account, error) {
+func (store *Store) GetUserByEmail(email string) (*User, error) {
 	var firstname, lastname, uid string
 	var passwordHash []byte
-	query := "SELECT firstname, lastname, password, uid FROM users WHERE email = $1"
+	query := "SELECT first_name, last_name, password, uid FROM users WHERE email = $1"
 	err := store.db.QueryRow(query, email).Scan(&firstname, &lastname, &passwordHash, &uid)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not fetch account")
 	}
-	return &Account{
-		Firstname:    firstname,
-		Lastname:     lastname,
+	return &User{
+		FirstName:    firstname,
+		LastName:     lastname,
 		Email:        email,
 		PasswordHash: string(passwordHash),
 		UID:          uid,

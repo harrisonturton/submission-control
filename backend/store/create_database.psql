@@ -1,0 +1,71 @@
+
+DROP TABLE IF EXISTS users       CASCADE;
+DROP TABLE IF EXISTS enrol       CASCADE;
+DROP TABLE IF EXISTS courses     CASCADE;
+DROP TABLE IF EXISTS enrol       CASCADE;
+DROP TABLE IF EXISTS submissions CASCADE;
+DROP TABLE IF EXISTS assessment  CASCADE;
+
+DROP TYPE  IF EXISTS period;
+DROP TYPE  IF EXISTS assessment_type;
+
+CREATE TYPE period          AS ENUM ('summer', 'first', 'autumn', 'winter', 'second', 'spring');
+CREATE TYPE assessment_type AS ENUM ('assignment', 'lab');
+
+-- users holds all the basic account information
+-- for every user. A user is uniquely identified
+-- by their UID.
+CREATE TABLE users (
+	uid        VARCHAR(20)  UNIQUE NOT NULL,
+	email      VARCHAR(255) UNIQUE NOT NULL,
+	first_name VARCHAR(255) NOT NULL,
+	last_name  VARCHAR(255) NOT NULL,
+	password   BYTEA        NOT NULL,
+	PRIMARY KEY(uid)
+);
+
+-- courses contains the information about a course. Since
+-- the same course can run multiple times, a single course
+-- is uniquely identified by (course_code, year, period)
+CREATE TABLE courses (
+	id          SERIAL PRIMARY KEY,
+	name        VARCHAR(255) NOT NULL,
+	course_code VARCHAR(20)  NOT NULL,
+	period      PERIOD       NOT NULL,
+	year        INTEGER      NOT NULL
+);
+
+-- assessment contains the different assignments & labs that
+-- students may submit their code to.
+CREATE TABLE assessment (
+	id        SERIAL PRIMARY KEY,
+	name      VARCHAR(255)    NOT NULL,
+	comments  TEXT            NOT NULL,
+	type      ASSESSMENT_TYPE NOT NULL,
+	course_id SERIAL          NOT NULL,
+	FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+
+-- submissions are what the students submit to each
+-- assessment. A single user may submit multiple times
+-- to a single assessment, and each submission can get
+-- feedback individually.
+CREATE TABLE submissions (
+	id            SERIAL PRIMARY KEY,
+	assessment_id SERIAL       NOT NULL,
+	uid           VARCHAR(20)  NOT NULL,
+	title         VARCHAR(255) NOT NULL,
+	comments      TEXT         NOT NULL,
+	feedback      TEXT         NOT NULL,
+	FOREIGN KEY (uid) REFERENCES users(uid),
+	FOREIGN KEY (assessment_id) REFERENCES assessment(id)
+);
+
+-- enrol is maps users to the courses they are, or have previously
+-- been enrolled in.
+CREATE TABLE enrol (
+	user_uid  VARCHAR(20) NOT NULL,
+	course_id SERIAL      NOT NULL,
+	FOREIGN KEY (user_uid) REFERENCES users(uid),
+	FOREIGN KEY (course_id) REFERENCES courses(id)
+);

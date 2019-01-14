@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/hex"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/harrisonturton/submission-control/backend/store"
@@ -25,7 +24,7 @@ var (
 	// TokenTimeout is the duration a client can use the token to
 	// access authenticated resources, after which it will be
 	// rejected.
-	TokenTimeout = time.Minute * 5
+	TokenTimeout = time.Minute * 10
 )
 
 // ParseToken parses a token into a Claims instance
@@ -72,17 +71,11 @@ func GenerateToken(email string) (string, error) {
 
 // Authenticate will verify a login attempt.
 func Authenticate(store *store.Store, email string, passwordAttempt string) (bool, error) {
-	// Get account data
-	account, err := store.GetAccountByEmail(email)
+	// Get user data
+	user, err := store.GetUserByEmail(email)
 	if err != nil {
 		return false, err
 	}
-	// password hash is read as a hex string from the database (where it
-	// is stored in binary), but bcrypt expects a []byte
-	passwordHashBytes, err := hex.DecodeString(account.PasswordHash)
-	if err != nil {
-		return false, err
-	}
-	err = bcrypt.CompareHashAndPassword(passwordHashBytes, []byte(passwordAttempt))
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(passwordAttempt))
 	return err == nil, err
 }

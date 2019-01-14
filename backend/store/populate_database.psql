@@ -1,0 +1,30 @@
+
+INSERT INTO users (uid, first_name, last_name, email, password) VALUES
+	('u6386433', 'Harrison', 'Turton', 'harrisonturton@gmail.com', '$2a$10$a87UYM9z..YvrEBFtNA6H..hyClG1GN9PEoBwZTcmdybd5TKzCuFS'),
+	('u1234567', 'Jake', 'Smith', 'u1234567@anu.edu.au', 'JDJhJDEwJHEzMHRXL0RseUVSdjQuMDgydlA2enVHTlhtZ1VZcENBQUlmQVlSSy9IRzNrNFJxUGNNZ1cy'),
+	('u7654321', 'Alice', 'Debroff', 'u7654321@anu.edu.au', 'JDJhJDEwJHEzMHRXL0RseUVSdjQuMDgydlA2enVHTlhtZ1VZcENBQUlmQVlSSy9IRzNrNFJxUGNNZ1cy');
+
+INSERT INTO courses (id, name, course_code, period, year) VALUES
+	(1, 'Computer Organisation & Execution', 'COMP2300', 'first', 2018),
+	(2, 'Concurrent & Distributed Systems', 'COMP2310', 'second', 2018),
+	(3, 'Structued Programming', 'COMP1140', 'second', 2017),
+	(4, 'Programming as Problem Solving', 'COMP1130', 'first', 2017);
+
+INSERT INTO enrol (user_uid, course_id) VALUES
+	('u6386433', 1),
+	('u6386433', 2),
+	('u6386433', 3),
+	('u7654321', 2),
+	('u7654321', 4),
+	('u1234567', 1),
+	('u1234567', 4);
+
+INSERT INTO assessment (id, name, comments, type, course_id) VALUES
+	(1, 'Harmony & Money',      '', 'assignment', 2),
+	(2, 'Distributed Server',   '', 'lab', 2),
+	(3, 'Implicit Concurrency', '', 'lab', 2),
+	(4, 'Synchronised Data',    '', 'lab', 2);
+
+INSERT INTO submissions (id, assessment_id, uid, title, comments, feedback) VALUES
+	(1, 1, 'u6386433', 'Add better comments', 'Forgot to add comments', 'This is a lot better. I like how you’ve written the comments — good job!'),
+	(2, 1, 'u6386433', 'Initial submission', '', 'Quick, add comments before the due date!');
