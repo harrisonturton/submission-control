@@ -9,12 +9,13 @@ import (
 // the various dependencies into each handler.
 func CreateMux(store *store.Store) *http.ServeMux {
 	var handlers = map[string]http.HandlerFunc{
-		"/auth":       authHandler(store),
-		"/refresh":    refreshHandler(store),
-		"/user":       userHandler(store),
-		"/enrol":      enrolHandler(store),
-		"/assessment": assessmentHandler(store),
-		"/":           notFoundHandler(),
+		"/auth":        authHandler(store),
+		"/refresh":     refreshHandler(store),
+		"/user":        userHandler(store),
+		"/enrol":       enrolHandler(store),
+		"/assessment":  assessmentHandler(store),
+		"/submissions": submissionHandler(store),
+		"/":            notFoundHandler(),
 	}
 	mux := http.NewServeMux()
 	for route, handler := range handlers {

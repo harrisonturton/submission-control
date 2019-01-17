@@ -124,19 +124,19 @@ func (store *Store) GetSubmissionsForUser(uid string) ([]Submission, error) {
 	var submissions []Submission
 	for rows.Next() {
 		var id, assessmentID int
-		var uid, title, comments, feedback string
+		var uid, title, description, feedback string
 		err := rows.Scan(&id, &assessmentID, &uid, &title, &description, &feedback)
 		if err != nil {
 			log.Println(err.Error())
 			continue
 		}
 		submissions = append(submissions, Submission{
-			ID:          id,
-			AsessmentID: assessmentID,
-			UID:         uid,
-			Title:       title,
-			Description: description,
-			Feedback:    feedback,
+			ID:           id,
+			AssessmentID: assessmentID,
+			UID:          uid,
+			Title:        title,
+			Description:  description,
+			Feedback:     feedback,
 		})
 	}
 	rows.Close()

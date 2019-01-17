@@ -47,3 +47,10 @@ type UserResponse struct {
 	StatusCode int        `json:"status"`
 	User       store.User `json:"user"`
 }
+
+// SubmissionResponse is the response sent when replying to a
+// submission request on the /submission endpoint
+type SubmissionResponse struct {
+	StatusCode  int                `json:"status"`
+	Submissions []store.Submission `json:"submissions"`
+}

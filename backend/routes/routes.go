@@ -202,6 +202,45 @@ func userHandler(store *store.Store) http.HandlerFunc {
 	})
 }
 
+func submissionHandler(store *store.Store) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !request.IsAuthorized(r) {
+			log.Println("Unauthorized")
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		// Reject is not POST
+		if r.Method != http.MethodGet {
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Get user UID from the URL
+		userUIDParams, ok := r.URL.Query()["uid"]
+		if !ok || len(userUIDParams) != 1 {
+			badRequestHandler("unrecognised UID").ServeHTTP(w, r)
+			return
+		}
+		userUID := userUIDParams[0]
+		submissions, err := store.GetSubmissionsForUser(userUID)
+		if err != nil {
+			log.Printf("Could not find submissions: %v", err)
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Send response
+		resp := SubmissionResponse{
+			StatusCode:  200,
+			Submissions: submissions,
+		}
+		respBytes, err := json.Marshal(resp)
+		if err != nil {
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		w.Write(respBytes)
+	})
+}
+
 func assessmentHandler(store *store.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !request.IsAuthorized(r) {
