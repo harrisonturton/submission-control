@@ -1,18 +1,19 @@
 import thunk from "redux-thunk";
 import { createStore, applyMiddleware } from "redux";
-import { appReducer, INITIAL_STATE } from "reducers"; 
+import { rootReducer, initial_state } from "reducer";
 import { retreiveToken } from "api/auth";
 
-let appStore = createStore(
-	appReducer,
-	hydrateState(INITIAL_STATE),
-	applyMiddleware(
-		thunk,
-		logger
-	)
+let store = createStore(
+	rootReducer,
+	initial_state,
+	// hydrateAuthentication(initial_state),
+	applyMiddleware(thunk, logger)
 );
 
-function hydrateState(initial_state) {
+// hydrateAuthentication looks for a token in localStorage,
+// and sets is_authenticated accordingly. Used to keep authentication
+// between page refreshes.
+function hydrateAuthentication(initial_state) {
 	let token = retreiveToken();
 	if (token === undefined || token === null) {
 		return initial_state;	
@@ -20,12 +21,15 @@ function hydrateState(initial_state) {
 	console.log(JSON.stringify(initial_state));
 	return {
 		...initial_state,
-		is_authenticated: true,
-		token: token
+		auth: {
+			...initial_state.auth,	
+			is_authenticated: true,
+			token: token
+		}
 	};
 }
 
-function logger({ getState }) {
+function logger({ getState })  {
 	return next => action => {
 		console.log(`%cDispatching ${action.type}`, "font-weight:bold")
 		console.log(JSON.stringify(action));
@@ -36,5 +40,5 @@ function logger({ getState }) {
 		return next(action);
 	};
 }
-
-export default appStore;
+	
+export default store;

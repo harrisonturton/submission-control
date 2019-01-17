@@ -1,5 +1,5 @@
 
-import { auth_url, refresh_url } from "api/routes";
+import * as routes from "api/routes";
 
 // Where we store the JWT token in localStorage
 const token_key = "submission-control-token";
@@ -10,9 +10,8 @@ export const refresh_time = 1000 * 60 * 3;
 // How long until a JWT token is invalid. 10 minutes.
 export const token_timeout = 1000 * 60 * 10;
 
-// fetchToken is used for signing in
-export const sendSignInRequest = async (email, password) => {
-	let resp = await fetch(auth_url, post({
+export const signIn = async (email, password) => {
+	let resp = await fetch(routes.auth, post({
 		email: email,
 		password: password,
 	}));
@@ -28,9 +27,8 @@ export const sendSignInRequest = async (email, password) => {
 	return body.token;
 };
 
-// refreshToken is used for refreshing an existing token
-export const sendRefreshRequest = async token => {
-	let resp = await fetch(refresh_url, post({
+export const refreshToken = async token => {
+	let resp = await fetch(routes.refresh, post({
 		token: token
 	}));
 	if (!resp.ok) {

@@ -1,127 +1,93 @@
 
-import {
-	// Authentication
-	sendSignInRequest,
-	sendRefreshRequest,
-	storeToken,
-	forgetToken,
-	refresh_time,
-	token_timeout,
-	// Data
-	fetchCourses,
-	fetchUserData,
-	fetchAssessmentsForCourse
-} from "api";
-import {
-	loginRequest,
-	loginSuccess,
-	loginFailure,
-	logout,
-	refreshToken,
-	setCourses,
-	setUser,
-	setAssessment
-} from "actions";
+import * as auth from "api/auth";
+import * as api from "api/api";
+import * as auth_action from "actions/auth";
+import * as api_action from "actions/api";
 
-// loginThunk sends a login request to the API
-export const makeLoginRequest = (email, password) => dispatch => {
-	console.log("LOGGING IN...");
-	dispatch(loginRequest());
-	return sendSignInRequest(email, password)
-		.then(token => {
-			if (token === null) {
-				forgetToken()
-				dispatch(loginFailure());
-			} else {
-				storeToken(token);
-				dispatch(fetchState(email, token));
-				setTimeout(() => dispatch(makeRefreshRequest()), refresh_time);
-				dispatch(loginSuccess(token));
-			}
-		});
-};
-
-// refreshThunk sends a request to refresh out JWT token
-export const makeRefreshRequest = () => (dispatch, getState) => {
-	let { is_authenticated, token, timestamp } = getState().auth;
-	if (!is_authenticated) {
-		dispatch(logout());
-		return;	
-	}
-	// Check if token has timed out
-	let time_since_refresh = new Date() - timestamp;
-	if (time_since_refresh >= token_timeout) {
-		dispatch(logout());
-		return;
-	}
-	// Make refresh request
-	return sendRefreshRequest(token)
-		.then(token => {
-			if (token === null) {
-				forgetToken();
-				dispatch(logout());
-			} else {
-				storeToken(token);
-				dispatch(refreshToken(token));
-				setTimeout(() => dispatch(makeRefreshRequest()), refresh_time);
-			}
-		});
-}
-
-// fetchState will hydrate the entire store state from the database
-export const fetchState = (email, token) => async dispatch => {
-	console.log("INSIDE FETCH STATE")
-	function onSuccess(user_data, courses, assessments) {
-		console.log("FETCHING STATE...");
-		console.log(JSON.stringify(user_data));
-		console.log(JSON.stringify(courses));
-		dispatch(setUser(user_data));
-		dispatch(setCourses(courses));
-		dispatch(setAssessment(assessments))
-	}
-	function onError(error) {
-		return error;	
-	}
-	try {
-		console.log("Trying...");
-		const user_data = await fetchUserData(email, token);
-		if (user_data === null) {
-			return;	
-		}
-		console.log("User data", JSON.stringify(user_data));
-		const courses = await fetchCourses(user_data.uid, token);
-		if (courses === null) {
+// attemptSignIn will attempt to authenticate with the backend server,
+// and receives a JWT token if successful. It will also dispatch
+// thunks to fetch the initial state and populate the redux store.
+export const attemptSignIn = (email, password) => dispatch => {
+	dispatch(auth_action.loginRequest())
+	return auth.signIn(email, password).then(token => {
+		// If the token is null, then we failed to sign in.
+		// Wipe any tokens in localStorage.
+		if (token === null) {
+			auth.forgetToken();
+			dispatch(auth_action.loginFailure());
 			return;
 		}
-		var assessments = {};
-		for (var i = 0; i < courses.length; i++) {
-			var course = courses[i];
-			let assessment = await fetchAssessmentsForCourse(course.id, token);
-			if (assessment === null) {
-				continue;
-			}
-			assessments[course.id] = assessment;
-		}
-		return onSuccess(user_data, courses, assessments);
-	} catch (err) {
-		return onError(err);
-	}
-};
+		// Store the token for later access, and refresh the
+		// token in the future. Get the initial state for the store.
+		auth.storeToken(token);
+		dispatch(auth_action.loginSuccess());
+		dispatch(fetchInitialState(token, email));
+		setTimeout(() => dispatch(attemptRefreshToken()), auth.refresh_time);
+	});
+}
 
-export const makeEnrolRequest = uid => (dispatch, getState) => {
-	let { is_authenticated, token } = getState().auth;
+// attemptRefreshToken will exchange our current token with a new one, so we
+// can stay authenticated (since each token is time-limited).
+// It will try and retreive the token from localStorage. If it does not
+// exist, then we assume the user has logged out, and we do not refresh.
+export const attemptRefreshToken = () => (dispatch, getState) => {
+	let { is_authenticated, timestamp }	= getState().auth;
+	// If already logged out, then do not refresh the token.
 	if (!is_authenticated) {
-		dispatch(logout());
 		return;
 	}
-	return fetchCourses(uid, token)
-		.then(courses => {
-			if (courses === null) {
-				console.log("Courses is null");
-				return;
-			} else {
-				dispatch(setCourses(courses))	
-			}
-		})
+	// If the token doesn't exist, then assume logged out
+	let token = auth.retreiveToken();
+	if (token === undefined || token === null) {
+		return;	
+	}
+	// Check if the token has timed out
+	let time_since_refresh = new Date() - timestamp;
+	if (time_since_refresh >= auth.token_timeout) {
+		dispatch(auth_action.logout());
+		return;	
+	}
+	// Make the refresh request. This is very similar to the behaviour
+	// in signIn().
+	return auth.refreshToken(token).then(token => {
+		if (token === null) {
+			auth.forgetToken();
+			dispatch(auth_action.logout());
+			return;
+		}
+		auth.storeToken(token);
+		dispatch(auth_action.refreshToken(token));
+		setTimeout(() => dispatch(attemptRefreshToken()), auth.refresh_time);
+	});
 };
 
+// fetchInitialState will make multiple requests to the backend
+// to build up a state object, and then send this to our store.
+// It needs the users email to begin collecting user-specific data.
+export const fetchInitialState = (token, email) => dispatch => {
+	dispatch(api_action.dataRequest());
+	// First, get the user data
+	return fetchState(token, email).then(data => {
+		if (data === null) {
+			dispatch(api_action.dataFailure());
+			return;
+		}
+		dispatch(api_action.dataSuccess(data));
+	});
+};
+
+const fetchState = async (token, email) => {
+	let user = await api.fetchUserData(email, token);
+	if (user === null || user === undefined) {
+		return null;	
+	}
+	let courses = await api.fetchCourses(user.uid, token);
+	if (courses === null || courses === undefined) {
+		return null;
+	}
+	let assessment = await api.fetchAssessment(user.uid, token);
+	if (assessment === null || assessment === undefined) {
+		return null;	
+	}
+	return { user, courses, assessment };
+};

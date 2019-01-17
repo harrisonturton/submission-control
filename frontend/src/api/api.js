@@ -1,9 +1,12 @@
 
-import { auth_url, refresh_url, enrol_url, assessment_url, user_url } from "api/routes";
+import * as routes from "api/routes";
 
+// fetchUserData will retreive the information about a user
+// uniquely identified by their email.
+// { uid, first_name, last_name, email }
 export const fetchUserData = async (email, token) => {
 	// Make sure request completes successfully
-	let url = `${user_url}?email=${email}`;
+	let url = `${routes.user}?email=${email}`;
 	let resp = await fetch(url, {
 		method: "GET",
 		headers: {
@@ -23,10 +26,11 @@ export const fetchUserData = async (email, token) => {
 	return body.user;
 };
 
-// fetchCourses returns a list of courses a user is enrolled in
+// fetchCourses returns a list of courses a user is enrolled in.
+// [ { id, name, course_code, period, year } ]
 export const fetchCourses = async (uid, token) => {
 	// Make sure request completes successfully
-	let url = `${enrol_url}?uid=${uid}`;
+	let url = `${routes.enrolled}?uid=${uid}`;
 	let resp = await fetch(url, {
 		method: "GET",
 		headers: {
@@ -45,13 +49,14 @@ export const fetchCourses = async (uid, token) => {
 	return body.courses;
 }
 
-export const fetchAssessmentsForCourse = async (course_id, token) => {
+// fetchAssessment will return a list of assessments for a user.
+export const fetchAssessment = async (uid, token) => {
 	// Make sure request completes successfully
-	let url = `${assessment_url}?course_id=${course_id}`;
+	let url = `${routes.assessment}?uid=${uid}`;
 	let resp = await fetch(url, {
 		method: "GET",
 		headers: {
-			"Authorization": token	
+			"Authorization": token
 		}
 	});
 	if (!resp.ok) {

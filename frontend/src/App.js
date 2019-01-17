@@ -6,25 +6,23 @@ const CourseScreen = ({ match }) => (
 	<p>{match.params.course_code}</p>
 );
 
-export default class App extends Component {
-	render() {
-		return (
-			<Router>
-				<Switch>
-					<Route
-						path="/login"
-						component={LoginScreen}
-					/>
-					<Route
-						path="/course/:course_code"
-						component={CourseScreen}
-					/>
-					<PrivateRoute
-						exact path="/"
-						component={HomeScreen}
-					/>
-				</Switch>
-			</Router>
-		);
-	}
-}
+const App = () => (
+	<Router>
+		<Switch>
+			<Route
+				path="/login"
+				component={LoginScreen}
+			/>
+			<Route
+				path="/course/:course_code"
+				component={CourseScreen}
+			/>
+			<PrivateRoute
+				exact path="/"
+				component={HomeScreen}
+			/>
+		</Switch>
+	</Router>
+);
+
+export default App;

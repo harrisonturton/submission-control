@@ -1,19 +1,31 @@
 
-export const SET_COURSES    = "SET_COURSES";
-export const SET_USER       = "SET_USER";
-export const SET_ASSESSMENT = "SET_ASSESSMENT";
+export const DATA_REQUEST = "DATA_REQUEST";
+export const DATA_SUCCESS = "DATA_SUCCESS";
+export const DATA_FAILURE = "DATA_FAILURE";
 
-export const setCourses = courses => ({
-	type: SET_COURSES,
-	courses: courses
+export const dataRequest = data => ({
+	type: DATA_REQUEST,
+	data: {
+		is_fetching: true,
+		failed: false
+	}
 });
 
-export const setUser = user_data => ({
-	type: SET_USER,
-	user: user_data
+export const dataSuccess = data => ({
+	type: DATA_SUCCESS,
+	data: {
+		is_fetching: false,
+		failed: false,
+		user: data.user,
+		courses: data.courses,
+		assessment: data.assessment
+	}
 });
 
-export const setAssessment = assessment => ({
-	type: SET_ASSESSMENT,
-	assessment: assessment
+export const dataFailure = () => ({
+	type: DATA_FAILURE,
+	data: {
+		is_fetching: false,
+		failed: true,
+	}
 });

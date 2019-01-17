@@ -1,5 +1,5 @@
 import { connect } from "react-redux";
-import { makeLoginRequest } from "actions/thunks";
+import { attemptSignIn } from "actions/thunks";
 import Login from "containers/LoginScreen/Login";
 
 const mapStateToProps = state => ({
@@ -8,7 +8,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	requestLogin: (email, password) => dispatch(makeLoginRequest(email, password)),
+	requestLogin: (email, password) => dispatch(attemptSignIn(email, password))
 });
 
 const LoginContainer = connect(
