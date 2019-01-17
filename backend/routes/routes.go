@@ -8,7 +8,6 @@ import (
 	"github.com/harrisonturton/submission-control/backend/store"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 // These are the handlers called for each route, as specified in
@@ -210,22 +209,17 @@ func assessmentHandler(store *store.Store) http.HandlerFunc {
 			return
 		}
 		// Get course ID from the URL
-		courseIDParam, ok := r.URL.Query()["course_id"]
-		if !ok || len(courseIDParam) != 1 {
+		userUIDParam, ok := r.URL.Query()["uid"]
+		if !ok || len(userUIDParam) != 1 {
 			log.Println("Invalid course ID")
-			badRequestHandler("invalid course id").ServeHTTP(w, r)
+			badRequestHandler("invalid user id").ServeHTTP(w, r)
 			return
 		}
 		// Get assessments from the store
-		courseID, err := strconv.Atoi(courseIDParam[0])
+		userUID := userUIDParam[0]
+		assessment, err := store.GetAssessmentForUser(userUID)
 		if err != nil {
-			log.Println("Failed to convert courseID to integer")
-			notFoundHandler().ServeHTTP(w, r)
-			return
-		}
-		assessment, err := store.GetAssessmentByCourse(courseID)
-		if err != nil {
-			log.Println("Could not find assessment")
+			log.Println("Could not find assessments")
 			notFoundHandler().ServeHTTP(w, r)
 			return
 		}

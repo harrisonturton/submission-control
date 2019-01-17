@@ -87,24 +87,26 @@ func (store *Store) GetCoursesByUser(uid string) ([]Course, error) {
 	return courses, nil
 }
 
-// GetAssessmentByCourse will fetch a list of assessments for a specific course.
-func (store *Store) GetAssessmentByCourse(courseID int) ([]Assessment, error) {
-	query := "SELECT name, type FROM assessment WHERE id = $1"
-	rows, err := store.db.Query(query, courseID)
+// GetAssessmentForUser will fetch a list of all assessments (for all courses) for a single user.
+func (store *Store) GetAssessmentForUser(uid string) ([]Assessment, error) {
+	query := "SELECT assessment.course_id, name, type FROM assessment JOIN enrol on assessment.id = enrol.course_id WHERE enrol.user_uid = $1"
+	rows, err := store.db.Query(query, uid)
 	if err != nil {
 		return []Assessment{}, nil
 	}
 	var assessment []Assessment
 	for rows.Next() {
-		var name, assessmentType string
-		err := rows.Scan(&name, &assessmentType)
+		var courseID int
+		var name, assType string
+		err := rows.Scan(&courseID, &name, &assType)
 		if err != nil {
 			log.Println(err.Error())
 			continue
 		}
 		assessment = append(assessment, Assessment{
-			Name: name,
-			Type: assessmentType,
+			Name:     name,
+			Type:     assType,
+			CourseID: courseID,
 		})
 	}
 	rows.Close()

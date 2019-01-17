@@ -38,6 +38,7 @@ const (
 // Assessment represents a single piece of assessment, whether
 // it be a proper assignment or something for a lab.
 type Assessment struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	CourseID int    `json:"course_id"`
 }
