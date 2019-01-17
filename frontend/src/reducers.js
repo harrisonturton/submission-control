@@ -1,13 +1,35 @@
 
-import { token_timeout } from "auth";
+import { token_timeout } from "api";
 import {
 	LOGIN_REQUEST,
 	LOGIN_SUCCESS,
 	LOGIN_FAILURE,
 	LOGOUT,
 	REFRESH_TOKEN,
-	CHECK_TOKEN_TIMEOUT
+	CHECK_TOKEN_TIMEOUT,
+	SET_COURSES,
+	SET_USER,
+	SET_ASSESSMENT
 } from "actions";
+
+let state = {
+	auth: {
+		is_authenticated: false,
+		is_fetching: false,
+		token: null,
+		timestamp: null,
+	},
+	user: {
+		email: null,
+		first_name: null,
+		last_name: null,
+	},
+	data: {
+		is_fetching: false,
+		courses: [],
+		assessment_by_course: {}
+	}
+}
 
 let INITIAL_STATE = {
 	auth: {
@@ -23,14 +45,36 @@ let INITIAL_STATE = {
 		current_course: null,
 		courses: []
 	},
-	assignments_by_course: {},
+	assessment_by_course: {},
 	labs_by_course: {}
 };
 
 let appReducer = (prev_state = INITIAL_STATE, action) => ({
 	...prev_state,
-	auth: authReducer(prev_state.auth, action)
+	auth: authReducer(prev_state.auth, action),
+	user: userReducer(prev_state.user, action),
+	assessment_by_course: assessmentReducer(prev_state.assessment_by_course, action)
 });
+
+let assessmentReducer = (prev_state = INITIAL_STATE.assessment_by_course, action) => {
+	switch (action.type) {
+		case SET_ASSESSMENT:
+			return action.assessment;
+		default:
+			return prev_state;
+	}
+};
+
+let userReducer = (prev_state = INITIAL_STATE.user, action) => {
+	switch (action.type) {
+		case SET_COURSES:
+			return { ...prev_state, courses: action.courses }
+		case SET_USER:
+			return { ...prev_state, ...action.user}
+		default:
+			return prev_state;
+	}
+}
 
 let authReducer = (prev_state = INITIAL_STATE.auth, action) => {
 	console.log(action.type);

@@ -1,5 +1,7 @@
 package routes
 
+import "github.com/harrisonturton/submission-control/backend/store"
+
 // FailedResponse is a common response for failed API requests.
 type FailedResponse struct {
 	StatusCode int    `json:"status"`
@@ -26,4 +28,22 @@ type RefreshRequest struct {
 type TokenResponse struct {
 	StatusCode int    `json:"status"`
 	Token      string `json:"token"`
+}
+
+// EnrolResponse is the response to an EnrolledRequest
+type EnrolResponse struct {
+	StatusCode int            `json:"status"`
+	Courses    []store.Course `json:"courses"`
+}
+
+// AssessmentResponse is the response to an AssessmentRequest
+type AssessmentResponse struct {
+	StatusCode int                `json:"status"`
+	Assessment []store.Assessment `json:"assessment"`
+}
+
+// UserResponse is sent in response to a GET request on /user
+type UserResponse struct {
+	StatusCode int        `json:"status"`
+	User       store.User `json:"user"`
 }

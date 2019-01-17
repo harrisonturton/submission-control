@@ -1,72 +1,23 @@
-body {
-	overflow-x: hidden;
-}
-
 html, body, * {
-	margin: 0;
-	padding: 0;
-	list-style-type: none;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  outline: none;
+  border: none;
+  font-family: "SF Pro Display", "Helvetica", "Roboto", sans-serif;
+  color: #2F3334;
+  font-size: 16px;
+  font-weight: normal;
+  text-decoration: none; }
 
-	font-family: "SF Pro Display", Helvetica, sans-serif;
-	text-decoration: none;
-	font-size: 16px;
-	font-weight: normal;
-	letter-spacing: 0.8px;
-
-	outline: none;
-	border: none;
-}
+body {
+  overflow-x: hidden; }
 
 a {
-	color: inherit;
-}
+  color: inherit; }
 
 .app {
-	width: 100%;
-	height: 100%;
-}
+  width: 100%;
+  height: 100%; }
 
-.tab-bar {
-	display: flex;
-	flex-direction: horizontal;
-	justify-content: space-between;
-	padding-left: 60px;
-	padding-right: 60px;
-	padding-top: 20px;
-}
-
-.tabs > li {
-	font-size: 0.9em;
-	display: inline;
-	padding-left: 15px;
-	opacity: 0.5;
-	transition: opacity 200ms ease-out;;
-}
-
-.tabs > li:hover {
-	opacity: 1;	
-}
-
-.searchbar {
-	border-radius: 100px;
-	background-color: #F5F8F9;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-.searchbar-input {
-	vertical-align: top;
-	font-size: 14px;
-	background-color: transparent;
-	padding-top: 6px;
-	padding-bottom: 6px;
-	padding-left: 20px;
-	padding-right: 20px;
-}
-
-.search-icon {
-	width: 18px;
-	height: 18px;
-	padding-right: 15px;
-}
+/*# sourceMappingURL=index.css.map */

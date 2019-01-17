@@ -3,6 +3,7 @@ package store
 import (
 	"database/sql"
 	"github.com/pkg/errors"
+	"log"
 )
 
 // Store represents the database. It does NOT
@@ -39,4 +40,73 @@ func (store *Store) GetUserByEmail(email string) (*User, error) {
 		PasswordHash: string(passwordHash),
 		UID:          uid,
 	}, nil
+}
+
+// GetCoursesByUser will return an array of all the courses a user is
+// enrolled in.
+func (store *Store) GetCoursesByUser(uid string) ([]Course, error) {
+	// Get a list of CourseIDs
+	query := "SELECT course_id FROM enrol WHERE user_uid = $1"
+	rows, err := store.db.Query(query, uid)
+	if err != nil {
+		return []Course{}, err
+	}
+	var courseIDs []string
+	for rows.Next() {
+		var courseID string
+		err := rows.Scan(&courseID)
+		if err != nil {
+			log.Println(err.Error())
+			log.Println("Failed in rows.Next for " + courseID)
+			continue
+		}
+		courseIDs = append(courseIDs, courseID)
+	}
+	rows.Close()
+	// Use the IDs to query for the actual course items
+	var courses []Course
+	for _, courseID := range courseIDs {
+		var name, courseCode, period string
+		var year int
+		var id int
+		query = "SELECT id, name, course_code, period, year FROM courses WHERE id = $1"
+		err := store.db.QueryRow(query, courseID).Scan(&id, &name, &courseCode, &period, &year)
+		if err != nil {
+			log.Println(err.Error())
+			log.Printf("Failed in queryRow for %d\n", courseID)
+			continue
+		}
+		courses = append(courses, Course{
+			ID:         id,
+			Name:       name,
+			CourseCode: courseCode,
+			Period:     period,
+			Year:       year,
+		})
+	}
+	return courses, nil
+}
+
+// GetAssessmentByCourse will fetch a list of assessments for a specific course.
+func (store *Store) GetAssessmentByCourse(courseID int) ([]Assessment, error) {
+	query := "SELECT name, type FROM assessment WHERE id = $1"
+	rows, err := store.db.Query(query, courseID)
+	if err != nil {
+		return []Assessment{}, nil
+	}
+	var assessment []Assessment
+	for rows.Next() {
+		var name, assessmentType string
+		err := rows.Scan(&name, &assessmentType)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		assessment = append(assessment, Assessment{
+			Name: name,
+			Type: assessmentType,
+		})
+	}
+	rows.Close()
+	return assessment, nil
 }

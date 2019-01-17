@@ -5,6 +5,7 @@
 	flex-direction: column;
 	padding: 15px;
 	border-radius: 3px;
+	transition: background-color 200ms ease-out;
 
 	&:hover {
 		background-color: #F6F8F9;
@@ -24,6 +25,8 @@
 
 .feedback-due {
 	color: $font-light;
+	font-size: 0.9em;
+	letter-spacing: normal;
 }
 
 .feedback {

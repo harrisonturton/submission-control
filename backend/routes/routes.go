@@ -8,6 +8,7 @@ import (
 	"github.com/harrisonturton/submission-control/backend/store"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 // These are the handlers called for each route, as specified in
@@ -78,6 +79,10 @@ func authHandler(store *store.Store) http.HandlerFunc {
 // a new token is returned.
 func refreshHandler(store *store.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !request.IsAuthorized(r) {
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
 		// Reject is not POST
 		if r.Method != http.MethodPost {
 			notFoundHandler().ServeHTTP(w, r)
@@ -88,14 +93,6 @@ func refreshHandler(store *store.Store) http.HandlerFunc {
 		err := json.Unmarshal(request.GetBody(r), &refresh)
 		if err != nil {
 			badRequestHandler("unrecognised body").ServeHTTP(w, r)
-			return
-		}
-		// Verify token
-		ok := auth.VerifyToken(refresh.Token)
-		if !ok {
-			log.Printf("Failed to verify login information: %v\n", err)
-			log.Println(refresh.Token)
-			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
 		// Get claims from the token
@@ -127,13 +124,123 @@ func refreshHandler(store *store.Store) http.HandlerFunc {
 	})
 }
 
-func usersHandler(store *store.Store) http.HandlerFunc {
+func enrolHandler(store *store.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !request.IsAuthorized(r) {
 			unauthorizedHandler().ServeHTTP(w, r)
 			return
 		}
-		w.Write([]byte("users\n"))
+		// Reject is not POST
+		if r.Method != http.MethodGet {
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Get user UID from the URL
+		userUIDParams, ok := r.URL.Query()["uid"]
+		if !ok || len(userUIDParams) != 1 {
+			badRequestHandler("unrecognised UID").ServeHTTP(w, r)
+			return
+		}
+		userUID := userUIDParams[0]
+		// Get data
+		courses, err := store.GetCoursesByUser(userUID)
+		if err != nil {
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Send response
+		resp := EnrolResponse{
+			StatusCode: 200,
+			Courses:    courses,
+		}
+		respBytes, err := json.Marshal(resp)
+		if err != nil {
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		w.Write(respBytes)
+	})
+}
+
+func userHandler(store *store.Store) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !request.IsAuthorized(r) {
+			log.Println("Unauthorized")
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		// Reject is not POST
+		if r.Method != http.MethodGet {
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Get user UID from the URL
+		userEmailParams, ok := r.URL.Query()["email"]
+		if !ok || len(userEmailParams) != 1 {
+			log.Println("Invalid email")
+			badRequestHandler("invalid email").ServeHTTP(w, r)
+			return
+		}
+		userEmail := userEmailParams[0]
+		// Get data
+		user, err := store.GetUserByEmail(userEmail)
+		if user == nil || err != nil {
+			log.Printf("Could not find user: %v", err)
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Send response
+		resp := UserResponse{
+			StatusCode: 200,
+			User:       *user,
+		}
+		respBytes, err := json.Marshal(resp)
+		if err != nil {
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		w.Write(respBytes)
+	})
+}
+
+func assessmentHandler(store *store.Store) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !request.IsAuthorized(r) {
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		// Get course ID from the URL
+		courseIDParam, ok := r.URL.Query()["course_id"]
+		if !ok || len(courseIDParam) != 1 {
+			log.Println("Invalid course ID")
+			badRequestHandler("invalid course id").ServeHTTP(w, r)
+			return
+		}
+		// Get assessments from the store
+		courseID, err := strconv.Atoi(courseIDParam[0])
+		if err != nil {
+			log.Println("Failed to convert courseID to integer")
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		assessment, err := store.GetAssessmentByCourse(courseID)
+		if err != nil {
+			log.Println("Could not find assessment")
+			notFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		// Respond
+		resp := AssessmentResponse{
+			StatusCode: 200,
+			Assessment: assessment,
+		}
+		respBytes, err := json.Marshal(resp)
+		if err != nil {
+			unauthorizedHandler().ServeHTTP(w, r)
+			return
+		}
+		log.Println(string(respBytes))
+		w.Write(respBytes)
 	})
 }
 

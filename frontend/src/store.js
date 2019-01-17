@@ -1,7 +1,7 @@
 import thunk from "redux-thunk";
 import { createStore, applyMiddleware } from "redux";
 import { appReducer, INITIAL_STATE } from "reducers"; 
-import { retreiveToken } from "auth";
+import { retreiveToken } from "api/auth";
 
 let appStore = createStore(
 	appReducer,
@@ -29,10 +29,11 @@ function logger({ getState }) {
 	return next => action => {
 		console.log(`%cDispatching ${action.type}`, "font-weight:bold")
 		console.log(JSON.stringify(action));
-		const returnVal = next(action);
-		console.log("%cNew State", "font-weight:bold")
-		console.log(JSON.stringify(getState()));
-		return returnVal;
+		// const returnVal = next(action);
+		// console.log("%cNew State", "font-weight:bold")
+		// console.log(JSON.stringify(getState()));
+		// return returnVal;
+		return next(action);
 	};
 }
 

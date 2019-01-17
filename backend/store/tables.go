@@ -1,17 +1,12 @@
 package store
 
-import (
-	"time"
-)
-
 // User represents the login and account
 // information that is required for every user.
 type User struct {
-	Email     string   `json:"email"`
-	FirstName string   `json:"first_name"`
-	LastName  string   `json:"last_name"`
-	UID       string   `json:"uid"`
-	Roles     []string `json:"roles"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	UID       string `json:"uid"`
 
 	PasswordHash string
 }
@@ -20,11 +15,11 @@ type User struct {
 // A course is uniquely identified by the course code
 // and running semester (Period).
 type Course struct {
-	Name        string       `json:"name"`
-	CourseCode  string       `json:"course_code"`
-	Period      Semester     `json:"period"`
-	Assignments []Assessment `json:"assignments"`
-	Labs        []Assessment `json:"labs"`
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	CourseCode string `json:"course_code"`
+	Period     string `json:"period"`
+	Year       int    `json:"year"`
 }
 
 // Semester represents the time when a course is being run
@@ -43,6 +38,6 @@ const (
 // Assessment represents a single piece of assessment, whether
 // it be a proper assignment or something for a lab.
 type Assessment struct {
-	Name    string    `json:"name"`
-	DueDate time.Time `json:"due_date"`
+	Name string `json:"name"`
+	Type string `json:"type"`
 }

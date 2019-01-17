@@ -1,80 +1,84 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Link, Redirect } from "react-router-dom";
-import { hasToken } from "auth";
+import { Redirect } from "react-router-dom";
+import { hasToken } from "api";
 import "./style.css";
-
-import { 
+import {
 	Header,
 	AssessmentItemList,
-	AssessmentFeedbackList
+	AssessmentFeedbackList,
 } from "components";
 
+const RedirectToLogin = () => <Redirect to="/login"/>;
+
 class Home extends Component {
+	renderAssessment(assignments, labs) {
+		return (
+			<div className="assignment-wrapper">
+				<AssessmentItemList
+					title="Upcoming Assignments"
+					subtitle=""
+					items={assignments}
+				/>
+				<AssessmentItemList
+					title="Upcoming Labs"
+					subtitle=""
+					items={labs}
+				/>
+			</div>
+		);
+	}
+	renderFeedback(feedback) {
+		return (
+			<div className="feedback-wrapper">
+				<AssessmentFeedbackList
+					title="Assessment Feedback"
+					subtitle=""
+					items={feedback}
+				/>
+			</div>
+		);
+	}
 	render() {
 		let is_authenticated = hasToken();
-		if (!is_authenticated) {
-			return <Redirect to="/login"/>;	
-		}
+		let { header, assignments, labs, feedback } = this.props;
 		return (
 			<div className="home-wrapper">
 				<Header
-					currentCourse="Concurrent & Distributed Programming"
-					courses={[
-						"Computer Networks",
-						"Structured Programming",
-						"Programming as Problem Solving",
-					]}
+					currentCourse={header.current_course}
+					courses={header.courses}
 				/>
-				<div className="assessment-wrapper">
-					<AssessmentItemList
-						title="Upcoming Assignments"
-						subtitle="View or submit"
-						items={[
-							{ title: "Harmony & Money", course_code: "comp2300", due_date: new Date(), comments: "2 submissions with 8 warnings on the most recent build." },
-							{ title: "Harmony & Money", course_code: "comp2300", due_date: new Date(), comments: "2 submissions with 8 warnings on the most recent build." },
-						]}
-					/>
-					<AssessmentItemList
-						title="Upcoming Labs"
-						subtitle="View or submit"
-						items={[
-							{ title: "Harmony & Money", course_code: "comp2300", due_date: new Date(), comments: "2 submissions with 8 warnings on the most recent build." },
-							{ title: "Harmony & Money", course_code: "comp2300", due_date: new Date(), comments: "2 submissions with 8 warnings on the most recent build." },
-						]}
-					/>
-				</div>
-				<div className="feedback-wrapper">
-					<AssessmentFeedbackList
-						title="Assessment Feedback"
-						subtitle="View or comment"
-						items={[
-							{
-								title: "Distributed Server",
-								dute_date: new Date(),
-								feedback: "Although I really like what you did with the solution, your code style could be a bit better! Remember to name your variables in a readable way, and comment the tricky bits that aren’t immediately apparent to the reader. Comment why, not what. We know what the code does — we can read it!"
-							},
-							{
-								title: "Synchronized Data",
-								due_date: new Date(),
-								feedback: "Good stuff, the commenting is effective."
-							},
-							{
-								title: "Harmony & Money",
-								due_date: new Date(),
-								feedback: "Looks good, but I would've liked to see the flight controls refactored into a separate package. Make sure to test thoroughly!"
-							},
-						]}
-					/>
-				</div>
+				{this.renderAssessment(assignments, labs)}
+				{this.renderFeedback(feedback)}
 			</div>
 		);
 	}
 }
 
+const mapStateToProps = state => ({
+	header: {
+		current_course: "Test",
+		courses: ["one", "two"],
+	},
+	assignments: [],
+	labs: [],
+	feedback: []
+})
+
 const HomeScreen = connect(
-	null,
+	mapStateToProps,
 	null
 )(Home);
+
+const emptyIfUndefined = val => {
+	switch (typeof val) {
+		case "string":
+			return "";
+		case "array":
+			return []
+		default:
+			return 0;
+	}
+}
 
 export default HomeScreen;
