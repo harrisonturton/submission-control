@@ -72,6 +72,7 @@ export const fetchInitialState = (token, email) => dispatch => {
 			dispatch(api_action.dataFailure());
 			return;
 		}
+		console.log("new data\n", JSON.stringify(data));
 		dispatch(api_action.dataSuccess(data));
 	});
 };

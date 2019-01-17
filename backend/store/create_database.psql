@@ -55,7 +55,7 @@ CREATE TABLE submissions (
 	assessment_id SERIAL       NOT NULL,
 	uid           VARCHAR(20)  NOT NULL,
 	title         VARCHAR(255) NOT NULL,
-	comments      TEXT         NOT NULL,
+	description   TEXT         NOT NULL,
 	feedback      TEXT         NOT NULL,
 	FOREIGN KEY (uid) REFERENCES users(uid),
 	FOREIGN KEY (assessment_id) REFERENCES assessment(id)

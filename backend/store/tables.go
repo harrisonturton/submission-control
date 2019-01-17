@@ -42,3 +42,13 @@ type Assessment struct {
 	Type     string `json:"type"`
 	CourseID int    `json:"course_id"`
 }
+
+// Submission is a single submission made by a user to an assessment item.
+type Submission struct {
+	ID           int    `json:"id"`
+	AssessmentID int    `json:"assessment_id"`
+	UID          string `json:"uid"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	Feedback     string `json:"feedback"`
+}

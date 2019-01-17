@@ -41,7 +41,7 @@ export default class Header extends Component {
 				<ul>
 					{courses.map((course, i) => (
 						<li key={i} className="course-name">
-							<Link to="/course/comp2300">{course}</Link>
+							<Link to="/course/comp2300">{course.name}</Link>
 						</li>
 					))}
 				</ul>

@@ -112,3 +112,33 @@ func (store *Store) GetAssessmentForUser(uid string) ([]Assessment, error) {
 	rows.Close()
 	return assessment, nil
 }
+
+// GetSubmissionsForUser will return all the submissions made
+// by the user to every assessment they've had.
+func (store *Store) GetSubmissionsForUser(uid string) ([]Submission, error) {
+	query := "SELECT id, assessment_id, uid, title, description, feedback FROM submissions WHERE uid = $1"
+	rows, err := store.db.Query(query, uid)
+	if err != nil {
+		return []Submission{}, nil
+	}
+	var submissions []Submission
+	for rows.Next() {
+		var id, assessmentID int
+		var uid, title, comments, feedback string
+		err := rows.Scan(&id, &assessmentID, &uid, &title, &description, &feedback)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		submissions = append(submissions, Submission{
+			ID:          id,
+			AsessmentID: assessmentID,
+			UID:         uid,
+			Title:       title,
+			Description: description,
+			Feedback:    feedback,
+		})
+	}
+	rows.Close()
+	return submissions, nil
+}

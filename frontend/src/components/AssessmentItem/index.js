@@ -2,10 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./style.css";
 
-const AssessmentItem = ({ title, due_date, comments }) => (
+const AssessmentItem = ({ name, due_date, comments }) => (
 	<div className="assessment-item">
 		<div className="title-wrapper">
-			<span className="assessment-title">{title}</span>
+			<span className="assessment-title">{name}</span>
 			<span className="comments">{comments}</span>
 		</div>
 		<div className="date-wrapper">

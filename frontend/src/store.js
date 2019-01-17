@@ -33,11 +33,11 @@ function logger({ getState })  {
 	return next => action => {
 		console.log(`%cDispatching ${action.type}`, "font-weight:bold")
 		console.log(JSON.stringify(action));
-		// const returnVal = next(action);
-		// console.log("%cNew State", "font-weight:bold")
-		// console.log(JSON.stringify(getState()));
-		// return returnVal;
-		return next(action);
+		const returnVal = next(action);
+		console.log("%cNew State", "font-weight:bold")
+		console.log(JSON.stringify(getState()));
+		return returnVal;
+		// return next(action);
 	};
 }
 	

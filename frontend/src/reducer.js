@@ -20,7 +20,10 @@ export const initial_state = {
 			last_name: null,
 		},
 		courses: [],
-		assessment: []
+		assessment: {
+			assignments: [],
+			labs: []
+		}
 	}
 };
 

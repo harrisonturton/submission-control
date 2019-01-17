@@ -25,6 +25,6 @@ INSERT INTO assessment (id, name, comments, type, course_id) VALUES
 	(3, 'Implicit Concurrency', '', 'lab', 2),
 	(4, 'Synchronised Data',    '', 'lab', 2);
 
-INSERT INTO submissions (id, assessment_id, uid, title, comments, feedback) VALUES
+INSERT INTO submissions (id, assessment_id, uid, title, description, feedback) VALUES
 	(1, 1, 'u6386433', 'Add better comments', 'Forgot to add comments', 'This is a lot better. I like how you’ve written the comments — good job!'),
 	(2, 1, 'u6386433', 'Initial submission', '', 'Quick, add comments before the due date!');
