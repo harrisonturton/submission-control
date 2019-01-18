@@ -73,3 +73,26 @@ export const fetchAssessment = async (uid, token) => {
 		labs: body.assessment.filter(item => item.type == "lab"),
 	}
 }
+
+// fetchSubmissions will return an array of all submissions the user
+// has ever made.
+export const fetchSubmissions = async (uid, token) => {
+	// Make sure request completes successfully
+	let url = `${routes.submissions}?uid=${uid}`;
+	let resp = await fetch(url, {
+		method: "GET",
+		headers: {
+			"Authorization": token
+		}
+	});
+	if (!resp.ok) {
+		console.log(resp.statusText);
+		return null;	
+	}
+	// Check for data
+	let body = await resp.json();
+	if (body.submissions === null || body.submissions == null) {
+		return null;	
+	}
+	return body.submissions;
+}

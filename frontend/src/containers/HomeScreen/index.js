@@ -15,7 +15,7 @@ const RedirectToLogin = () => <Redirect to="/login"/>;
 class Home extends Component {
 	renderAssessment(assignments, labs) {
 		return (
-			<div className="assignment-wrapper">
+			<div className="assessment-wrapper">
 				<AssessmentItemList
 					title="Upcoming Assignments"
 					subtitle=""
@@ -35,7 +35,7 @@ class Home extends Component {
 				<AssessmentFeedbackList
 					title="Assessment Feedback"
 					subtitle=""
-					items={feedback}
+					submissions={feedback}
 				/>
 			</div>
 		);
@@ -68,7 +68,7 @@ const mapStateToProps = state => ({
 	header: mapHeaderState(state),
 	assignments: state.data.assessment.assignments,
 	labs: state.data.assessment.labs,
-	feedback: []
+	feedback: state.data.submissions === undefined ? [] : state.data.submissions
 });
 
 const mapHeaderState = state => {

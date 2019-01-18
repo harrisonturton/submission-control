@@ -90,5 +90,9 @@ const fetchState = async (token, email) => {
 	if (assessment === null || assessment === undefined) {
 		return null;	
 	}
-	return { user, courses, assessment };
+	let submissions = await api.fetchSubmissions(user.uid, token);
+	if (submissions === null || submissions === undefined) {
+		return null;	
+	}
+	return { user, courses, assessment, submissions };
 };

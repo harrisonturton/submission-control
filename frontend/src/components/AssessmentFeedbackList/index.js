@@ -4,19 +4,19 @@ import { AssessmentFeedbackItem } from "components";
 import PropTypes from "prop-types";
 import "./style.css";
 
-const AssessmentFeedbackList = ({ title, subtitle, items }) => (
+const AssessmentFeedbackList = ({ title, subtitle, submissions }) => (
 	<div className="assessment-feedback-list-wrapper">
 		<div className="assessment-feedback-list-header">
 			<span className="assessment-list-title">{title}</span>
 			<span className="assessment-list-subtitle">{subtitle}</span>
 		</div>
-		{items.map((item, i) => (
-			<Link to={`/course/${item.course_code}`}>
+		{submissions.map((submission, i) => (
+			<Link to={`/course/${submission.id}`}>
 				<AssessmentFeedbackItem
 					key={i}
-					title={item.title}
-					due_date={item.due_date}
-					feedback={item.feedback}
+					title={submission.title}
+					due_date={new Date()}
+					feedback={submission.feedback}
 				/>
 			</Link>
 		))}
@@ -26,7 +26,7 @@ const AssessmentFeedbackList = ({ title, subtitle, items }) => (
 AssessmentFeedbackList.propTypes = {
 	title: PropTypes.string.isRequired,
 	subtitle: PropTypes.string.isRequired,
-	items: PropTypes.array.isRequired,
+	submissions: PropTypes.array.isRequired,
 };
 
 export default AssessmentFeedbackList;

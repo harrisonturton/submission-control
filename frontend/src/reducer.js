@@ -22,7 +22,8 @@ export const initial_state = {
 		courses: [],
 		assessment: {
 			assignments: [],
-			labs: []
+			labs: [],
+			submissions: []
 		}
 	}
 };

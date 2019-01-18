@@ -18,7 +18,8 @@ export const dataSuccess = data => ({
 		failed: false,
 		user: data.user,
 		courses: data.courses,
-		assessment: data.assessment
+		assessment: data.assessment,
+		submissions: data.submissions
 	}
 });
 
