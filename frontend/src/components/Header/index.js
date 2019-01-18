@@ -39,9 +39,9 @@ export default class Header extends Component {
 					<img className="chevron" alt={""} src={chevronDown}/>
 				</span>
 				<ul>
-					{courses.map((course, i) => (
+					{courses.filter(course => course.name !== currentCourse).map((course, i) => (
 						<li key={i} className="course-name">
-							<Link to="/course/comp2300">{course.name}</Link>
+							<Link to={`/course/${course.id}`}>{course.name}</Link>
 						</li>
 					))}
 				</ul>

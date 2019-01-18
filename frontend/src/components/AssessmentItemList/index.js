@@ -11,7 +11,7 @@ const LoadingList = () => (
 const LoadedList = ({ items }) => (
 	<div>
 		{items.map((item, i) => (
-			<Link to={`/course/${item.course_code}`}>
+			<Link to={`/course/${item.course_id}`}>
 				<AssessmentItem
 					key={i}
 					name={item.name}

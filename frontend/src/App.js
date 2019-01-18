@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { PrivateRoute, HomeScreen, LoginScreen } from "containers";
+import { PrivateRoute, HomeScreen, LoginScreen, CourseScreen } from "containers";
 
-const CourseScreen = ({ match }) => (
-	<p>{match.params.course_code}</p>
-);
+//const CourseScreen = ({ match }) => (
+//	<p>{match.params.course_code}</p>
+//);
 
 const App = () => (
 	<Router>
@@ -14,7 +14,7 @@ const App = () => (
 				component={LoginScreen}
 			/>
 			<Route
-				path="/course/:course_code"
+				path="/course/:course_id"
 				component={CourseScreen}
 			/>
 			<PrivateRoute
