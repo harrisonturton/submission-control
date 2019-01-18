@@ -1,15 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { AssessmentFeedbackItem } from "components";
+import { AssessmentFeedbackItem, Loader } from "components";
 import PropTypes from "prop-types";
 import "./style.css";
 
-const AssessmentFeedbackList = ({ title, subtitle, submissions }) => (
-	<div className="assessment-feedback-list-wrapper">
-		<div className="assessment-feedback-list-header">
-			<span className="assessment-list-title">{title}</span>
-			<span className="assessment-list-subtitle">{subtitle}</span>
-		</div>
+const LoadingList = () => (
+	<Loader/>
+);
+
+const LoadedList = ({ submissions }) => (
+	<div>
 		{submissions.map((submission, i) => (
 			<Link to={`/course/${submission.id}`}>
 				<AssessmentFeedbackItem
@@ -20,6 +20,16 @@ const AssessmentFeedbackList = ({ title, subtitle, submissions }) => (
 				/>
 			</Link>
 		))}
+	</div>
+);
+
+const AssessmentFeedbackList = ({ title, subtitle, submissions }) => (
+	<div className="assessment-feedback-list-wrapper">
+		<div className="assessment-feedback-list-header">
+			<span className="assessment-list-title">{title}</span>
+			<span className="assessment-list-subtitle">{subtitle}</span>
+		</div>
+		{submissions === undefined ? <LoadingList/> : <LoadedList submissions={submissions}/>}
 	</div>
 );
 

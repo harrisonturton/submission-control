@@ -1,15 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { AssessmentItem } from "components";
+import { AssessmentItem, Loader } from "components";
 import PropTypes from "prop-types";
 import "./style.css";
 
-const AssessmentItemList = ({ title, subtitle, items }) => (
-	<div className="assessment-list-wrapper">
-		<div className="assessment-list-header">
-			<span className="assessment-list-title">{title}</span>
-			<span className="assessment-list-subtitle">{subtitle}</span>
-		</div>
+const LoadingList = () => (
+	<Loader/>
+);
+
+const LoadedList = ({ items }) => (
+	<div>
 		{items.map((item, i) => (
 			<Link to={`/course/${item.course_code}`}>
 				<AssessmentItem
@@ -23,11 +23,20 @@ const AssessmentItemList = ({ title, subtitle, items }) => (
 	</div>
 );
 
+const AssessmentItemList = ({ title, subtitle, items }) => (
+	<div className="assessment-list-wrapper">
+		<div className="assessment-list-header">
+			<span className="assessment-list-title">{title}</span>
+			<span className="assessment-list-subtitle">{subtitle}</span>
+		</div>
+		{items === undefined ? <LoadingList/> : <LoadedList items={items}/>}
+	</div>
+);
+
 AssessmentItemList.propTypes = {
 	title: PropTypes.string.isRequired,
 	subtitle: PropTypes.string.isRequired,
-	items: PropTypes.array.isRequired,
-	// Shape: { title, course_code, due_date  }
+	items: PropTypes.array.isRequired
 };
 
 export default AssessmentItemList;

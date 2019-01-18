@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
+import { Loader } from "components";
 import PropTypes from "prop-types";
 import "./style.css";
 
@@ -40,16 +41,15 @@ class Login extends Component {
 		if (is_authenticated) {
 			return <Redirect to="/"/>;
 		}
-		if (is_fetching) {
-			return <p>Waiting...</p>;
-		}
 		return (
 			<div className="login-wrapper">
 				<div className="login-splash-image"></div>
 				<div className="login-panel-wrapper">
 					<h1>Submission Control</h1>
 					<p>This website is where you can view & submit assignments, and give feedback on lectures.</p>
-					<form onSubmit={this.handleSubmit}>
+					{is_fetching
+							? <Loader/>
+							: <form onSubmit={this.handleSubmit}>
 						<label>Email</label>
 						<input
 							name="email"
@@ -65,7 +65,7 @@ class Login extends Component {
 							value={this.state.password}
 						/>
 						<input type="submit" value="Login"/>
-					</form>
+					</form>}
 				</div>
 			</div>
 		);
