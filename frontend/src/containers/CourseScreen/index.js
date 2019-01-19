@@ -2,11 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
-import {
-	Header,
-	AssessmentItemList,
-	AssessmentFeedbackList
-} from "components";
+import { Header } from "containers";
+import { AssessmentItemList, AssessmentFeedbackList } from "components";
 import "./style.css";
 
 class Course extends Component {
@@ -38,6 +35,7 @@ class Course extends Component {
 		let { is_authenticated, courses, assignments, labs, submissions } = this.props;
 		let filtered_assignments = assignments.filter(ass => ass.course_id == course_id);
 		let filtered_labs = labs.filter(lab => lab.course_id == course_id);
+		let filtered_submissions = submissions.filter(sub => sub.course_id == course_id);
 		let current_course = "";
 		for (var i = 0; i < courses.length; i++) {
 			if (courses[i].id == course_id) {
@@ -54,7 +52,7 @@ class Course extends Component {
 					courses={courses.filter(course => course.id !== course_id)}
 				/>
 				{this.renderAssessment(filtered_assignments, filtered_labs)}
-				{this.renderFeedback(submissions)}
+				{this.renderFeedback(filtered_submissions)}
 			</div>
 		);
 	}

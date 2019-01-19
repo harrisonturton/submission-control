@@ -4,11 +4,11 @@ import { AssessmentFeedbackItem, Loader } from "components";
 import PropTypes from "prop-types";
 import "./style.css";
 
-const LoadingList = () => (
-	<Loader/>
+const NotFound = () => (
+	<span className="not-found">There is nothing here.</span>
 );
 
-const LoadedList = ({ submissions }) => (
+const List = ({ submissions }) => (
 	<div>
 		{submissions.map((submission, i) => (
 			<Link
@@ -25,15 +25,18 @@ const LoadedList = ({ submissions }) => (
 	</div>
 );
 
-const AssessmentFeedbackList = ({ title, subtitle, submissions }) => (
-	<div className="assessment-feedback-list-wrapper">
-		<div className="assessment-feedback-list-header">
-			<span className="assessment-list-title">{title}</span>
-			<span className="assessment-list-subtitle">{subtitle}</span>
+const AssessmentFeedbackList = ({ title, subtitle, submissions }) => {
+	let has_submissions = submissions.length > 0;
+	return (
+		<div className="assessment-feedback-list-wrapper">
+			<div className="assessment-feedback-list-header">
+				<span className="assessment-list-title">{title}</span>
+				<span className="assessment-list-subtitle">{subtitle}</span>
+			</div>
+			{has_submissions ? <List submissions={submissions}/> : <NotFound/>}
 		</div>
-		{submissions === undefined ? <LoadingList/> : <LoadedList submissions={submissions}/>}
-	</div>
-);
+	);
+}
 
 AssessmentFeedbackList.propTypes = {
 	title: PropTypes.string.isRequired,
