@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Header } from "containers";
-import { AssessmentFeedbackList } from "components";
+import { AssessmentFeedbackList, AssessmentSubmission } from "components";
 import "./style.css";
 
 const _AssessmentScreen = ({ match, courses, assessment, submissions }) => {
@@ -19,13 +19,7 @@ const _AssessmentScreen = ({ match, courses, assessment, submissions }) => {
 				<h1>{assessment_name}</h1>
 			</div>
 			<div className="right-wrapper">
-				{filtered_submissions.map(sub => (
-					<div>
-						<h1>{sub.name}</h1>	
-						<h2>{sub.description}</h2>	
-						<h2>{sub.feedback}</h2>	
-					</div>
-				))}
+				{filtered_submissions.map(sub => <AssessmentSubmission title={sub.title} feedback={sub.feedback} dueDate={new Date()}/>)}
 			</div>
 		</div>
 	);

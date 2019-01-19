@@ -1,0 +1,42 @@
+@import "../../_partials.scss";
+
+.submission-item {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+
+	margin-bottom: 10px;
+	padding: 18px 30px 18px 20px;
+	border-radius: 4px;
+	border: 1px solid $border-light;
+	transition: border 200ms ease-out;
+	box-shadow: 0px 0px 12px rgba(0,0,0,0.05);
+
+	&:hover {
+		border: 1px solid $font-colored;
+	}
+}
+
+.submission-header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+.submission-title-wrapper, .submission-date-wrapper {
+	display: flex;
+	flex-direction: column;
+}
+
+.submission-title-wrapper > h1, .due-date {
+	padding-bottom: 2px;
+}
+
+.due-date {
+	color: $font-colored;
+}
+
+.feedback {
+	font-size: 14px;;
+}
