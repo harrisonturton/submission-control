@@ -35,13 +35,15 @@ class Course extends Component {
 	render() {
 		let { course_id } = this.props.match.params;
 		let { courses, assignments, labs, submissions } = this.props;
+		let filtered_assignments = assignments.filter(ass => ass.course_id == course_id);
+		let filtered_labs = labs.filter(lab => lab.course_id == course_id);
 		return (
 			<div className="course-wrapper">
 				<Header
 					currentCourse={courses.find(course => course.id == course_id).name}
 					courses={courses.filter(course => course.id !== course_id)}
 				/>
-				{this.renderAssessment(assignments, labs)}
+				{this.renderAssessment(filtered_assignments, filtered_labs)}
 				{this.renderFeedback(submissions)}
 			</div>
 		);
