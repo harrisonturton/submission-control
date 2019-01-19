@@ -1,31 +1,27 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { logout } from "actions/thunks";
 import chevronDown from "assets/chevron-down.png";
 import "./style.css";
 
-export default class Header extends Component {
-	// props:
-	//   courses: array of human-readable course names
-	//   currentCourse: the course to display in the header
+class _Header extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { isExpanded: false };
 		this.onClick = this.onClick.bind(this);
 		this.onMouseLeave = this.onMouseLeave.bind(this);
 	}
-	onClick() {
-		this.setState(prev => ({
-			isExpanded: !prev.isExpanded,
-		}));
-	}
-	onMouseLeave() {
-		this.setState(prev => ({
-			isExpanded: false
-		}));
-	}
+	onClick = () => this.setState(prev => ({
+		isExpanded: true
+	}));
+	onMouseLeave = () => this.setState(prev => ({
+		isExpanded: false
+	}));
 	render() {
 		let { isExpanded } = this.state;
-		let { courses, currentCourse } = this.props;
+		let { courses, currentCourse, logout } = this.props;
 		return (
 			<header
 				className={isExpanded ? "expanded" : ""}
@@ -34,10 +30,15 @@ export default class Header extends Component {
 					height: isExpanded ? courses.length * 40 + 10 : 15
 				}}
 			>
-				<span className="current" onClick={this.onClick}>
-					{currentCourse}
-					<img className="chevron" alt={""} src={chevronDown}/>
-				</span>
+				<div className="header-bar">
+					<span className="current" onClick={this.onClick}>
+						{currentCourse}
+						<img className="chevron" alt={""} src={chevronDown}/>
+					</span>
+					<button className="logout-button" onClick={() => logout()}>
+						LOGOUT
+					</button>
+				</div>
 				<ul>
 					{courses.filter(course => course.name !== currentCourse).map((course, i) => (
 						<li key={i} className="course-name">
@@ -49,3 +50,19 @@ export default class Header extends Component {
 		);
 	}
 }
+
+_Header.propTypes = {
+	currentCourse: PropTypes.string.isRequired,
+	courses:       PropTypes.array.isRequired
+}
+
+const mapDispatchToProps = dispatch => ({
+	logout: () => dispatch(logout())
+});
+
+const Header = connect(
+	null,
+	mapDispatchToProps
+)(_Header);
+
+export default Header;

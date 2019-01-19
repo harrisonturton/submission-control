@@ -22,3 +22,12 @@ export const saveState = state => {
 		console.log("Error saving state: ", err);
 	}
 };
+
+export const forgetState = state => {
+	try {
+		localStorage.removeItem(state_key);
+	} catch (err) {
+		// Ignore errors
+		console.log("Error forgetting state: ", err);
+	}
+};

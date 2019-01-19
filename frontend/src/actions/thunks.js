@@ -3,6 +3,7 @@ import * as auth from "api/auth";
 import * as api from "api/api";
 import * as auth_action from "actions/auth";
 import * as api_action from "actions/api";
+import { forgetState } from "util/state";
 
 // attemptSignIn will attempt to authenticate with the backend server,
 // and receives a JWT token if successful. It will also dispatch
@@ -55,6 +56,12 @@ export const attemptRefreshToken = () => (dispatch, getState) => {
 		setTimeout(() => dispatch(attemptRefreshToken()), auth.refresh_time);
 	});
 };
+
+// logout will remove persisted state (in localStorage) and wipe
+// our in-memory state.
+export const logout = () => dispatch => {
+	dispatch(auth_action.logout());
+}
 
 // fetchInitialState will make multiple requests to the backend
 // to build up a state object, and then send this to our store.

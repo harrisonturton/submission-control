@@ -2,10 +2,19 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Redirect } from "react-router-dom";
+import { Loader } from "components";
 
 const Home = ({ courses }) => {
-	let course_id = courses[0].id;	
-	return <Redirect to={`/course/${course_id}`}/>
+	let has_loaded = courses.length > 0;
+	let course = courses[0];
+	if (!has_loaded || course == undefined) {
+		return (
+			<div style={{display: "flex", alignItems: "center", justifyContent: "center", width: "100vw", height: "100vh"}}>
+				<Loader/>	
+			</div>
+		);
+	}
+	return <Redirect to={`/course/${courses.id}`}/>;
 };
 
 Home.propTypes = {
