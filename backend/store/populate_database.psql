@@ -20,10 +20,24 @@ INSERT INTO enrol (user_uid, course_id) VALUES
 	('u1234567', 4);
 
 INSERT INTO assessment (id, name, comments, type, course_id) VALUES
-	(1, 'Harmony & Money',      '', 'assignment', 2),
-	(2, 'Distributed Server',   '', 'lab', 2),
-	(3, 'Implicit Concurrency', '', 'lab', 2),
-	(4, 'Synchronised Data',    '', 'lab', 2);
+	(1, 'Harmony & Money',              '', 'assignment', 2),
+	(2, 'Assessment 2',                 '', 'assignment', 2),
+	(3, 'Distributed Server',           '', 'lab', 2),
+	(4, 'Implicit Concurrency',         '', 'lab', 2),
+	(5, 'Synchronised Data',            '', 'lab', 2),
+	(6, 'Synth',                        '', 'assignment', 1),
+	(7, 'Sequencer',                    '', 'assignment', 1),
+	(8, 'Networked Instrument',         '', 'assignment', 1),
+	(9, 'Introduction',                 '', 'lab', 1),
+	(10, 'First Machine Code',           '', 'lab', 1),
+	(11, 'Maths to Machine Code',        '', 'lab', 1),
+	(12, 'Hurdle Lab Assessment Task',   '', 'lab', 1),
+	(13, 'Blinky',                       '', 'lab', 1),
+	(14, 'Functions',                    '', 'lab', 1),
+	(15, 'Data Structures',             '', 'lab', 1),
+	(16, 'Input Through Interrupts',    '', 'lab', 1),
+	(17, 'Connecting Discoboards',      '', 'lab', 1),
+	(18, 'DIY Operating System',        '', 'lab', 1);
 
 INSERT INTO submissions (id, assessment_id, uid, title, description, feedback) VALUES
 	(1, 1, 'u6386433', 'Add better comments', 'Forgot to add comments', 'This is a lot better. I like how you’ve written the comments — good job!'),
