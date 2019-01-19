@@ -89,21 +89,31 @@ func (store *Store) GetCoursesByUser(uid string) ([]Course, error) {
 
 // GetAssessmentForUser will fetch a list of all assessments (for all courses) for a single user.
 func (store *Store) GetAssessmentForUser(uid string) ([]Assessment, error) {
-	query := "SELECT assessment.course_id, name, type FROM assessment JOIN enrol on assessment.course_id = enrol.course_id WHERE enrol.user_uid = $1"
+	query := `
+SELECT
+	assessment.id as assessment_id,
+	assessment.course_id,
+	name,
+	type
+FROM
+	assessment JOIN enrol ON assessment.course_id = enrol.course_id
+WHERE enrol.user_uid = $1;
+`
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
 		return []Assessment{}, nil
 	}
 	var assessment []Assessment
 	for rows.Next() {
-		var courseID int
+		var assessmentID, courseID int
 		var name, assType string
-		err := rows.Scan(&courseID, &name, &assType)
+		err := rows.Scan(&assessmentID, &courseID, &name, &assType)
 		if err != nil {
 			log.Println(err.Error())
 			continue
 		}
 		assessment = append(assessment, Assessment{
+			ID:       assessmentID,
 			Name:     name,
 			Type:     assType,
 			CourseID: courseID,
