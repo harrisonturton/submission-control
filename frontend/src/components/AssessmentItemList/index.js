@@ -4,11 +4,11 @@ import { AssessmentItem, Loader } from "components";
 import PropTypes from "prop-types";
 import "./style.css";
 
-const LoadingList = () => (
-	<Loader/>
+const NotFound = () => (
+	<span className="not-found">There is nothing here.</span>
 );
 
-const LoadedList = ({ items }) => (
+const List = ({ items }) => (
 	<div>
 		{items.map((item, i) => (
 			<Link 
@@ -25,15 +25,18 @@ const LoadedList = ({ items }) => (
 	</div>
 );
 
-const AssessmentItemList = ({ title, subtitle, items }) => (
-	<div className="assessment-list-wrapper">
-		<div className="assessment-list-header">
-			<span className="assessment-list-title">{title}</span>
-			<span className="assessment-list-subtitle">{subtitle}</span>
+const AssessmentItemList = ({ title, subtitle, items }) => {
+	let has_items = items.length > 0;
+	return (
+		<div className="assessment-list-wrapper">
+			<div className="assessment-list-header">
+				<span className="assessment-list-title">{title}</span>
+				<span className="assessment-list-subtitle">{subtitle}</span>
+			</div>
+			{has_items ? <List items={items}/> : <NotFound/>}
 		</div>
-		{items === undefined ? <LoadingList/> : <LoadedList items={items}/>}
-	</div>
-);
+	);
+};
 
 AssessmentItemList.propTypes = {
 	title: PropTypes.string.isRequired,
