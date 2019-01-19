@@ -35,17 +35,10 @@ class Course extends Component {
 	render() {
 		let { course_id } = this.props.match.params;
 		let { courses, assignments, labs, submissions } = this.props;
-		console.log("Rendering course page with ", JSON.stringify(courses))
-		let current_course = "";
-		courses.forEach(course => {
-			if (course.id == course_id) {
-				current_course = course.name;	
-			}	
-		});
 		return (
 			<div className="course-wrapper">
 				<Header
-					currentCourse={current_course}
+					currentCourse={courses.find(course => course.id == course_id).name}
 					courses={courses.filter(course => course.id !== course_id)}
 				/>
 				{this.renderAssessment(assignments, labs)}
