@@ -1,9 +1,6 @@
 
 import * as routes from "api/routes";
 
-// Where we store the JWT token in localStorage
-const token_key = "submission-control-token";
-
 // Time between token refreshes. Do it every 3 minutes.
 export const refresh_time = 1000 * 60 * 3;
 
@@ -42,24 +39,6 @@ export const refreshToken = async token => {
 	}
 	return body.token;
 };
-
-// store_token will save a new token to localStorage
-export function storeToken(token) {
-	localStorage.setItem(token_key, token);
-}
-
-export function forgetToken() {
-	localStorage.removeItem(token_key);
-}
-
-// retreive_token will retreive the JWT token from localStorage
-export function retreiveToken() {
-	return localStorage.getItem(token_key);
-}
-
-export function hasToken() {
-	return retreiveToken() !== null && retreiveToken() !== undefined;
-}
 
 const post = data => ({
 	method: "POST",

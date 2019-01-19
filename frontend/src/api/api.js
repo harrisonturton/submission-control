@@ -69,8 +69,8 @@ export const fetchAssessment = async (uid, token) => {
 		return null;	
 	}
 	return {
-		assignments: body.assessment.filter(item => item.type == "assignment"),
-		labs: body.assessment.filter(item => item.type == "lab"),
+		assignments: body.assessment.filter(item => item.type === "assignment"),
+		labs: body.assessment.filter(item => item.type === "lab"),
 	}
 }
 

@@ -1,5 +1,4 @@
 
-import { combineReducers } from "redux";
 import * as auth from "actions/auth";
 import * as data from "actions/api";
 
@@ -43,7 +42,7 @@ const authReducer = (state=initial_state.auth, action) => {
 			return { ...state, ...action.auth };
 		default:
 			return state;
-	};
+	}
 };
 
 const dataReducer = (state=initial_state.data, action) => {

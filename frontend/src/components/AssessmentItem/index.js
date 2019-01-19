@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import "./style.css";
 
 const AssessmentItem = ({ name, due_date, comments }) => (

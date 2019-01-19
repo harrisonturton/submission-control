@@ -11,9 +11,11 @@ const LoadingList = () => (
 const LoadedList = ({ submissions }) => (
 	<div>
 		{submissions.map((submission, i) => (
-			<Link to={`/course/${submission.id}`}>
+			<Link
+				key={i}
+				to={`/course/${submission.id}`}
+			>
 				<AssessmentFeedbackItem
-					key={i}
 					title={submission.title}
 					due_date={new Date()}
 					feedback={submission.feedback}

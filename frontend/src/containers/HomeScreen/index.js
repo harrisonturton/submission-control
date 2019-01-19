@@ -2,15 +2,12 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Redirect } from "react-router-dom";
-import { hasToken } from "api/auth";
 import "./style.css";
 import {
 	Header,
 	AssessmentItemList,
 	AssessmentFeedbackList,
 } from "components";
-
-const RedirectToLogin = () => <Redirect to="/login"/>;
 
 class Home extends Component {
 	renderAssessment(assignments, labs) {
@@ -41,8 +38,10 @@ class Home extends Component {
 		);
 	}
 	render() {
-		let is_authenticated = hasToken();
-		let { header, assignments, labs, feedback } = this.props;
+		let { is_authenticated, header, assignments, labs, feedback } = this.props;
+		if (!is_authenticated) {
+			return <Redirect to="/login"/>;
+		}
 		console.log("Rendering home...", JSON.stringify(labs));
 		return (
 			<div className="home-wrapper">
@@ -58,6 +57,7 @@ class Home extends Component {
 }
 
 Home.propTypes = {
+	is_authenticated: PropTypes.bool.isRequired,
 	header:      PropTypes.object.isRequired,
 	assignments: PropTypes.array.isRequired,
 	labs:        PropTypes.array.isRequired,
@@ -65,6 +65,7 @@ Home.propTypes = {
 };
 
 const mapStateToProps = state => ({
+	is_authenticated: state.auth.is_authenticated,
 	header: mapHeaderState(state),
 	assignments: state.data.assessment.assignments,
 	labs: state.data.assessment.labs,
@@ -78,35 +79,6 @@ const mapHeaderState = state => {
 		courses:        courses[0] === undefined ? [] : courses,
 	};
 };
-
-const mapAssignmentState = state => {
-	if (state.data.is_fetching || state.data.failed) {
-		return [];
-	}
-	return state.data.assessment.assignments;
-	let assignments = []
-	for (var i = 0; i < state.data.assessment.length; i++) {
-		let assessment = state.data.assessment[i];
-		if (assessment.type === "assignment") {
-			assignments.push(assessment)	
-		}
-	}
-	return assignments;
-}
-
-const mapLabState = state => {
-	if (state.data.is_fetching || state.data.failed) {
-		return [];
-	}
-	let labs = []
-	for (var i = 0; i < state.data.assessment.length; i++) {
-		let assessment = state.data.assessment[i];
-		if (assessment.type === "assignment") {
-			labs.push(assessment)	
-		}
-	}
-	return labs;
-}
 
 const HomeScreen = connect(
 	mapStateToProps,

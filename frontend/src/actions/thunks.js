@@ -13,13 +13,11 @@ export const attemptSignIn = (email, password) => dispatch => {
 		// If the token is null, then we failed to sign in.
 		// Wipe any tokens in localStorage.
 		if (token === null) {
-			auth.forgetToken();
 			dispatch(auth_action.loginFailure());
 			return;
 		}
 		// Store the token for later access, and refresh the
 		// token in the future. Get the initial state for the store.
-		auth.storeToken(token);
 		dispatch(auth_action.loginSuccess());
 		dispatch(fetchInitialState(token, email));
 		setTimeout(() => dispatch(attemptRefreshToken()), auth.refresh_time);
@@ -31,13 +29,12 @@ export const attemptSignIn = (email, password) => dispatch => {
 // It will try and retreive the token from localStorage. If it does not
 // exist, then we assume the user has logged out, and we do not refresh.
 export const attemptRefreshToken = () => (dispatch, getState) => {
-	let { is_authenticated, timestamp }	= getState().auth;
+	let { is_authenticated, token, timestamp }	= getState().auth;
 	// If already logged out, then do not refresh the token.
 	if (!is_authenticated) {
 		return;
 	}
 	// If the token doesn't exist, then assume logged out
-	let token = auth.retreiveToken();
 	if (token === undefined || token === null) {
 		return;	
 	}
@@ -51,11 +48,9 @@ export const attemptRefreshToken = () => (dispatch, getState) => {
 	// in signIn().
 	return auth.refreshToken(token).then(token => {
 		if (token === null) {
-			auth.forgetToken();
 			dispatch(auth_action.logout());
 			return;
 		}
-		auth.storeToken(token);
 		dispatch(auth_action.refreshToken(token));
 		setTimeout(() => dispatch(attemptRefreshToken()), auth.refresh_time);
 	});
