@@ -3,15 +3,19 @@ import { createStore, applyMiddleware } from "redux";
 import { rootReducer } from "reducer";
 import { loadState, saveState } from "util/state";
 
-const persisted_state = loadState();
-
-let store = createStore(
-	rootReducer,
-	persisted_state,
-	applyMiddleware(thunk, logger)
-);
-
-store.subscribe(() => saveState(store.getState()));
+const configureStore = () => {
+	const persisted_state = loadState();
+	const store = createStore(
+		rootReducer,
+		persisted_state,
+		applyMiddleware(
+			thunk,
+			logger
+		)
+	);
+	store.subscribe(() => saveState(store.getState()));
+	return store;
+};
 
 function logger({ getState })  {
 	return next => action => {
@@ -25,4 +29,4 @@ function logger({ getState })  {
 	};
 }
 	
-export default store;
+export default configureStore;
