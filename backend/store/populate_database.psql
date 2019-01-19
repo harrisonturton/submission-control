@@ -7,7 +7,7 @@ INSERT INTO users (uid, first_name, last_name, email, password) VALUES
 INSERT INTO courses (id, name, course_code, period, year) VALUES
 	(1, 'Computer Organisation & Execution', 'COMP2300', 'first', 2018),
 	(2, 'Concurrent & Distributed Systems', 'COMP2310', 'second', 2018),
-	(3, 'Structued Programming', 'COMP1140', 'second', 2017),
+	(3, 'Structured Programming', 'COMP1140', 'second', 2017),
 	(4, 'Programming as Problem Solving', 'COMP1130', 'first', 2017);
 
 INSERT INTO enrol (user_uid, course_id) VALUES
@@ -20,8 +20,8 @@ INSERT INTO enrol (user_uid, course_id) VALUES
 	('u1234567', 4);
 
 INSERT INTO assessment (id, name, comments, type, course_id) VALUES
-	(1, 'Harmony & Money',              '', 'assignment', 2),
-	(2, 'Assessment 2',                 '', 'assignment', 2),
+	(1, 'Gliding in Space',              '', 'assignment', 2),
+	(2, 'Harmony & Money',                 '', 'assignment', 2),
 	(3, 'Distributed Server',           '', 'lab', 2),
 	(4, 'Implicit Concurrency',         '', 'lab', 2),
 	(5, 'Synchronised Data',            '', 'lab', 2),
