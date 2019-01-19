@@ -47,7 +47,7 @@ type Assessment struct {
 type Submission struct {
 	ID           int    `json:"id"`
 	AssessmentID int    `json:"assessment_id"`
-	UID          string `json:"uid"`
+	CourseID     int    `json:"course_id"`
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	Feedback     string `json:"feedback"`

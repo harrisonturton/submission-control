@@ -116,24 +116,36 @@ func (store *Store) GetAssessmentForUser(uid string) ([]Assessment, error) {
 // GetSubmissionsForUser will return all the submissions made
 // by the user to every assessment they've had.
 func (store *Store) GetSubmissionsForUser(uid string) ([]Submission, error) {
-	query := "SELECT id, assessment_id, uid, title, description, feedback FROM submissions WHERE uid = $1"
+	//query := "SELECT id, assessment_id, uid, title, description, feedback FROM submissions WHERE uid = $1"
+	query := `
+SELECT
+	assessment.course_id, 
+	assessment.id  AS assessment_id,
+	submissions.id AS submission_id, 
+	submissions.title,
+	submissions.description,
+	feedback
+FROM assessment
+JOIN submissions ON assessment.id = submissions.assessment_id
+WHERE uid = $1;
+	`
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
 		return []Submission{}, nil
 	}
 	var submissions []Submission
 	for rows.Next() {
-		var id, assessmentID int
-		var uid, title, description, feedback string
-		err := rows.Scan(&id, &assessmentID, &uid, &title, &description, &feedback)
+		var courseID, assessmentID, submissionID int
+		var title, description, feedback string
+		err := rows.Scan(&courseID, &assessmentID, &submissionID, &title, &description, &feedback)
 		if err != nil {
 			log.Println(err.Error())
 			continue
 		}
 		submissions = append(submissions, Submission{
-			ID:           id,
+			ID:           submissionID,
 			AssessmentID: assessmentID,
-			UID:          uid,
+			CourseID:     courseID,
 			Title:        title,
 			Description:  description,
 			Feedback:     feedback,
