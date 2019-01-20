@@ -1,7 +1,7 @@
 import React from "react";
 import "./style.css";
 
-const AssessmentSubmission = ({ title, dueDate, feedback }) => (
+const SubmissionItem = ({ title, dueDate, feedback }) => (
 	<div className="submission-item">
 		<div className="submission-header">
 			<div className="submission-title-wrapper">
@@ -29,4 +29,4 @@ const formatTimestamp = date => date.toLocaleDateString("en-US", {
 });
 
 
-export default AssessmentSubmission;
+export default SubmissionItem;
