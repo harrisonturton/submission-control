@@ -3,6 +3,7 @@ import HomeScreen from "containers/HomeScreen";
 import LoginScreen from "containers/LoginScreen";
 import CourseScreen from "containers/CourseScreen";
 import AssessmentScreen from "containers/AssessmentScreen";
+import SubmissionScreen from "containers/SubmissionScreen";
 import Header from "containers/Header";
 
 export {
@@ -11,5 +12,6 @@ export {
 	HomeScreen,
 	CourseScreen,
 	AssessmentScreen,
+	SubmissionScreen,
 	Header
 };

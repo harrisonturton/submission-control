@@ -1,14 +1,18 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 import { Header } from "containers";
+import { connect } from "react-redux";
 import { AssessmentFeedbackList, SubmissionList } from "components";
 import "./style.css";
 
-const _AssessmentScreen = ({ match, courses, assessment, submissions }) => {
+const _AssessmentScreen = ({ match, is_authenticated, courses, assessment, submissions }) => {
 	let { course_id, assessment_id } = match.params;
 	let filtered_submissions = submissions.filter(sub => sub.assessment_id == assessment_id);
 	let assessment_name = assessment.find(ass => ass.id == assessment_id).name;
+	if (!is_authenticated) {
+		return <Redirect to="/login"/>;
+	}
 	return (
 		<div className="assessment-screen">
 			<Header
@@ -50,12 +54,14 @@ const _AssessmentScreen = ({ match, courses, assessment, submissions }) => {
 };
 
 _AssessmentScreen.propTypes = {
-	courses:     PropTypes.array.isRequired,
-	assessment:  PropTypes.array.isRequired,
-	submissions: PropTypes.array.isRequired,
+	is_authenticated: PropTypes.bool.isRequired,
+	courses:          PropTypes.array.isRequired,
+	assessment:       PropTypes.array.isRequired,
+	submissions:      PropTypes.array.isRequired,
 };
 
 const mapStateToProps = state => ({
+	is_authenticated: state.auth.is_authenticated,
 	courses: state.data.courses,
 	assessment: [ ...state.data.assessment.assignments, ...state.data.assessment.labs ],
 	submissions: state.data.submissions,
