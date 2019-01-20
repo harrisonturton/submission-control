@@ -17,6 +17,24 @@ const _AssessmentScreen = ({ match, courses, assessment, submissions }) => {
 			/>
 			<div className="left-wrapper">
 				<h1>{assessment_name}</h1>
+				<p>You can make multiple submissions to a single assignment or lab. Each submission will be tested against the test suite, and you’ll see the result. Your tutors and convenors can see & give feedback on any submission you make.</p>
+				<form>
+					<label>Title</label>
+					<input
+						name="title"
+						type="text"
+						placeholder="Title of your submission"
+					/>
+					<label>Comments</label>
+					<textarea
+						name="comments"
+						type="text"
+						placeholder="Some more info about your submission"
+					/>
+					<label>Zipped submission folder</label>
+					<input type="file"/>
+					<input type="submit" value="Submit"/>
+				</form>
 			</div>
 			<div className="right-wrapper">
 				<SubmissionList
