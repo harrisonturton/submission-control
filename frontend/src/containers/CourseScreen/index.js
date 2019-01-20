@@ -1,78 +1,74 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
-import { WithHeader, Header } from "containers";
+import { WithHeader } from "containers";
 import { AssessmentList, FeedbackList } from "components";
 import "./style.css";
 
-class Course extends Component {
-	renderAssessment = (assignments, labs) => (
-		<div className="assessment-wrapper">
-			<AssessmentList
-				title="Upcoming Assignments"
-				subtitle=""
-				items={assignments}
-			/>
-			<AssessmentList
-				title="Upcoming Labs"
-				subtitle=""
-				items={labs}
-			/>
-		</div>
-	);
-	renderFeedback = submissions => (
-		<div className="feedback-wrapper">
-			<FeedbackList
-				title="Assessment Feedback"
-				subtitle=""
-				submissions={submissions}
-			/>
-		</div>
-	);
+class _CourseScreen extends Component {
+	renderAssessment(assignments, labs) {
+		return (
+			<div className="assessment-wrapper">
+				<AssessmentList
+					title="Upcoming Assignments"
+					subtitle=""
+					items={assignments}
+				/>
+				<AssessmentList
+					title="Upcoming Labs"
+					subtitle=""
+					items={labs}
+				/>
+			</div>
+		);
+	}
+	renderFeedback(submissions) {
+		return (
+			<div className="feedback-wrapper">
+				<FeedbackList
+					title="Assessment Feedback"
+					subtitle=""
+					submissions={submissions}
+				/>
+			</div>
+		);
+	}
+	filterData(courseID, assignments, labs, submissions) {
+		const withCourseID = courseID => item => item.course_id == courseID;
+		return {
+			assignments: assignments.filter(withCourseID(courseID)),
+			labs:        labs.filter(withCourseID(courseID)),
+			submissions: submissions.filter(withCourseID(courseID))
+		};
+	}
 	render() {
 		let { course_id } = this.props.match.params;
-		let { is_authenticated, courses, assignments, labs, submissions } = this.props;
-		let filtered_assignments = assignments.filter(ass => ass.course_id == course_id);
-		let filtered_labs = labs.filter(lab => lab.course_id == course_id);
-		let filtered_submissions = submissions.filter(sub => sub.course_id == course_id);
-		let current_course = "";
-		for (var i = 0; i < courses.length; i++) {
-			if (courses[i].id == course_id) {
-				current_course = courses[i].name;	
-			}
-		}
-		if (!is_authenticated) {
-			return <Redirect to="/login"/>;
-		}
+		var { assignments, labs, submissions } = this.props;
+		var { assignments, labs, submissions } = this.filterData(course_id, assignments, labs, submissions);
 		return (
 			<WithHeader className="assessment-screen" currentCourseID={course_id}>
-				{this.renderAssessment(filtered_assignments, filtered_labs)}
-				{this.renderFeedback(filtered_submissions)}
+				{this.renderAssessment(assignments, labs)}
+				{this.renderFeedback(submissions)}
 			</WithHeader>
 		);
 	}
 }
 
-Course.propTypes = {
-	is_authenticated: PropTypes.bool.isRequired,
-	courses:          PropTypes.array.isRequired,
+_CourseScreen.propTypes = {
 	assignments:      PropTypes.array.isRequired,
 	labs:             PropTypes.array.isRequired,
 	submissions:      PropTypes.array.isRequired,
 };
 
-const mapStateToProps = state => {
-	console.log("current state: ", JSON.stringify(state));
-	return {
-		is_authenticated: state.auth.is_authenticated,
-		courses:     state.data.courses,
-		assignments: state.data.assessment.assignments,
-		labs:        state.data.assessment.labs,
-		submissions: state.data.submissions
-	};
-};
+const mapStateToProps = state => ({
+	assignments: state.data.assessment.assignments,
+	labs:        state.data.assessment.labs,
+	submissions: state.data.submissions
+});
 
-const CourseScreen = connect(mapStateToProps, null)(Course);
+const CourseScreen = connect(
+	mapStateToProps,
+	null
+)(_CourseScreen);
 
 export default CourseScreen;
