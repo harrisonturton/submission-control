@@ -46,10 +46,10 @@ class Course extends Component {
 			return <Redirect to="/login"/>;
 		}
 		return (
-			<div className="course-wrapper">
+			<div className="assessment-screen">
 				<Header
 					currentCourse={current_course}
-					courses={courses.filter(course => course.id !== course_id)}
+					courses={courses.filter(course => course.id != course_id)}
 				/>
 				{this.renderAssessment(filtered_assignments, filtered_labs)}
 				{this.renderFeedback(filtered_submissions)}

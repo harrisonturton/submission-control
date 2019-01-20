@@ -1,7 +1,14 @@
 import React from "react";
 import "./style.css";
 
-const SubmissionItem = ({ title, dueDate, feedback }) => (
+const Feedback = ({ feedback }) => (
+	<div className="feedback">
+		<div className="divider"></div>
+		<p className="description">{feedback}</p>
+	</div>
+);
+
+const SubmissionItem = ({ title, hasFeedback, description, dueDate, feedback }) => (
 	<div className="submission-item">
 		<div className="submission-header">
 			<div className="submission-title-wrapper">
@@ -13,7 +20,10 @@ const SubmissionItem = ({ title, dueDate, feedback }) => (
 				<span className="timestamp">{formatTimestamp(dueDate)}</span>
 			</div>
 		</div>
-		<p className="feedback">{feedback}</p>
+		{description === ""
+				? <p className="absent">No description</p>
+				: <p className="description">{description}</p>}
+		<Feedback hasFeedback={hasFeedback} feedback={feedback}/>
 	</div>
 );
 

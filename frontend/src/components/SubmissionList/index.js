@@ -17,6 +17,8 @@ const List = ({ courseID, assessmentID, submissions }) => (
 				<SubmissionItem
 					title={sub.title}
 					dueDate={new Date()}
+					description={sub.description}
+					hasFeedback={sub.feedback !== ""}
 					feedback={sub.feedback}
 				/>
 			</Link>

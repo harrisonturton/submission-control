@@ -37,6 +37,17 @@
 	color: $font-colored;
 }
 
-.feedback {
-	font-size: 14px;;
+.description, .absent {
+	font-size: 14px;
+}
+
+.absent {
+	font-style: italic;
+	color: $font-light;
+}
+
+.divider {
+	border-top: 1px solid rgba(0,0,0,0.1);
+	margin-top: 10px;
+	margin-bottom: 12px;
 }

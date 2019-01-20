@@ -22,6 +22,7 @@ class _Header extends Component {
 	render() {
 		let { isExpanded } = this.state;
 		let { courses, currentCourse, logout } = this.props;
+		console.log("Header courses: ", JSON.stringify(courses));
 		return (
 			<header
 				className={isExpanded ? "expanded" : ""}
