@@ -4,14 +4,12 @@ html, body, * {
   list-style-type: none;
   outline: none;
   border: none;
+  box-sizing: border-box;
   font-family: "SF Pro Display", "Helvetica", "Roboto", sans-serif;
   color: #2F3334;
   font-size: 16px;
   font-weight: normal;
   text-decoration: none; }
-
-body {
-  overflow-x: hidden; }
 
 a {
   color: inherit; }
@@ -23,8 +21,11 @@ a {
 .column-parent {
   display: flex;
   flex-direction: row; }
-
-.column {
-  width: 50%; }
+  .column-parent > .column-right {
+    width: 50%;
+    margin-left: 15px; }
+  .column-parent > .column-left {
+    width: 50%;
+    margin-right: 15px; }
 
 /*# sourceMappingURL=index.css.map */

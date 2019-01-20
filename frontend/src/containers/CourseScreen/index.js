@@ -8,7 +8,7 @@ import "./style.css";
 class _CourseScreen extends Component {
 	renderAssessment(assignments, labs) {
 		return (
-			<div className="column">
+			<div className="column-left">
 				<AssessmentList
 					title="Upcoming Assignments"
 					subtitle=""
@@ -24,7 +24,7 @@ class _CourseScreen extends Component {
 	}
 	renderFeedback(submissions) {
 		return (
-			<div className="column">
+			<div className="column-right">
 				<FeedbackList
 					title="Assessment Feedback"
 					subtitle=""

@@ -7,16 +7,13 @@ html, body, * {
 	list-style-type: none;
 	outline: none;
 	border: none;
+	box-sizing: border-box;
 
 	font-family: $font-family;
 	color: $font-normal;
 	font-size: 16px;
 	font-weight: normal;
 	text-decoration: none;
-}
-
-body {
-	overflow-x: hidden;
 }
 
 a {
@@ -31,8 +28,14 @@ a {
 .column-parent {
 	display: flex;
 	flex-direction: row;
-}
 
-.column {
-	width: 50%;
+	& > .column-right {
+		width: 50%;
+		margin-left: 15px;
+	}
+
+	& > .column-left {
+		width: 50%;
+		margin-right: 15px;
+	}
 }
