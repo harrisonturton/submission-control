@@ -5,7 +5,7 @@ import { Redirect } from "react-router-dom";
 import { Header } from "containers";
 import "./style.css";
 
-const RedirectToLogin = () => <Redirect to="/"/>;
+const RedirectToLogin = () => <Redirect to="/login"/>;
 
 const _WithHeader = ({ children, className, isAuthenticated, currentCourseID }) => !isAuthenticated ? <RedirectToLogin/> : (
 	<div className={"body-wrapper" + (className ? ` ${className}` : "")}>

@@ -21,6 +21,7 @@ class _Header extends Component {
 		this.setState({ isExpanded: false });
 	}
 	renderHeaderTop(currentCourse) {
+		let { logout } = this.props;
 		return (
 			<div className="header-top">
 				<span className="current" onClick={this.onClick}>
