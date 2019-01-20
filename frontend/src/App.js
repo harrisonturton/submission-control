@@ -1,17 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import {
-	PrivateRoute,
 	HomeScreen,
 	LoginScreen,
 	CourseScreen,
 	AssessmentScreen,
 	SubmissionScreen
 } from "containers";
-
-//const CourseScreen = ({ match }) => (
-//	<p>{match.params.course_code}</p>
-//);
 
 const App = () => (
 	<Router>
@@ -32,7 +27,7 @@ const App = () => (
 				path="/course/:course_id"
 				component={CourseScreen}
 			/>
-			<PrivateRoute
+			<Route
 				exact path="/"
 				component={HomeScreen}
 			/>
