@@ -13,7 +13,7 @@ const List = ({ submissions }) => (
 		{submissions.map((submission, i) => (
 			<Link
 				key={i}
-				to={`/course/${submission.id}`}
+				to={`/course/${submission.course_id}/${submission.assessment_id}/${submission.id}`}
 			>
 				<AssessmentFeedbackItem
 					title={submission.title}
@@ -39,9 +39,9 @@ const AssessmentFeedbackList = ({ title, subtitle, submissions }) => {
 }
 
 AssessmentFeedbackList.propTypes = {
-	title: PropTypes.string.isRequired,
-	subtitle: PropTypes.string.isRequired,
-	submissions: PropTypes.array.isRequired,
+	title:        PropTypes.string.isRequired,
+	subtitle:     PropTypes.string.isRequired,
+	submissions:  PropTypes.array.isRequired,
 };
 
 export default AssessmentFeedbackList;
