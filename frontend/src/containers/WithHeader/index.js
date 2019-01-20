@@ -3,11 +3,12 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { Header } from "containers";
+import "./style.css";
 
 const RedirectToLogin = () => <Redirect to="/"/>;
 
 const _WithHeader = ({ children, className, isAuthenticated, currentCourseID }) => !isAuthenticated ? <RedirectToLogin/> : (
-	<div className={`body-wrapper ${className}`}>
+	<div className={"body-wrapper" + (className ? ` ${className}` : "")}>
 		<Header currentCourseID={currentCourseID}/>
 		{children}
 	</div>

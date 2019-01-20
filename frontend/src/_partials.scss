@@ -16,8 +16,3 @@ $border-light: #DFE4EA;
 $border-dark:  #4C6E78;
 
 $success: #57C666;
-
-@mixin two-column-parent {
-	display: flex;
-	flex-direction: row;
-}

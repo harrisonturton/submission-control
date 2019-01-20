@@ -8,7 +8,7 @@ import "./style.css";
 class _CourseScreen extends Component {
 	renderAssessment(assignments, labs) {
 		return (
-			<div className="assessment-wrapper">
+			<div className="column">
 				<AssessmentList
 					title="Upcoming Assignments"
 					subtitle=""
@@ -24,7 +24,7 @@ class _CourseScreen extends Component {
 	}
 	renderFeedback(submissions) {
 		return (
-			<div className="feedback-wrapper">
+			<div className="column">
 				<FeedbackList
 					title="Assessment Feedback"
 					subtitle=""
@@ -46,7 +46,7 @@ class _CourseScreen extends Component {
 		var { assignments, labs, submissions } = this.props;
 		var { assignments, labs, submissions } = this.filterData(course_id, assignments, labs, submissions);
 		return (
-			<WithHeader className="assessment-screen" currentCourseID={course_id}>
+			<WithHeader className="column-parent" currentCourseID={course_id}>
 				{this.renderAssessment(assignments, labs)}
 				{this.renderFeedback(submissions)}
 			</WithHeader>
