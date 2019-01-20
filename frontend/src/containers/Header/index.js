@@ -12,57 +12,76 @@ class _Header extends Component {
 		this.state = { isExpanded: false };
 		this.onClick = this.onClick.bind(this);
 		this.onMouseLeave = this.onMouseLeave.bind(this);
+		this.renderHeaderTop = this.renderHeaderTop.bind(this);
 	}
-	onClick = () => this.setState(prev => ({
-		isExpanded: true
-	}));
-	onMouseLeave = () => this.setState(prev => ({
-		isExpanded: false
-	}));
+	onClick() {
+		this.setState({ isExpanded: true });
+	}
+	onMouseLeave() {
+		this.setState({ isExpanded: false });
+	}
+	renderHeaderTop(currentCourse) {
+		return (
+			<div className="header-top">
+				<span className="current" onClick={this.onClick}>
+					{currentCourse.name}
+					<img className="chevron" alt={""} src={chevronDown}/>
+				</span>
+				<button className="logout-button" onClick={() => logout()}>
+					LOGOUT
+				</button>
+			</div>
+		);
+	}
+	renderHeaderDropdown(courses, currentCourse) {
+		return (
+			<ul>
+				{courses.filter(course => course.name !== currentCourse).map((course, i) => (
+					<li key={i} className="course-name">
+						<Link to={`/course/${course.id}`}>{course.name}</Link>
+					</li>
+				))}
+			</ul>
+		);
+	}
 	render() {
 		let { isExpanded } = this.state;
 		let { courses, currentCourse, logout } = this.props;
-		console.log("Header courses: ", JSON.stringify(courses));
+		let expandedHeight = courses.length * 40 + 10;
+		let minimisedHeight = 15;
 		return (
 			<header
 				className={isExpanded ? "expanded" : ""}
 				onMouseLeave={this.onMouseLeave}
 				style={{
-					height: isExpanded ? courses.length * 40 + 10 : 15
+					height: isExpanded ? expandedHeight : minimisedHeight
 				}}
 			>
-				<div className="header-bar">
-					<span className="current" onClick={this.onClick}>
-						{currentCourse}
-						<img className="chevron" alt={""} src={chevronDown}/>
-					</span>
-					<button className="logout-button" onClick={() => logout()}>
-						LOGOUT
-					</button>
-				</div>
-				<ul>
-					{courses.filter(course => course.name !== currentCourse).map((course, i) => (
-						<li key={i} className="course-name">
-							<Link to={`/course/${course.id}`}>{course.name}</Link>
-						</li>
-					))}
-				</ul>
+				{this.renderHeaderTop(currentCourse)}
+				{this.renderHeaderDropdown(courses, currentCourse)}
 			</header>
 		);
 	}
 }
 
 _Header.propTypes = {
-	currentCourse: PropTypes.string.isRequired,
-	courses:       PropTypes.array.isRequired
+	currentCourseID: PropTypes.string.isRequired,
+	// Calculated from the state according to currentCourseID
+	currentCourse:   PropTypes.string.isRequired,
+	courses:         PropTypes.array.isRequired
 }
+
+const mapStateToProps = (state, { currentCourseID }) => ({
+	currentCourse: state.data.courses.find(course => course.id == currentCourseID),
+	courses:       state.data.courses.filter(course => course.id != currentCourseID)
+});
 
 const mapDispatchToProps = dispatch => ({
 	logout: () => dispatch(logout())
 });
 
 const Header = connect(
-	null,
+	mapStateToProps,
 	mapDispatchToProps
 )(_Header);
 

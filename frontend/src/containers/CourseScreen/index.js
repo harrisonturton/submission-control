@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
-import { Header } from "containers";
+import { WithHeader, Header } from "containers";
 import { AssessmentList, FeedbackList } from "components";
 import "./style.css";
 
@@ -46,14 +46,10 @@ class Course extends Component {
 			return <Redirect to="/login"/>;
 		}
 		return (
-			<div className="assessment-screen">
-				<Header
-					currentCourse={current_course}
-					courses={courses.filter(course => course.id != course_id)}
-				/>
+			<WithHeader className="assessment-screen" currentCourseID={course_id}>
 				{this.renderAssessment(filtered_assignments, filtered_labs)}
 				{this.renderFeedback(filtered_submissions)}
-			</div>
+			</WithHeader>
 		);
 	}
 }
