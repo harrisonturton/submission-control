@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { AssessmentFeedbackItem, Loader } from "components";
+import { FeedbackItem, Loader } from "components";
 import PropTypes from "prop-types";
 import "./style.css";
 
@@ -15,7 +15,7 @@ const List = ({ submissions }) => (
 				key={i}
 				to={`/course/${submission.course_id}/${submission.assessment_id}/${submission.id}`}
 			>
-				<AssessmentFeedbackItem
+				<FeedbackItem
 					title={submission.title}
 					due_date={new Date()}
 					feedback={submission.feedback}
@@ -25,7 +25,7 @@ const List = ({ submissions }) => (
 	</div>
 );
 
-const AssessmentFeedbackList = ({ title, subtitle, submissions }) => {
+const FeedbackList = ({ title, subtitle, submissions }) => {
 	let has_submissions = submissions.length > 0;
 	return (
 		<div className="assessment-feedback-list-wrapper">
@@ -38,10 +38,10 @@ const AssessmentFeedbackList = ({ title, subtitle, submissions }) => {
 	);
 }
 
-AssessmentFeedbackList.propTypes = {
+FeedbackList.propTypes = {
 	title:        PropTypes.string.isRequired,
 	subtitle:     PropTypes.string.isRequired,
 	submissions:  PropTypes.array.isRequired,
 };
 
-export default AssessmentFeedbackList;
+export default FeedbackList;

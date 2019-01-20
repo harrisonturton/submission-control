@@ -3,18 +3,18 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import { Header } from "containers";
-import { AssessmentItemList, AssessmentFeedbackList } from "components";
+import { AssessmentList, FeedbackList } from "components";
 import "./style.css";
 
 class Course extends Component {
 	renderAssessment = (assignments, labs) => (
 		<div className="assessment-wrapper">
-			<AssessmentItemList
+			<AssessmentList
 				title="Upcoming Assignments"
 				subtitle=""
 				items={assignments}
 			/>
-			<AssessmentItemList
+			<AssessmentList
 				title="Upcoming Labs"
 				subtitle=""
 				items={labs}
@@ -23,7 +23,7 @@ class Course extends Component {
 	);
 	renderFeedback = submissions => (
 		<div className="feedback-wrapper">
-			<AssessmentFeedbackList
+			<FeedbackList
 				title="Assessment Feedback"
 				subtitle=""
 				submissions={submissions}

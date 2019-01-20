@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Redirect } from "react-router-dom";
 import { Header } from "containers";
 import { connect } from "react-redux";
-import { AssessmentFeedbackList, SubmissionList } from "components";
+import { SubmissionList } from "components";
 import "./style.css";
 
 const _AssessmentScreen = ({ match, is_authenticated, courses, assessment, submissions }) => {

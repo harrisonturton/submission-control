@@ -25,7 +25,7 @@ const List = ({ items }) => (
 	</div>
 );
 
-const AssessmentItemList = ({ title, subtitle, items }) => {
+const AssessmentList = ({ title, subtitle, items }) => {
 	let has_items = items.length > 0;
 	return (
 		<div className="assessment-list-wrapper">
@@ -38,10 +38,10 @@ const AssessmentItemList = ({ title, subtitle, items }) => {
 	);
 };
 
-AssessmentItemList.propTypes = {
+AssessmentList.propTypes = {
 	title: PropTypes.string.isRequired,
 	subtitle: PropTypes.string.isRequired,
 	items: PropTypes.array.isRequired
 };
 
-export default AssessmentItemList;
+export default AssessmentList;
