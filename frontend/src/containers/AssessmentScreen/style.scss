@@ -1,48 +1,12 @@
 @import "../../_partials.scss";
 
-.assessment-screen {
-	margin-top: 110px;
-	margin-left: 40px;
-	margin-right: 40px;
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-}
-
-.right-column-wrapper {
-	display: flex;
-	width: 50%;
-	margin-right: 40px;	
-}
-
-.left-column-wrapper {
-	width: 50%;
+.assessment-form {
 	padding-right: 40px;
 	display: flex;
 	flex-direction: column;
+	margin-top: 15px;
 
-	& > h1 {
-		font-size: 36px;
-		font-weight: 300;
-		color: $font-colored;
-		margin-bottom: 15px;
-	}
-
-	& > p {
-		color: $font-normal;
-		font-size: 16px;
-		line-height: 1.35;
-		opacity: 0.9;
-	}
-
-	& > form {
-		padding-right: 40px;
-		display: flex;
-		flex-direction: column;
-		margin-top: 15px;
-
-		& > textarea {
-			height: 100px;	
-		}
+	& > textarea {
+		height: 100px;	
 	}
 }

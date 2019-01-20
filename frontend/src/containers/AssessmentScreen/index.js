@@ -8,10 +8,10 @@ import "./style.css";
 class _AssessmentScreen extends Component {
 	renderLeftColumn(assessmentName) {
 		return (
-			<div className="left-column-wrapper">
+			<div className="column">
 				<h1>{assessmentName}</h1>
 				<p>You can make multiple submissions to a single assignment or lab. Each submission will be tested against the test suite, and you’ll see the result. Your tutors and convenors can see & give feedback on any submission you make.</p>
-				<form>
+				<form className="assessment-form">
 					<label>Title</label>
 					<input
 						name="title"
@@ -33,7 +33,7 @@ class _AssessmentScreen extends Component {
 	}
 	renderRightColumn(courseID, assessmentID, submissions) {
 		return (
-			<div className="right-column-wrapper">
+			<div className="column">
 				<SubmissionList
 					title="Your Submissions"
 					subtitle=""
@@ -50,7 +50,7 @@ class _AssessmentScreen extends Component {
 		var submissions = submissions.filter(sub => sub.assessment_id == assessment_id);
 		let assessmentName = assessment.find(ass => ass.id == assessment_id).name;
 		return (
-			<WithHeader className="assessment-screen" currentCourseID={course_id}>
+			<WithHeader className="column-parent" currentCourseID={course_id}>
 				{this.renderLeftColumn(assessmentName)}
 				{this.renderRightColumn(course_id, assessment_id, submissions)}
 			</WithHeader>
