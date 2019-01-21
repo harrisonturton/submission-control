@@ -1,7 +1,16 @@
 @import "../../_partials.scss";
 
+
+.column-left {
+	& > .assessment-title {
+		font-color: $font-colored;
+		font-weight: 300;
+		font-size: 34px;
+		margin-bottom: 10px;
+	}
+}
+
 .assessment-form {
-	padding-right: 40px;
 	display: flex;
 	flex-direction: column;
 	margin-top: 15px;
@@ -9,4 +18,9 @@
 	& > textarea {
 		height: 100px;	
 	}
+}
+
+.assessment-description {
+	font-size: 16px;
+	line-height: 1.35;
 }
