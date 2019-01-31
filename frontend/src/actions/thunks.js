@@ -42,14 +42,14 @@ export const attemptRefreshToken = () => (dispatch, getState) => {
 	// Check if the token has timed out
 	let time_since_refresh = new Date() - timestamp;
 	if (time_since_refresh >= auth.token_timeout) {
-		dispatch(auth_action.logout());
+		dispatch(logout());
 		return;	
 	}
 	// Make the refresh request. This is very similar to the behaviour
 	// in signIn().
 	return auth.refreshToken(token).then(token => {
 		if (token === null) {
-			dispatch(auth_action.logout());
+			dispatch(logout());
 			return;
 		}
 		dispatch(auth_action.refreshToken(token));
@@ -60,6 +60,7 @@ export const attemptRefreshToken = () => (dispatch, getState) => {
 // logout will remove persisted state (in localStorage) and wipe
 // our in-memory state.
 export const logout = () => dispatch => {
+	forgetState();
 	dispatch(auth_action.logout());
 }
 

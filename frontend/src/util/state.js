@@ -23,7 +23,7 @@ export const saveState = state => {
 	}
 };
 
-export const forgetState = state => {
+export const forgetState = () => {
 	try {
 		localStorage.removeItem(state_key);
 	} catch (err) {
