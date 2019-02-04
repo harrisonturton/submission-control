@@ -5,6 +5,7 @@ import (
 	"github.com/harrisonturton/submission-control/backend/auth"
 	"github.com/harrisonturton/submission-control/backend/store"
 	"github.com/pkg/errors"
+	"log"
 )
 
 func buildAuthResponse(store store.Reader, login LoginRequest) ([]byte, error) {
@@ -38,18 +39,22 @@ func buildRefreshResponse(token string) ([]byte, error) {
 func buildStudentStateResponse(store store.Reader, uid string) ([]byte, error) {
 	user, err := store.GetUser(uid)
 	if err != nil {
+		log.Printf("Error getting user: %v\n", err)
 		return nil, err
 	}
 	enrollments, err := store.GetEnrolment(uid)
 	if err != nil {
+		log.Printf("Error getting enrolments: %v\n", err)
 		return nil, err
 	}
 	assessment, err := store.GetAssessment(uid)
 	if err != nil {
+		log.Printf("Error getting assessments: %v\n", err)
 		return nil, err
 	}
 	submissions, err := store.GetSubmissions(uid)
 	if err != nil {
+		log.Printf("Error getting submissions: %v\n", err)
 		return nil, err
 	}
 	return json.Marshal(StudentStateResponse{

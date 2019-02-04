@@ -3,7 +3,7 @@ const state_key = "state";
 
 export const loadState = () => {
 	try {
-		const serialized_state = localStorage.getItem(state_key);
+		const serialized_state = sessionStorage.getItem(state_key);
 		if (serialized_state === null) {
 			return undefined;	
 		}
@@ -16,7 +16,7 @@ export const loadState = () => {
 export const saveState = state => {
 	try {
 		const serialized_state = JSON.stringify(state);
-		localStorage.setItem(state_key, serialized_state);
+		sessionStorage.setItem(state_key, serialized_state);
 	} catch (err) {
 		// Ignore errors
 		console.log("Error saving state: ", err);
@@ -25,7 +25,7 @@ export const saveState = state => {
 
 export const forgetState = () => {
 	try {
-		localStorage.removeItem(state_key);
+		sessionStorage.removeItem(state_key);
 	} catch (err) {
 		// Ignore errors
 		console.log("Error forgetting state: ", err);

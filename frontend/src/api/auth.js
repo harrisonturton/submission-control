@@ -7,9 +7,9 @@ export const refresh_time = 1000 * 60 * 3;
 // How long until a JWT token is invalid. 10 minutes.
 export const token_timeout = 1000 * 60 * 10;
 
-export const signIn = async (email, password) => {
+export const signIn = async (uid, password) => {
 	let resp = await fetch(routes.auth, post({
-		email: email,
+		uid: uid,
 		password: password,
 	}));
 	if (!resp.ok) {

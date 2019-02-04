@@ -8,9 +8,9 @@ import { forgetState } from "util/state";
 // attemptSignIn will attempt to authenticate with the backend server,
 // and receives a JWT token if successful. It will also dispatch
 // thunks to fetch the initial state and populate the redux store.
-export const attemptSignIn = (email, password) => dispatch => {
+export const attemptSignIn = (uid, password) => dispatch => {
 	dispatch(auth_action.loginRequest())
-	return auth.signIn(email, password).then(token => {
+	return auth.signIn(uid, password).then(token => {
 		// If the token is null, then we failed to sign in.
 		// Wipe any tokens in localStorage.
 		if (token === null) {
@@ -20,7 +20,7 @@ export const attemptSignIn = (email, password) => dispatch => {
 		// Store the token for later access, and refresh the
 		// token in the future. Get the initial state for the store.
 		dispatch(auth_action.loginSuccess());
-		dispatch(fetchInitialState(token, email));
+		dispatch(fetchInitialState(token, uid));
 		setTimeout(() => dispatch(attemptRefreshToken()), auth.refresh_time);
 	});
 }
@@ -67,35 +67,15 @@ export const logout = () => dispatch => {
 // fetchInitialState will make multiple requests to the backend
 // to build up a state object, and then send this to our store.
 // It needs the users email to begin collecting user-specific data.
-export const fetchInitialState = (token, email) => dispatch => {
+export const fetchInitialState = (token, uid) => dispatch => {
 	dispatch(api_action.dataRequest());
 	// First, get the user data
-	return fetchState(token, email).then(data => {
+	return api.fetchStudentState(uid, token).then(data => {
 		if (data === null) {
 			dispatch(api_action.dataFailure());
 			return;
 		}
-		console.log("new data\n", JSON.stringify(data));
+		console.log("recieved data on login:\n", JSON.stringify(data));
 		dispatch(api_action.dataSuccess(data));
 	});
-};
-
-const fetchState = async (token, email) => {
-	let user = await api.fetchUserData(email, token);
-	if (user === null || user === undefined) {
-		return null;	
-	}
-	let courses = await api.fetchCourses(user.uid, token);
-	if (courses === null || courses === undefined) {
-		return null;
-	}
-	let assessment = await api.fetchAssessment(user.uid, token);
-	if (assessment === null || assessment === undefined) {
-		return null;	
-	}
-	let submissions = await api.fetchSubmissions(user.uid, token);
-	if (submissions === null || submissions === undefined) {
-		return null;	
-	}
-	return { user, courses, assessment, submissions };
 };

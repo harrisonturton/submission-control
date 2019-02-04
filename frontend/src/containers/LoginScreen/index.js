@@ -8,7 +8,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	requestLogin: (email, password) => dispatch(attemptSignIn(email, password))
+	requestLogin: (uid, password) => dispatch(attemptSignIn(uid, password))
 });
 
 const LoginContainer = connect(

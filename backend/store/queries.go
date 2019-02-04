@@ -62,7 +62,6 @@ WHERE enrol.user_uid = $1;
 // GetSubmissions will return all the submissions made
 // by the user to every assessment they've had.
 func (store *Store) GetSubmissions(uid string) ([]Submission, error) {
-	//query := "SELECT id, assessment_id, uid, title, description, feedback FROM submissions WHERE uid = $1"
 	query := `
 SELECT
 	assessment.course_id, 
@@ -108,7 +107,7 @@ func (store *Store) GetEnrolment(uid string) ([]Enrolment, error) {
 SELECT id, user_uid as uid, role, name, course_code, period, year
 FROM enrol
 JOIN courses ON enrol.course_id = courses.id
-WHERE uid = $1;
+WHERE enrol.user_uid = $1;
 `
 	rows, err := store.db.Query(query, uid)
 	if err != nil {

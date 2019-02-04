@@ -12,23 +12,23 @@ class Login extends Component {
 		super(props);
 		this.state = {
 			redirectToReferrer: false,
-			email: "",
+			uid: "",
 			password: ""
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleEmailChange = this.handleEmailChange.bind(this);	
+		this.handleUIDChange = this.handleUIDChange.bind(this);	
 		this.handlePasswordChange = this.handlePasswordChange.bind(this);	
 	}
 	async handleSubmit(event) {
 		event.preventDefault();
-		let { email, password } = this.state;
+		let { uid, password } = this.state;
 		let { requestLogin } = this.props;
-		requestLogin(email, password)
-		console.log(`Submitting ${email} ${password}`);
+		requestLogin(uid, password)
+		console.log(`Submitting ${uid} ${password}`);
 	}
-	handleEmailChange(event) {
+	handleUIDChange(event) {
 		this.setState({
-			email: event.target.value	
+			uid: event.target.value	
 		});
 	}
 	handlePasswordChange(event) {
@@ -50,12 +50,12 @@ class Login extends Component {
 					{is_fetching
 							? <Loader/>
 							: <form onSubmit={this.handleSubmit}>
-						<label>Email</label>
+						<label>UID</label>
 						<input
-							name="email"
-							type="email"
-							onChange={this.handleEmailChange}
-							value={this.state.email}
+							name="uid"
+							type="text"
+							onChange={this.handleUIDChange}
+							value={this.state.uid}
 						/>
 						<label>Password</label>
 						<input

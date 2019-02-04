@@ -47,9 +47,10 @@ class _Header extends Component {
 	}
 	render() {
 		let { isExpanded } = this.state;
-		let { courses, currentCourse, logout } = this.props;
+		let { courses, currentCourseID, currentCourse, logout } = this.props;
 		let expandedHeight = courses.length * 40 + 10;
 		let minimisedHeight = 15;
+		console.log(`Rendering header for id ${currentCourseID} for ${currentCourse}`);
 		return (
 			<header
 				className={isExpanded ? "expanded" : ""}

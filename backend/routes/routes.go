@@ -60,6 +60,7 @@ func stateHandler(store store.Reader) http.HandlerFunc {
 		}
 		resp, err := buildStudentStateResponse(store, uid)
 		if err != nil {
+			log.Println("failed to build state response")
 			writeInternalServerError(w)
 			return
 		}
