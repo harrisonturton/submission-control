@@ -12,7 +12,7 @@ import (
 // Claims is the data passed with the JWT for
 // authentication
 type Claims struct {
-	Email string `json:"email"`
+	UID string `json:"uid"`
 	jwt.StandardClaims
 }
 
@@ -57,9 +57,9 @@ func VerifyToken(rawToken string) bool {
 }
 
 // GenerateToken will generate a new JWT token from an email address.
-func GenerateToken(email string) (string, error) {
+func GenerateToken(uid string) (string, error) {
 	claims := Claims{
-		email,
+		uid,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(TokenTimeout).Unix(),
 			Issuer:    "server",
@@ -70,9 +70,9 @@ func GenerateToken(email string) (string, error) {
 }
 
 // Authenticate will verify a login attempt.
-func Authenticate(store *store.Store, email string, passwordAttempt string) (bool, error) {
+func Authenticate(store store.Reader, uid string, passwordAttempt string) (bool, error) {
 	// Get user data
-	user, err := store.GetUserByEmail(email)
+	user, err := store.GetUser(uid)
 	if err != nil {
 		return false, err
 	}

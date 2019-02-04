@@ -10,14 +10,14 @@ INSERT INTO courses (id, name, course_code, period, year) VALUES
 	(3, 'Structured Programming', 'COMP1140', 'second', 2017),
 	(4, 'Programming as Problem Solving', 'COMP1130', 'first', 2017);
 
-INSERT INTO enrol (user_uid, course_id) VALUES
-	('u6386433', 1),
-	('u6386433', 2),
-	('u6386433', 3),
-	('u7654321', 2),
-	('u7654321', 4),
-	('u1234567', 1),
-	('u1234567', 4);
+INSERT INTO enrol (user_uid, course_id, role) VALUES
+	('u6386433', 1, 'student'),
+	('u6386433', 2, 'student'),
+	('u6386433', 3, 'tutor'),
+	('u7654321', 2, 'convenor'),
+	('u7654321', 4, 'convenor'),
+	('u1234567', 1, 'student'),
+	('u1234567', 4, 'student');
 
 INSERT INTO assessment (id, name, comments, type, course_id) VALUES
 	(1, 'Gliding in Space',              '', 'assignment', 2),

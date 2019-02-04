@@ -13,7 +13,7 @@ type FailedResponse struct {
 // JWT access token, which must be attached to the
 // Authentication header for all consequent API requests.
 type LoginRequest struct {
-	Email    string `json:"email"`
+	UID      string `json:"uid"`
 	Password string `json:"password"`
 }
 
@@ -53,4 +53,13 @@ type UserResponse struct {
 type SubmissionResponse struct {
 	StatusCode  int                `json:"status"`
 	Submissions []store.Submission `json:"submissions"`
+}
+
+// StudentStateResponse contains all the state data required to render
+// a students page on the client.
+type StudentStateResponse struct {
+	User        store.User         `json:"user"`
+	Assessment  []store.Assessment `json:"assessment"`
+	Submissions []store.Submission `json:"submissions"`
+	Enrolled    []store.Enrolment  `json:"enrolled"`
 }

@@ -2,15 +2,16 @@
 DROP TABLE IF EXISTS users       CASCADE;
 DROP TABLE IF EXISTS enrol       CASCADE;
 DROP TABLE IF EXISTS courses     CASCADE;
-DROP TABLE IF EXISTS enrol       CASCADE;
 DROP TABLE IF EXISTS submissions CASCADE;
 DROP TABLE IF EXISTS assessment  CASCADE;
+DROP TABLE IF EXISTS roles       CASCADE;
 
 DROP TYPE  IF EXISTS period;
 DROP TYPE  IF EXISTS assessment_type;
 
 CREATE TYPE period          AS ENUM ('summer', 'first', 'autumn', 'winter', 'second', 'spring');
 CREATE TYPE assessment_type AS ENUM ('assignment', 'lab');
+CREATE TYPE role            AS ENUM ('student', 'tutor', 'convenor', 'admin');
 
 -- users holds all the basic account information
 -- for every user. A user is uniquely identified
@@ -66,6 +67,7 @@ CREATE TABLE submissions (
 CREATE TABLE enrol (
 	user_uid  VARCHAR(20) NOT NULL,
 	course_id SERIAL      NOT NULL,
+	role      ROLE        NOT NULL,
 	FOREIGN KEY (user_uid) REFERENCES users(uid),
 	FOREIGN KEY (course_id) REFERENCES courses(id)
 );

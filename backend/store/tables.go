@@ -22,17 +22,15 @@ type Course struct {
 	Year       int    `json:"year"`
 }
 
-// Semester represents the time when a course is being run
-type Semester int
-
-// These are the different periods in which a course can be run
+// These are the different periods in which a course
+// can be run, each year
 const (
-	Summer Semester = iota
-	First
-	Autumn
-	Winter
-	Second
-	Spring
+	PeriodFirst  = "first"
+	PeriodSecond = "second"
+	PeriodSummer = "summer"
+	PeriodAutumn = "autumn"
+	PeriodWinter = "winter"
+	PeriodSpring = "spring"
 )
 
 // Assessment represents a single piece of assessment, whether
@@ -52,4 +50,12 @@ type Submission struct {
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	Feedback     string `json:"feedback"`
+}
+
+// Enrolment maps a user to the course they are, or have previously been,
+// enrolled in.
+type Enrolment struct {
+	Course Course `json:"course"`
+	UID    string `json:"uid"`
+	Role   string `json:"role"`
 }
