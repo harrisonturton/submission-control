@@ -4,16 +4,8 @@ import (
 	"encoding/json"
 	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/harrisonturton/submission-control/backend/store"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
-)
-
-const (
-	errBadRequest          = "bad request"
-	errUnauthorized        = "unauthorized"
-	errNotFound            = "not found"
-	errInternalServerError = "internal server error"
 )
 
 func authHandler(store store.Reader) http.HandlerFunc {
@@ -79,46 +71,4 @@ func needsAuthorization(handler http.HandlerFunc) http.HandlerFunc {
 		// Else handle normally
 		handler(w, r)
 	})
-}
-
-func queryURL(key string, r *http.Request) (string, error) {
-	values, ok := r.URL.Query()[key]
-	if !ok || len(values) != 1 {
-		return "", errors.New("failed to get parameter from query url")
-	}
-	return values[0], nil
-}
-
-func post(handler http.HandlerFunc) http.HandlerFunc {
-	return checkHTTPMethod(http.MethodPost, handler)
-}
-
-func get(handler http.HandlerFunc) http.HandlerFunc {
-	return checkHTTPMethod(http.MethodGet, handler)
-}
-
-func checkHTTPMethod(httpMethod string, handler http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != httpMethod {
-			writeNotFound(w)
-			return
-		}
-		handler.ServeHTTP(w, r)
-	})
-}
-
-func writeInternalServerError(w http.ResponseWriter) {
-	http.Error(w, errInternalServerError, http.StatusInternalServerError)
-}
-
-func writeBadRequest(w http.ResponseWriter) {
-	http.Error(w, errBadRequest, http.StatusBadRequest)
-}
-
-func writeUnauthorized(w http.ResponseWriter) {
-	http.Error(w, errUnauthorized, http.StatusUnauthorized)
-}
-
-func writeNotFound(w http.ResponseWriter) {
-	http.Error(w, errNotFound, http.StatusNotFound)
 }

@@ -8,6 +8,20 @@ import (
 	"log"
 )
 
+// TokenResponse responds with a JWT token.
+type TokenResponse struct {
+	Token string `json:"token"`
+}
+
+// StudentStateResponse contains all the state data required to render
+// a students page on the client.
+type StudentStateResponse struct {
+	User        store.User         `json:"user"`
+	Assessment  []store.Assessment `json:"assessment"`
+	Submissions []store.Submission `json:"submissions"`
+	Enrolled    []store.Enrolment  `json:"enrolled"`
+}
+
 func buildAuthResponse(store store.Reader, login LoginRequest) ([]byte, error) {
 	ok, err := auth.Authenticate(store, login.UID, login.Password)
 	if !ok || err != nil {
