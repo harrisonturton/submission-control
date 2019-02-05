@@ -1,69 +1,35 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { WithHeader } from "containers";
-import { AssessmentList, FeedbackList } from "components";
-import "./style.css";
+import PropTypes from "prop-types";
+import { Redirect } from "react-router-dom";
+import { StudentCourseScreen, ConvenorCourseScreen } from "containers";
+import { Loader } from "components";
 
-class _CourseScreen extends Component {
-	renderAssessment(assignments, labs) {
-		return (
-			<div className="column-left">
-				<AssessmentList
-					title="Upcoming Assignments"
-					subtitle=""
-					items={assignments}
-				/>
-				<AssessmentList
-					title="Upcoming Labs"
-					subtitle=""
-					items={labs}
-				/>
-			</div>
-		);
+const _CourseScreen = ({ role, match }) => {
+	let { course_id } = match.params;
+	console.log(`COURSE SCREEN HAS ROLE ${role}`);
+	switch (role) {
+		case "student":
+			return <StudentCourseScreen courseID={course_id}/>;
+		case "convenor":
+		case "admin":
+		case "tutor":
+			return <ConvenorCourseScreen courseID={course_id}/>;
+		default:
+			return <h1>Unknown role {role}. Please email harrison.turton@anu.edu.au</h1>;
 	}
-	renderFeedback(submissions) {
-		return (
-			<div className="column-right">
-				<FeedbackList
-					title="Assessment Feedback"
-					subtitle=""
-					submissions={submissions}
-				/>
-			</div>
-		);
-	}
-	filterData(courseID, assignments, labs, submissions) {
-		const withCourseID = courseID => item => item.course_id == courseID;
-		return {
-			assignments: assignments.filter(withCourseID(courseID)),
-			labs:        labs.filter(withCourseID(courseID)),
-			submissions: submissions.filter(withCourseID(courseID))
-		};
-	}
-	render() {
-		let { course_id } = this.props.match.params;
-		var { assignments, labs, submissions } = this.props;
-		var { assignments, labs, submissions } = this.filterData(course_id, assignments, labs, submissions);
-		return (
-			<WithHeader className="column-parent" currentCourseID={course_id}>
-				{this.renderAssessment(assignments, labs)}
-				{this.renderFeedback(submissions)}
-			</WithHeader>
-		);
-	}
-}
-
-_CourseScreen.propTypes = {
-	assignments:      PropTypes.array.isRequired,
-	labs:             PropTypes.array.isRequired,
-	submissions:      PropTypes.array.isRequired,
 };
 
-const mapStateToProps = state => ({
-	assignments: state.data.assessment.assignments,
-	labs:        state.data.assessment.labs,
-	submissions: state.data.submissions
+const getRole = (courses, course_id) => {
+	let course = courses.find(course => course.id == course_id)
+	if (!course) {
+		return "student";
+	}
+	return course.role;
+}
+
+const mapStateToProps = (state, { match }) => ({
+	role: getRole(state.data.courses, match.params.course_id)
 });
 
 const CourseScreen = connect(
