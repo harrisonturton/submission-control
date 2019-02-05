@@ -13,7 +13,7 @@ const List = ({ submissions }) => (
 		{submissions.map((submission, i) => (
 			<Link
 				key={i}
-				to={`/course/${submission.course_id}/${submission.assessment_id}/${submission.id}`}
+				to={`/course/${submission.course_id}/assessment/${submission.assessment_id}/${submission.id}`}
 			>
 				<FeedbackItem
 					title={submission.title}

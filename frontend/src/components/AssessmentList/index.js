@@ -13,7 +13,7 @@ const List = ({ items }) => (
 		{items.map((item, i) => (
 			<Link 
 				key={i}
-				to={`/course/${item.course_id}/${item.id}`}
+				to={`/course/${item.course_id}/assessment/${item.id}`}
 			>
 				<AssessmentItem
 					name={item.name}

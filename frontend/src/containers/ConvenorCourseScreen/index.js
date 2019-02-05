@@ -5,8 +5,8 @@ import { WithHeader } from "containers";
 import { AssessmentList } from "components";
 import "./style.css";
 
-const AdminButton = ({ title, subtitle }) => (
-	<a href="/" className="admin">
+const AdminButton = ({ title, subtitle, destination }) => (
+	<a href={destination} className="admin">
 		<span className="title">{title}</span>
 		<span className="subtitle">{subtitle}</span>
 	</a>
@@ -29,7 +29,7 @@ class _ConvenorCourseScreen extends Component {
 			</div>
 		);
 	}
-	renderAdmin() {
+	renderAdmin(courseID) {
 		return (
 			<div className="column-right admin-wrapper">
 				<div className="admin-header">
@@ -42,19 +42,16 @@ class _ConvenorCourseScreen extends Component {
 						subtitle="Assignment times, students & tutors"
 					/>
 					<AdminButton
-						title="Manage Students"
+						title="Manage Students & Tutors"
 						subtitle="Enrol or remove students"
-					/>
-					<AdminButton
-						title="Manage Tutors"
-						subtitle="Add or remove tutors"
+						destination={`${courseID}/admin/students`}
 					/>
 					<AdminButton
 						title="Manage Test Suite"
 						subtitle="Create & debug test configurations"
 					/>
 					<AdminButton
-						title="Manage Student Feedback"
+						title="Manage Feedback"
 						subtitle="Create & schedule feedback items"
 					/>
 				</div>
@@ -74,7 +71,7 @@ class _ConvenorCourseScreen extends Component {
 		return (
 			<WithHeader className="column-parent" currentCourseID={courseID}>
 				{this.renderAssessment(assignments, labs)}
-				{this.renderAdmin()}
+				{this.renderAdmin(courseID)}
 			</WithHeader>
 		);
 	}

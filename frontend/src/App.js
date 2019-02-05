@@ -5,7 +5,8 @@ import {
 	LoginScreen,
 	CourseScreen,
 	AssessmentScreen,
-	SubmissionScreen
+	SubmissionScreen,
+	ManageStudentsScreen
 } from "containers";
 
 const App = () => (
@@ -16,11 +17,15 @@ const App = () => (
 				component={LoginScreen}
 			/>
 			<Route
-				path="/course/:course_id/:assessment_id/:submission_id"
+				path="/course/:course_id/admin/students"
+				component={ManageStudentsScreen}
+			/>
+			<Route
+				path="/course/:course_id/assessment/:assessment_id/:submission_id"
 				component={SubmissionScreen}
 			/>
 			<Route
-				path="/course/:course_id/:assessment_id"
+				path="/course/:course_id/assessment/:assessment_id"
 				component={AssessmentScreen}
 			/>
 			<Route

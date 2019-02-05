@@ -12,7 +12,7 @@ const List = ({ courseID, assessmentID, submissions }) => (
 		{submissions.map((sub, i) => (
 			<Link
 				key={i}
-				to={`/course/${courseID}/${assessmentID}/${sub.id}`}
+				to={`/course/${courseID}/assessment/${assessmentID}/${sub.id}`}
 			>
 				<SubmissionItem
 					title={sub.title}
