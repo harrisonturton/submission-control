@@ -23,6 +23,14 @@ const StudentTable = ({ students }) => (
 	</table>
 );
 
+const UploadForm = () => (
+	<form className="student-admin-form">
+		<label>CSV file of students</label>
+		<input type="file"/>
+		<input type="submit" value="Submit"/>
+	</form>
+);
+
 const mapStateToProps = state => ({
 	
 });
@@ -34,6 +42,7 @@ const _ManageStudentsScreen = ({ match, students }) => {
 			<div className="column-left">
 				<h1 className="admin-title">Manage Students</h1>
 				<p className="admin-description">Add or remove tutors & students. Quickly find who you need to edit.</p>
+				<UploadForm/>
 			</div>
 			<div className="column-right">
 				<div className="student-list-header">
