@@ -5,6 +5,7 @@ import FeedbackItem   from "components/FeedbackItem";
 import FeedbackList   from "components/FeedbackList";
 import SubmissionItem from "components/SubmissionItem";
 import SubmissionList from "components/SubmissionList";
+import TutorialItem   from "components/TutorialItem";
 
 export {
 	AssessmentItem,
@@ -13,5 +14,6 @@ export {
 	FeedbackList,
 	SubmissionItem,
 	SubmissionList,
-	Loader
+	Loader,
+	TutorialItem
 };

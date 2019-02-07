@@ -40,6 +40,7 @@ class _ConvenorCourseScreen extends Component {
 					<AdminButton
 						title="Manage Tutorial Groups"
 						subtitle="Assignment times, students & tutors"
+						destination={`${courseID}/admin/tutorials`}
 					/>
 					<AdminButton
 						title="Manage Students & Tutors"

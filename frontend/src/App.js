@@ -6,7 +6,8 @@ import {
 	CourseScreen,
 	AssessmentScreen,
 	SubmissionScreen,
-	ManageStudentsScreen
+	ManageStudentsScreen,
+	ManageTutorialsScreen
 } from "containers";
 
 const App = () => (
@@ -19,6 +20,10 @@ const App = () => (
 			<Route
 				path="/course/:course_id/admin/students"
 				component={ManageStudentsScreen}
+			/>
+			<Route
+				path="/course/:course_id/admin/tutorials"
+				component={ManageTutorialsScreen}
 			/>
 			<Route
 				path="/course/:course_id/assessment/:assessment_id/:submission_id"

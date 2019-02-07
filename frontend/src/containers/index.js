@@ -8,6 +8,7 @@ import SubmissionScreen     from "containers/SubmissionScreen";
 import Header               from "containers/Header";
 import WithHeader           from "containers/WithHeader";
 import ManageStudentsScreen from "containers/ManageStudentsScreen";
+import ManageTutorialsScreen from "containers/ManageTutorialsScreen";
 
 export {
 	LoginScreen,
@@ -19,5 +20,6 @@ export {
 	SubmissionScreen,
 	Header,
 	WithHeader,
-	ManageStudentsScreen
+	ManageStudentsScreen,
+	ManageTutorialsScreen
 };
