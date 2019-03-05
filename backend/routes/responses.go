@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"github.com/harrisonturton/submission-control/backend/auth"
 	"github.com/harrisonturton/submission-control/backend/store"
 	"github.com/pkg/errors"
+	"io"
 	"log"
 )
 
@@ -20,6 +22,20 @@ type StudentStateResponse struct {
 	Assessment  []store.Assessment `json:"assessment"`
 	Submissions []store.Submission `json:"submissions"`
 	Enrolled    []store.Enrolment  `json:"enrolled"`
+}
+
+// UserResponse contains data for a single user and their
+// enrolled courses.
+type UserResponse struct {
+	User      store.User        `json:"user"`
+	Enrolment []store.Enrolment `json:"enrolment"`
+}
+
+// StudentRecord is the type for each row in a .csv
+type StudentRecord struct {
+	Firstname string
+	Lastname  string
+	Tutorials []string
 }
 
 func buildAuthResponse(store store.Reader, login LoginRequest) ([]byte, error) {
@@ -77,4 +93,31 @@ func buildStudentStateResponse(store store.Reader, uid string) ([]byte, error) {
 		Submissions: submissions,
 		Enrolled:    enrollments,
 	})
+}
+
+func buildUserResponse(store store.Reader, uid string) ([]byte, error) {
+	user, err := store.GetUser(uid)
+	if err != nil {
+		log.Printf("Error getting user: %v\n", err)
+		return nil, err
+	}
+	enrollment, err := store.GetEnrolment(uid)
+	if err != nil {
+		log.Printf("Error getting enrolment: %v\n", err)
+		return nil, err
+	}
+	return json.Marshal(UserResponse{
+		User:      *user,
+		Enrolment: enrollment,
+	})
+}
+
+func buildStudentUploadResponse(store *store.Reader, data io.Reader) ([]byte, error) {
+	r := csv.NewReader(data)
+	_, err := r.ReadAll() // [][]string
+	if err != nil {
+		log.Println("Failed to read .csv form data")
+		return nil, err
+	}
+	return nil, err
 }

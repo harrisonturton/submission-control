@@ -14,13 +14,31 @@ func (store *Store) GetUser(uid string) (*User, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "could not fetch account")
 	}
+	enrolment, err := store.GetEnrolment(uid)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not fetch enrolment for account")
+	}
 	return &User{
 		FirstName:    firstname,
 		LastName:     lastname,
 		Email:        email,
 		PasswordHash: string(passwordHash),
 		UID:          uid,
+		Enrolment:    enrolment,
 	}, nil
+}
+
+// GetUserRole will fetch the role for a user who is enrolled in a course.
+// It will return an error if the user is not enrolled in the course, or
+// if the user cannot be found.
+func (store *Store) GetUserRole(uid, courseID string) (string, error) {
+	query := "SELECT role FROM enrol WHERE user_uid = $1 AND course_id $2"
+	var role string
+	err := store.db.QueryRow(query, uid, courseID).Scan(&role)
+	if err != nil {
+		return "", errors.Wrap(err, "could not fetch role")
+	}
+	return role, nil
 }
 
 // GetAssessment will fetch a list of all assessments (for all courses) for a single user.

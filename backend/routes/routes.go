@@ -1,9 +1,11 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/harrisonturton/submission-control/backend/store"
+	"io"
 	"log"
 	"net/http"
 )
@@ -57,6 +59,39 @@ func stateHandler(store store.Reader) http.HandlerFunc {
 			return
 		}
 		w.Write(resp)
+	}))
+}
+
+func userHandler(store store.Reader) http.HandlerFunc {
+	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
+		uid, err := queryURL("uid", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		resp, err := buildUserResponse(store, uid)
+		if err != nil {
+			log.Println("failed to build user response")
+			writeInternalServerError(w)
+			return
+		}
+		w.Write(resp)
+	}))
+}
+
+func studentUploadHandler(store store.Reader) http.HandlerFunc {
+	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
+		var buf bytes.Buffer
+		file, _, err := r.FormFile("file")
+		if err != nil {
+			log.Println("Failed to get file")
+			writeBadRequest(w)
+			return
+		}
+		defer file.Close()
+		io.Copy(&buf, file)
+		contents := buf.String()
+		w.Write([]byte(contents))
 	}))
 }
 

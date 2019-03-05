@@ -3,10 +3,11 @@ package store
 // User represents the login and account
 // information that is required for every user.
 type User struct {
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	UID       string `json:"uid"`
+	Email     string      `json:"email"`
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	UID       string      `json:"uid"`
+	Enrolment []Enrolment `json:"enrolment"`
 
 	PasswordHash string
 }
