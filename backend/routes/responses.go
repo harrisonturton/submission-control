@@ -31,6 +31,19 @@ type UserResponse struct {
 	Enrolment []store.Enrolment `json:"enrolment"`
 }
 
+// AssessmentResponse contains a list of assessments,
+// for every course a user is enrolled in. Served on the
+// /assessment GET endpoint.
+type AssessmentResponse struct {
+	Assessment []store.Assessment `json:"assessment"`
+}
+
+// SubmissionsResponse contains all the submissions the user
+// has made.
+type SubmissionsResponse struct {
+	Submissions []store.Submission `json:"submissions"`
+}
+
 // StudentRecord is the type for each row in a .csv
 type StudentRecord struct {
 	Firstname string
@@ -109,6 +122,28 @@ func buildUserResponse(store store.Reader, uid string) ([]byte, error) {
 	return json.Marshal(UserResponse{
 		User:      *user,
 		Enrolment: enrollment,
+	})
+}
+
+func buildAssessmentResponse(store store.Reader, uid string) ([]byte, error) {
+	assessment, err := store.GetAssessment(uid)
+	if err != nil {
+		log.Printf("Error getting assessment: %v\n", err)
+		return nil, err
+	}
+	return json.Marshal(AssessmentResponse{
+		Assessment: assessment,
+	})
+}
+
+func buildSubmissionsResponse(store store.Reader, uid string) ([]byte, error) {
+	submissions, err := store.GetSubmissions(uid)
+	if err != nil {
+		log.Printf("Error getting submissions: %v\n", err)
+		return nil, err
+	}
+	return json.Marshal(SubmissionsResponse{
+		Submissions: submissions,
 	})
 }
 

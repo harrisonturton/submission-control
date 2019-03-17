@@ -79,6 +79,40 @@ func userHandler(store store.Reader) http.HandlerFunc {
 	}))
 }
 
+func assessmentHandler(store store.Reader) http.HandlerFunc {
+	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
+		uid, err := queryURL("uid", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		resp, err := buildAssessmentResponse(store, uid)
+		if err != nil {
+			log.Println("failed to build assessment response")
+			writeInternalServerError(w)
+			return
+		}
+		w.Write(resp)
+	}))
+}
+
+func submissionsHandler(store store.Reader) http.HandlerFunc {
+	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
+		uid, err := queryURL("uid", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		resp, err := buildSubmissionsResponse(store, uid)
+		if err != nil {
+			log.Println("failed to build submissions response")
+			writeInternalServerError(w)
+			return
+		}
+		w.Write(resp)
+	}))
+}
+
 func studentUploadHandler(store store.Reader) http.HandlerFunc {
 	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
 		var buf bytes.Buffer

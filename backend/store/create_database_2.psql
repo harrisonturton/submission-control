@@ -1,0 +1,105 @@
+
+-- Remove schema
+DROP TABLE IF EXISTS users        CASCADE;
+DROP TABLE IF EXISTS enrol        CASCADE;
+DROP TABLE IF EXISTS courses      CASCADE;
+DROP TABLE IF EXISTS submissions  CASCADE;
+DROP TABLE IF EXISTS assessment   CASCADE;
+DROP TABLE IF EXISTS test_results CASCADE;
+
+-- Remove enums
+DROP TABLE IF EXISTS roles             CASCADE;
+DROP TABLE IF EXISTS assessment_types  CASCADE;
+DROP TABLE IF EXISTS periods           CASCADE;
+DROP TABLE IF EXISTS test_result_types CASCADE;
+
+
+-- CREATE TYPE PERIOD          AS ENUM ('summer', 'first', 'autumn', 'winter', 'second', 'spring');
+-- CREATE TYPE ASSESSMENT_TYPE AS ENUM ('assignment', 'lab');
+-- CREATE TYPE TEST_RESULT     AS ENUM ('warnings', 'errors', 'perfect');
+-- CREATE TYPE ROLE            AS ENUM ('student', 'tutor', 'convenor', 'admin');
+
+-- Enums
+-- Define these in mini tables (populated later), to make more extensible
+-- in the future. ANU might add extrqa periods, we might want to support extra
+-- roles, differentiate between assignments/labs/tutorials/hurdles, etc.
+
+CREATE TABLE roles (
+	id   SERIAL PRIMARY KEY,
+	role TEXT
+);
+
+CREATE TABLE assessment_types (
+	id   SERIAL PRIMARY KEY,
+	type TEXT
+);
+
+CREATE TABLE test_result_types (
+	id       SERIAL PRIMARY KEY,
+	type     TEXT,
+	warnings TEXT,
+	errors   TEXT
+);
+
+CREATE TABLE periods (
+	id     SERIAL PRIMARY KEY,
+	period TEXT
+);
+
+-- Database schema
+
+CREATE TABLE users (
+	uid      VARCHAR(20)  PRIMARY KEY,
+	email    VARCHAR(255) UNIQUE NOT NULL,
+	password BYTEA               NOT NULL
+);
+
+CREATE TABLE courses (
+	-- id is used instead of (code, period, year) to
+	-- uniquely identify a course, since its easier.
+	id     SERIAL       PRIMARY KEY,
+	-- code is used within the university to identify a course,
+	-- but not when it was run (a single course can be run
+	-- multiple times, with different students/assessments/etc)
+	code   VARCHAR(20)  NOT NULL,
+	name   VARCHAR(255) NOT NULL,
+	year   INTEGER      NOT NULL,
+	period INTEGER      REFERENCES periods(id),
+	-- ensure that a single course can only be run once per period.
+	CONSTRAINT once_per_period UNIQUE (code, period, year)
+);
+
+CREATE TABLE assessment ( 
+	id           SERIAL          PRIMARY KEY,
+	name         VARCHAR(255)    NOT NULL,	
+	comments     TEXT,
+	type         INTEGER         REFERENCES assessment_types(id),
+	course_id    INTEGER         REFERENCES courses(id),
+	-- assessment names must be unique within a course,
+	-- but not across courses.
+	CONSTRAINT unique_name_per_course UNIQUE (name, course_id)
+);
+
+CREATE TABLE test_results (
+	id            SERIAL      PRIMARY KEY,
+	warnings      TEXT        NOT NULL,
+	errors        TEXT        NOT NULL,
+	result        INTEGER     REFERENCES test_result_types(id)
+);
+
+CREATE TABLE submissions (
+	id            SERIAL      PRIMARY KEY,
+	title         TEXT        NOT NULL,
+	description   TEXT        NOT NULL,
+	feedback      TEXT        NOT NULL,
+	uid           VARCHAR(20) REFERENCES users(uid),
+	assessment_id INTEGER     REFERENCES assessment(id),
+	result_id     INTEGER     REFERENCES test_results(id)
+);
+
+CREATE TABLE enrol (
+	user_uid  VARCHAR(20) REFERENCES users(uid),
+	course_id INTEGER     REFERENCES courses(id),
+	role      INTEGER     REFERENCES roles(id),
+	CONSTRAINT one_role_per_course_run UNIQUE (user_uid, course_id)
+);

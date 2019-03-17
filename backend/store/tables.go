@@ -1,5 +1,7 @@
 package store
 
+import "time"
+
 // User represents the login and account
 // information that is required for every user.
 type User struct {
@@ -37,20 +39,27 @@ const (
 // Assessment represents a single piece of assessment, whether
 // it be a proper assignment or something for a lab.
 type Assessment struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	CourseID int    `json:"course_id"`
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	CourseID   int    `json:"course_id"`
+	TestResult string `json:"test_result"`
 }
 
 // Submission is a single submission made by a user to an assessment item.
 type Submission struct {
-	ID           int    `json:"id"`
-	AssessmentID int    `json:"assessment_id"`
-	CourseID     int    `json:"course_id"`
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	Feedback     string `json:"feedback"`
+	ID             int    `json:"id"`
+	AssessmentName string `json:"assessment_name"`
+	AssessmentID   int    `json:"assessment_id"`
+	CourseID       int    `json:"course_id"`
+	Title          string `json:"title"`
+	Description    string `json:"description"`
+	Feedback       string `json:"feedback"`
+
+	TestResult string    `json:"test_result"`
+	Warnings   string    `json:"warnings"`
+	Errors     string    `json:"errors"`
+	Timestamp  time.Time `json:"timestamp"`
 }
 
 // Enrolment maps a user to the course they are, or have previously been,

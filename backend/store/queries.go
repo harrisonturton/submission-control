@@ -3,14 +3,25 @@ package store
 import (
 	"github.com/pkg/errors"
 	"log"
+	"time"
 )
 
-// GetUser will return a single user with a matching uid.
+// GetUser will fetch the data for a single user
 func (store *Store) GetUser(uid string) (*User, error) {
+	query := `
+SELECT
+	first_name,
+	last_name,
+	email,
+	password
+FROM users
+WHERE uid = $1
+`
 	var firstname, lastname, email string
 	var passwordHash []byte
-	query := "SELECT first_name, last_name, password, email FROM users WHERE uid = $1"
-	err := store.db.QueryRow(query, uid).Scan(&firstname, &lastname, &passwordHash, &email)
+	err := store.db.
+		QueryRow(query, uid).
+		Scan(&firstname, &lastname, &email, &passwordHash)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not fetch account")
 	}
@@ -22,110 +33,27 @@ func (store *Store) GetUser(uid string) (*User, error) {
 		FirstName:    firstname,
 		LastName:     lastname,
 		Email:        email,
-		PasswordHash: string(passwordHash),
 		UID:          uid,
 		Enrolment:    enrolment,
+		PasswordHash: string(passwordHash),
 	}, nil
 }
 
-// GetUserRole will fetch the role for a user who is enrolled in a course.
-// It will return an error if the user is not enrolled in the course, or
-// if the user cannot be found.
-func (store *Store) GetUserRole(uid, courseID string) (string, error) {
-	query := "SELECT role FROM enrol WHERE user_uid = $1 AND course_id $2"
-	var role string
-	err := store.db.QueryRow(query, uid, courseID).Scan(&role)
-	if err != nil {
-		return "", errors.Wrap(err, "could not fetch role")
-	}
-	return role, nil
-}
-
-// GetAssessment will fetch a list of all assessments (for all courses) for a single user.
-func (store *Store) GetAssessment(uid string) ([]Assessment, error) {
-	query := `
-SELECT
-	assessment.id as assessment_id,
-	assessment.course_id,
-	name,
-	type
-FROM
-	assessment JOIN enrol ON assessment.course_id = enrol.course_id
-WHERE enrol.user_uid = $1;
-`
-	rows, err := store.db.Query(query, uid)
-	if err != nil {
-		return []Assessment{}, nil
-	}
-	var assessment []Assessment
-	for rows.Next() {
-		var assessmentID, courseID int
-		var name, assType string
-		err := rows.Scan(&assessmentID, &courseID, &name, &assType)
-		if err != nil {
-			log.Println(err.Error())
-			continue
-		}
-		assessment = append(assessment, Assessment{
-			ID:       assessmentID,
-			Name:     name,
-			Type:     assType,
-			CourseID: courseID,
-		})
-	}
-	rows.Close()
-	return assessment, nil
-}
-
-// GetSubmissions will return all the submissions made
-// by the user to every assessment they've had.
-func (store *Store) GetSubmissions(uid string) ([]Submission, error) {
-	query := `
-SELECT
-	assessment.course_id, 
-	assessment.id  AS assessment_id,
-	submissions.id AS submission_id, 
-	submissions.title,
-	submissions.description,
-	feedback
-FROM assessment
-JOIN submissions ON assessment.id = submissions.assessment_id
-WHERE uid = $1;
-	`
-	rows, err := store.db.Query(query, uid)
-	if err != nil {
-		return []Submission{}, nil
-	}
-	var submissions []Submission
-	for rows.Next() {
-		var courseID, assessmentID, submissionID int
-		var title, description, feedback string
-		err := rows.Scan(&courseID, &assessmentID, &submissionID, &title, &description, &feedback)
-		if err != nil {
-			log.Println(err.Error())
-			continue
-		}
-		submissions = append(submissions, Submission{
-			ID:           submissionID,
-			AssessmentID: assessmentID,
-			CourseID:     courseID,
-			Title:        title,
-			Description:  description,
-			Feedback:     feedback,
-		})
-	}
-	rows.Close()
-	return submissions, nil
-}
-
-// GetEnrolment will return all the enrolments (mappings from user
-// to course, with a role) for a single user.
+// GetEnrolment will fetch all the enrolled courses for a given user
 func (store *Store) GetEnrolment(uid string) ([]Enrolment, error) {
 	query := `
-SELECT id, user_uid as uid, role, name, course_code, period, year
+SELECT
+	courses.id,
+	roles.role,
+	name,
+	code,
+	periods.period,
+	year
 FROM enrol
-JOIN courses ON enrol.course_id = courses.id
-WHERE enrol.user_uid = $1;
+JOIN courses on enrol.course_id = courses.id
+JOIN roles ON enrol.role = roles.id
+JOIN periods ON periods.id = courses.period
+WHERE user_uid = $1
 `
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
@@ -134,8 +62,8 @@ WHERE enrol.user_uid = $1;
 	var enrolment []Enrolment
 	for rows.Next() {
 		var id, year int
-		var uid, name, role, courseCode, period string
-		err := rows.Scan(&id, &uid, &role, &name, &courseCode, &period, &year)
+		var role, name, code, period string
+		err := rows.Scan(&id, &role, &name, &code, &period, &year)
 		if err != nil {
 			log.Println(err.Error())
 			continue
@@ -144,7 +72,7 @@ WHERE enrol.user_uid = $1;
 			Course: Course{
 				ID:         id,
 				Name:       name,
-				CourseCode: courseCode,
+				CourseCode: code,
 				Period:     period,
 				Year:       year,
 			},
@@ -154,4 +82,115 @@ WHERE enrol.user_uid = $1;
 	}
 	rows.Close()
 	return enrolment, nil
+}
+
+// GetAssessment will fetch the entire list of assessments for some student
+func (store *Store) GetAssessment(uid string) ([]Assessment, error) {
+	query := `
+SELECT
+	assessment.id,
+	assessment.course_id,
+	name,
+	assessment_types.type,
+	test_result_types.type
+FROM assessment
+JOIN submissions ON submissions.assessment_id = assessment.id
+JOIN assessment_types ON assessment_types.id = assessment.type
+JOIN test_results ON submissions.result_id = test_results.id
+JOIN test_result_types ON test_result_types.id = test_results.id
+WHERE uid = $1
+ORDER BY submissions.timestamp DESC
+LIMIT 1
+`
+	rows, err := store.db.Query(query, uid)
+	if err != nil {
+		return []Assessment{}, err
+	}
+	var assessment []Assessment
+	for rows.Next() {
+		var id, courseID int
+		var name, assessmentType, testResult string
+		err := rows.Scan(
+			&id,
+			&courseID,
+			&name,
+			&assessmentType,
+			&testResult,
+		)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		assessment = append(assessment, Assessment{
+			ID:         id,
+			Name:       name,
+			Type:       assessmentType,
+			CourseID:   courseID,
+			TestResult: testResult,
+		})
+	}
+	rows.Close()
+	return assessment, nil
+}
+
+// GetSubmissions will fetch all the submissions for a given user
+func (store *Store) GetSubmissions(uid string) ([]Submission, error) {
+	query := `
+SELECT
+	submissions.id,
+	title,
+	description,
+	timestamp,
+	name as assessment_name,
+	course_id,
+	assessment_id,
+	test_result_types.type AS test_result,
+	warnings,
+	errors
+FROM submissions
+JOIN assessment ON assessment_id = assessment.id
+JOIN test_results ON result_id = test_results.id
+JOIN test_result_types ON test_results.type = test_result_types.id
+WHERE uid = $1`
+	rows, err := store.db.Query(query, uid)
+	if err != nil {
+		return []Submission{}, err
+	}
+	var submissions []Submission
+	for rows.Next() {
+		var title, assessmentName, description, feedback, testResult, warnings, errors string
+		var id, courseID, assessmentID int
+		var timestamp time.Time
+		err := rows.Scan(
+			&id,
+			&title,
+			&description,
+			&timestamp,
+			&assessmentName,
+			&courseID,
+			&assessmentID,
+			&testResult,
+			&warnings,
+			&errors,
+		)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		submissions = append(submissions, Submission{
+			ID:             id,
+			AssessmentName: assessmentName,
+			AssessmentID:   assessmentID,
+			CourseID:       courseID,
+			Title:          title,
+			Description:    description,
+			Feedback:       feedback,
+			TestResult:     testResult,
+			Warnings:       warnings,
+			Errors:         errors,
+			Timestamp:      timestamp,
+		})
+	}
+	rows.Close()
+	return submissions, nil
 }

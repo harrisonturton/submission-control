@@ -30,7 +30,7 @@ CREATE TABLE users (
 -- is uniquely identified by (course_code, year, period)
 CREATE TABLE courses (
 	id          SERIAL PRIMARY KEY,
-	name        VARCHAR(255) NOT NULL,
+	name        VARCHAR(255) UNIQUE NOT NULL,
 	course_code VARCHAR(20)  NOT NULL,
 	period      PERIOD       NOT NULL,
 	year        INTEGER      NOT NULL
@@ -40,7 +40,7 @@ CREATE TABLE courses (
 -- students may submit their code to.
 CREATE TABLE assessment (
 	id        SERIAL PRIMARY KEY,
-	name      VARCHAR(255)    NOT NULL,
+	name      VARCHAR(255)    UNIQUE NOT NULL,
 	comments  TEXT            NOT NULL,
 	type      ASSESSMENT_TYPE NOT NULL,
 	course_id SERIAL          NOT NULL,
