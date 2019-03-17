@@ -36,9 +36,7 @@ CREATE TABLE assessment_types (
 
 CREATE TABLE test_result_types (
 	id       SERIAL PRIMARY KEY,
-	type     TEXT,
-	warnings TEXT,
-	errors   TEXT
+	type     TEXT
 );
 
 CREATE TABLE periods (
@@ -49,9 +47,11 @@ CREATE TABLE periods (
 -- Database schema
 
 CREATE TABLE users (
-	uid      VARCHAR(20)  PRIMARY KEY,
-	email    VARCHAR(255) UNIQUE NOT NULL,
-	password BYTEA               NOT NULL
+	uid        VARCHAR(20)  PRIMARY KEY,
+	email      VARCHAR(255) UNIQUE NOT NULL,
+	first_name VARCHAR(100)        NOT NULL,
+	last_name  VARCHAR(100)        NOT NULL,
+	password   BYTEA               NOT NULL
 );
 
 CREATE TABLE courses (
@@ -64,7 +64,7 @@ CREATE TABLE courses (
 	code   VARCHAR(20)  NOT NULL,
 	name   VARCHAR(255) NOT NULL,
 	year   INTEGER      NOT NULL,
-	period INTEGER      REFERENCES periods(id),
+	period INTEGER      NOT NULL REFERENCES periods(id),
 	-- ensure that a single course can only be run once per period.
 	CONSTRAINT once_per_period UNIQUE (code, period, year)
 );
@@ -72,19 +72,18 @@ CREATE TABLE courses (
 CREATE TABLE assessment ( 
 	id           SERIAL          PRIMARY KEY,
 	name         VARCHAR(255)    NOT NULL,	
-	comments     TEXT,
-	type         INTEGER         REFERENCES assessment_types(id),
-	course_id    INTEGER         REFERENCES courses(id),
+	type         INTEGER         NOT NULL REFERENCES assessment_types(id),
+	course_id    INTEGER         NOT NULL REFERENCES courses(id),
 	-- assessment names must be unique within a course,
 	-- but not across courses.
 	CONSTRAINT unique_name_per_course UNIQUE (name, course_id)
 );
 
 CREATE TABLE test_results (
-	id            SERIAL      PRIMARY KEY,
-	warnings      TEXT        NOT NULL,
-	errors        TEXT        NOT NULL,
-	result        INTEGER     REFERENCES test_result_types(id)
+	id       SERIAL      PRIMARY KEY,
+	warnings TEXT        NOT NULL,
+	errors   TEXT        NOT NULL,
+	type     INTEGER     NOT NULL REFERENCES test_result_types(id)
 );
 
 CREATE TABLE submissions (
@@ -92,14 +91,15 @@ CREATE TABLE submissions (
 	title         TEXT        NOT NULL,
 	description   TEXT        NOT NULL,
 	feedback      TEXT        NOT NULL,
-	uid           VARCHAR(20) REFERENCES users(uid),
-	assessment_id INTEGER     REFERENCES assessment(id),
-	result_id     INTEGER     REFERENCES test_results(id)
+	timestamp     TIMESTAMP   NOT NULL,
+	uid           VARCHAR(20) NOT NULL REFERENCES users(uid),
+	assessment_id INTEGER     NOT NULL REFERENCES assessment(id),
+	result_id     INTEGER              REFERENCES test_results(id)
 );
 
 CREATE TABLE enrol (
-	user_uid  VARCHAR(20) REFERENCES users(uid),
-	course_id INTEGER     REFERENCES courses(id),
-	role      INTEGER     REFERENCES roles(id),
+	user_uid  VARCHAR(20) NOT NULL REFERENCES users(uid),
+	course_id INTEGER     NOT NULL REFERENCES courses(id),
+	role      INTEGER     NOT NULL REFERENCES roles(id),
 	CONSTRAINT one_role_per_course_run UNIQUE (user_uid, course_id)
 );
