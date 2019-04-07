@@ -87,20 +87,25 @@ WHERE user_uid = $1
 // GetAssessment will fetch the entire list of assessments for some student
 func (store *Store) GetAssessment(uid string) ([]Assessment, error) {
 	query := `
+WITH statuses AS (
+	SELECT
+		submissions.assessment_id,
+		type
+	FROM submissions
+	JOIN test_result_types ON test_result_types.id = submissions.result_id
+	ORDER BY timestamp LIMIT 1)
 SELECT
 	assessment.id,
-	assessment.course_id,
-	name,
+	courses.id,
+	assessment.name,
 	assessment_types.type,
-	test_result_types.type
-FROM assessment
-JOIN submissions ON submissions.assessment_id = assessment.id
-JOIN assessment_types ON assessment_types.id = assessment.type
-JOIN test_results ON submissions.result_id = test_results.id
-JOIN test_result_types ON test_result_types.id = test_results.id
-WHERE uid = $1
-ORDER BY submissions.timestamp DESC
-LIMIT 1
+	coalesce(statuses.type, 'untested')
+FROM courses
+JOIN enrol ON enrol.course_id = courses.id
+JOIN assessment ON assessment.course_id = enrol.course_id
+JOIN assessment_types ON assessment.type = assessment_types.id
+FULL OUTER JOIN statuses ON statuses.assessment_id = assessment.id
+WHERE enrol.user_uid = $1
 `
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
@@ -195,4 +200,34 @@ WHERE uid = $1`
 	}
 	rows.Close()
 	return submissions, nil
+}
+
+// GetTutorialEnrolment will fetch a list of tutorials for the
+// given UID. If the user is enrolled in the course as a tutor,
+// they are the tutorials the tutor is scheduled to mark.
+func (store *Store) GetTutorialEnrolment(uid string) ([]TutorialEnrolment, error) {
+	query := `
+SELECT
+	id, name
+FROM tutorial_enrol
+JOIN tutorials
+ON tutorial_enrol.tutorial_id = tutorials.id
+WHERE user_uid = $1
+`
+	rows, err := store.db.Query(query, uid)
+	if err != nil {
+		return []TutorialEnrolment{}, err
+	}
+	var enrolment []TutorialEnrolment
+	for rows.Next() {
+		var id, name string
+		err := rows.Scan(&id, &name)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		enrolment = append(enrolment, TutorialEnrolment{})
+	}
+	rows.Close()
+	return enrolment, nil
 }
