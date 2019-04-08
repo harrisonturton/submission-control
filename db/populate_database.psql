@@ -39,9 +39,22 @@ INSERT INTO courses (period, year, code, name) VALUES
 	(1, 2017, 'COMP2310', 'Concurrent & Distributed Systems'),
 	(2, 2017, 'COMP1130', 'Programming as Problem Solving');
 
-INSERT INTO enrol (role, user_uid, course_id) VALUES
+INSERT INTO tutorials (name, course_id) VALUES
+	('Mon 9am', 1),
+	('Wed 10am', 1),
+	('Wed 12pm', 1),
+	('Thur 4pm', 1),
+	('Mon 8:30am', 2),
+	('Tue 5pm', 2),
+	('Wed 11am', 2);
+
+INSERT INTO enrol (role, uid, course_id) VALUES
 	(4, 'u6386433', 1), -- Student for COMP2310
 	(3, 'u6386433', 2); -- Tutor for COMP2300
+
+INSERT INTO tutorial_enrol (uid, tutorial_id) VALUES
+	('u6386433', 1),
+	('u6386433', 2);
 
 INSERT INTO assessment (course_id, type, name) VALUES
 	-- COMP2310 first sem 2019
@@ -71,6 +84,6 @@ INSERT INTO test_results (warnings, errors, type) VALUES
 	('Illegally nested comments', '', 2);
 
 INSERT INTO submissions (uid, timestamp, assessment_id, result_id, title, description, feedback) VALUES
-	('u6386433', '1999-01-08 08:05:06', 1, NULL, 'Add better comments', 'forgot to add comments', 'This is a lot better! I like how you''ve explained the "why", not "what". Good job!'),
+	('u6386433', '1999-01-08 08:05:06', 1, 3, 'Add better comments', 'forgot to add comments', 'This is a lot better! I like how you''ve explained the "why", not "what". Good job!'),
 	('u6386433', '1999-01-08 04:10:06', 1, 1,    'Init commit', 'first try', 'Wow, I can''t believe this even compiled. It''s great that it works, but please clean up your code! Comment it!'),
 	('u6386433', '1999-01-08 04:05:06', 1, 2,    'Second commit', 'Fix the comments issue', 'Awesome!');

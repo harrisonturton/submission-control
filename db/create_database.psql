@@ -1,11 +1,13 @@
 
 -- Remove schema
-DROP TABLE IF EXISTS users        CASCADE;
-DROP TABLE IF EXISTS enrol        CASCADE;
-DROP TABLE IF EXISTS courses      CASCADE;
-DROP TABLE IF EXISTS submissions  CASCADE;
-DROP TABLE IF EXISTS assessment   CASCADE;
-DROP TABLE IF EXISTS test_results CASCADE;
+DROP TABLE IF EXISTS users          CASCADE;
+DROP TABLE IF EXISTS enrol          CASCADE;
+DROP TABLE IF EXISTS courses        CASCADE;
+DROP TABLE IF EXISTS tutorials      CASCADE;
+DROP TABLE IF EXISTS tutorial_enrol CASCADE;
+DROP TABLE IF EXISTS submissions    CASCADE;
+DROP TABLE IF EXISTS assessment     CASCADE;
+DROP TABLE IF EXISTS test_results   CASCADE;
 
 -- Remove enums
 DROP TABLE IF EXISTS roles             CASCADE;
@@ -69,6 +71,15 @@ CREATE TABLE courses (
 	CONSTRAINT once_per_period UNIQUE (code, period, year)
 );
 
+CREATE TABLE tutorials (
+	id        SERIAL       PRIMARY KEY,
+	name      VARCHAR(255) NOT NULL,
+	course_id INTEGER      NOT NULL,
+	-- ensure that tutorials must have unique names within
+	-- a course.
+	CONSTRAINT once_per_course UNIQUE (name, course_id)
+);
+
 CREATE TABLE assessment ( 
 	id           SERIAL          PRIMARY KEY,
 	name         VARCHAR(255)    NOT NULL,	
@@ -94,12 +105,17 @@ CREATE TABLE submissions (
 	timestamp     TIMESTAMP   NOT NULL,
 	uid           VARCHAR(20) NOT NULL REFERENCES users(uid),
 	assessment_id INTEGER     NOT NULL REFERENCES assessment(id),
-	result_id     INTEGER              REFERENCES test_results(id)
+	result_id     INTEGER     NOT NULL REFERENCES test_results(id)
 );
 
 CREATE TABLE enrol (
-	user_uid  VARCHAR(20) NOT NULL REFERENCES users(uid),
+	uid       VARCHAR(20) NOT NULL REFERENCES users(uid),
 	course_id INTEGER     NOT NULL REFERENCES courses(id),
 	role      INTEGER     NOT NULL REFERENCES roles(id),
-	CONSTRAINT one_role_per_course_run UNIQUE (user_uid, course_id)
+	CONSTRAINT one_role_per_course_run UNIQUE (uid, course_id)
+);
+
+CREATE TABLE tutorial_enrol (
+	uid         VARCHAR(20) NOT NULL REFERENCES users(uid),
+	tutorial_id INTEGER     NOT NULL REFERENCES tutorials(id)
 );
