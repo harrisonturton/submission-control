@@ -53,7 +53,7 @@ FROM enrol
 JOIN courses on enrol.course_id = courses.id
 JOIN roles ON enrol.role = roles.id
 JOIN periods ON periods.id = courses.period
-WHERE user_uid = $1
+WHERE uid = $1
 `
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
@@ -105,7 +105,7 @@ JOIN enrol ON enrol.course_id = courses.id
 JOIN assessment ON assessment.course_id = enrol.course_id
 JOIN assessment_types ON assessment.type = assessment_types.id
 FULL OUTER JOIN statuses ON statuses.assessment_id = assessment.id
-WHERE enrol.user_uid = $1
+WHERE enrol.uid = $1
 `
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
@@ -212,7 +212,7 @@ SELECT
 FROM tutorial_enrol
 JOIN tutorials
 ON tutorial_enrol.tutorial_id = tutorials.id
-WHERE user_uid = $1
+WHERE uid = $1
 `
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
