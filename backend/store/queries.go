@@ -202,32 +202,95 @@ WHERE uid = $1`
 	return submissions, nil
 }
 
-// GetTutorialEnrolment will fetch a list of tutorials for the
-// given UID. If the user is enrolled in the course as a tutor,
-// they are the tutorials the tutor is scheduled to mark.
+// GetTutorialEnrolment will fetch all the tutorials for the courses
+// in which the user is enrolled as a tutor. It will fetch all the tutorials,
+// not just the ones assigned to that user.
 func (store *Store) GetTutorialEnrolment(uid string) ([]TutorialEnrolment, error) {
 	query := `
 SELECT
-	id, name
-FROM tutorial_enrol
-JOIN tutorials
-ON tutorial_enrol.tutorial_id = tutorials.id
-WHERE uid = $1
-`
+  tutorials.id,
+  tutorials.name,
+  courses.id,
+  courses.name,
+  courses.code,
+  periods.period,
+  courses.year
+FROM enrol
+JOIN courses ON enrol.course_id = courses.id
+JOIN tutorials ON tutorials.course_id = courses.id
+JOIN periods ON courses.period = periods.id
+WHERE enrol.uid = $1`
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
 		return []TutorialEnrolment{}, err
 	}
 	var enrolment []TutorialEnrolment
 	for rows.Next() {
-		var id, name string
-		err := rows.Scan(&id, &name)
+		var tutorialID, courseID, courseYear int
+		var tutorialName, courseName, courseCode, coursePeriod string
+		err = rows.Scan(
+			&tutorialID,
+			&tutorialName,
+			&courseID,
+			&courseName,
+			&courseCode,
+			&coursePeriod,
+			&courseYear,
+		)
 		if err != nil {
 			log.Println(err.Error())
 			continue
 		}
-		enrolment = append(enrolment, TutorialEnrolment{})
+		tutors, err := store.getTutorsForTutorial(tutorialID)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		enrolment = append(enrolment, TutorialEnrolment{
+			Tutors: tutors,
+			Tutorial: Tutorial{
+				ID:   tutorialID,
+				Name: tutorialName,
+			},
+			Course: Course{
+				ID:         courseID,
+				Name:       courseName,
+				CourseCode: courseCode,
+				Period:     coursePeriod,
+				Year:       courseYear,
+			},
+		})
 	}
 	rows.Close()
 	return enrolment, nil
+}
+
+func (store *Store) getTutorsForTutorial(tutorialID int) ([]string, error) {
+	query := ` 
+SELECT
+  tutorial_enrol.uid
+FROM tutorial_enrol
+JOIN tutorials ON tutorial_enrol.tutorial_id = tutorials.id
+JOIN enrol ON tutorials.course_id = enrol.course_id AND tutorial_enrol.uid = enrol.uid
+JOIN roles ON enrol.role = roles.id
+WHERE roles.role = 'tutor' AND tutorials.id = $1`
+	rows, err := store.db.Query(query, tutorialID)
+	if err != nil {
+		return []string{}, err
+	}
+	var tutors []string
+	for rows.Next() {
+		var uid string
+		err := rows.Scan(&uid)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		tutors = append(tutors, uid)
+	}
+	rows.Close()
+	if len(tutors) == 0 {
+		return []string{}, nil
+	}
+	return tutors, nil
 }

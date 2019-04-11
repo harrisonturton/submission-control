@@ -12,6 +12,7 @@ type Reader interface {
 	GetAssessment(uid string) ([]Assessment, error)
 	GetSubmissions(uid string) ([]Submission, error)
 	GetEnrolment(uid string) ([]Enrolment, error)
+	GetTutorialEnrolment(uid string) ([]TutorialEnrolment, error)
 }
 
 // Store represents the database. It does NOT

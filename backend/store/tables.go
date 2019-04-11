@@ -25,6 +25,21 @@ type Course struct {
 	Year       int    `json:"year"`
 }
 
+// Tutorial represents a lab/tutorial space for a course
+type Tutorial struct {
+	ID     int      `json:"id"`
+	Name   string   `json:"name"`
+	Tutors []string `json:"tutors"`
+}
+
+// TutorialEnrolment shows the tutorials a user
+// is enrolled in.
+type TutorialEnrolment struct {
+	Tutorial Tutorial `json:"tutorial"`
+	Course   Course   `json:"course"`
+	Tutors   []string `json:"tutors"`
+}
+
 // These are the different periods in which a course
 // can be run, each year
 const (
