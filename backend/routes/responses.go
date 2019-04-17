@@ -44,6 +44,11 @@ type SubmissionsResponse struct {
 	Submissions []store.Submission `json:"submissions"`
 }
 
+// TutorialResponse is given on the /tutorials endpoint
+type TutorialResponse struct {
+	Tutorials []store.TutorialEnrolment `json:"tutorials"`
+}
+
 // StudentRecord is the type for each row in a .csv
 type StudentRecord struct {
 	Firstname string
@@ -155,4 +160,17 @@ func buildStudentUploadResponse(store *store.Reader, data io.Reader) ([]byte, er
 		return nil, err
 	}
 	return nil, err
+}
+
+func buildTutorialResponse(store store.Reader, uid string) ([]byte, error) {
+	tutorialEnrolment, err := store.GetTutorialEnrolment(uid)
+	if err != nil {
+		log.Printf("Error getting tutorials: %v\n", err)
+		return nil, err
+	}
+	b, _ := json.Marshal(tutorialEnrolment[0])
+	log.Print(string(b))
+	return json.Marshal(TutorialResponse{
+		Tutorials: tutorialEnrolment,
+	})
 }

@@ -129,6 +129,23 @@ func studentUploadHandler(store store.Reader) http.HandlerFunc {
 	}))
 }
 
+func tutorialHandler(store store.Reader) http.HandlerFunc {
+	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
+		uid, err := queryURL("uid", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		resp, err := buildTutorialResponse(store, uid)
+		if err != nil {
+			log.Println("failed to build tutorial response")
+			writeInternalServerError(w)
+			return
+		}
+		w.Write(resp)
+	}))
+}
+
 func needsAuthorization(handler http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Reject if not authorized

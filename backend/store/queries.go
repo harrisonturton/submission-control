@@ -243,14 +243,32 @@ WHERE enrol.uid = $1`
 		}
 		tutors, err := store.getTutorsForTutorial(tutorialID)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println("Failed to get tutors: " + err.Error())
+			continue
+		}
+		students, err := store.getStudentsForTutorial(tutorialID)
+		if err != nil {
+			log.Println("Failed to get students: " + err.Error())
+			continue
+		}
+		submissions, err := store.getSubmissionsForTutorial(tutorialID)
+		if err != nil {
+			log.Println("Failed to get submissions: " + err.Error())
+			continue
+		}
+		assessment, err := store.getAssessmentForTutorial(tutorialID)
+		if err != nil {
+			log.Println("Failed to get assessment: " + err.Error())
 			continue
 		}
 		enrolment = append(enrolment, TutorialEnrolment{
-			Tutors: tutors,
 			Tutorial: Tutorial{
-				ID:   tutorialID,
-				Name: tutorialName,
+				ID:          tutorialID,
+				Name:        tutorialName,
+				Students:    students,
+				Tutors:      tutors,
+				Submissions: submissions,
+				Assessment:  assessment,
 			},
 			Course: Course{
 				ID:         courseID,
@@ -293,4 +311,144 @@ WHERE roles.role = 'tutor' AND tutorials.id = $1`
 		return []string{}, nil
 	}
 	return tutors, nil
+}
+
+func (store *Store) getStudentsForTutorial(tutorialID int) ([]string, error) {
+	query := ` 
+SELECT
+  tutorial_enrol.uid
+FROM tutorial_enrol
+JOIN tutorials ON tutorial_enrol.tutorial_id = tutorials.id
+JOIN enrol ON tutorials.course_id = enrol.course_id AND tutorial_enrol.uid = enrol.uid
+JOIN roles ON enrol.role = roles.id
+WHERE roles.role = 'student' AND tutorials.id = $1`
+	rows, err := store.db.Query(query, tutorialID)
+	if err != nil {
+		return []string{}, err
+	}
+	var students []string
+	for rows.Next() {
+		var uid string
+		err := rows.Scan(&uid)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		students = append(students, uid)
+	}
+	rows.Close()
+	if len(students) == 0 {
+		return []string{}, nil
+	}
+	return students, nil
+}
+
+// getSubmissionsForTutorial will fetch all the submissions for students in a given
+// tutorial
+func (store *Store) getSubmissionsForTutorial(tutorialID int) ([]Submission, error) {
+	query := `
+SELECT
+  submissions.id,
+  assessment.name,
+  assessment.id,
+  assessment.course_id,
+  submissions.title,
+  submissions.description,
+  submissions.feedback,
+  test_result_types.type,
+  test_results.warnings,
+  test_results.errors,
+  submissions.timestamp
+FROM tutorial_enrol
+JOIN tutorials ON tutorial_enrol.tutorial_id = tutorials.id
+JOIN enrol ON tutorials.course_id = enrol.course_id AND tutorial_enrol.uid = enrol.uid
+JOIN roles ON enrol.role = roles.id
+JOIN submissions ON submissions.uid = enrol.uid
+JOIN assessment ON submissions.assessment_id = assessment.id AND enrol.course_id = assessment.course_id
+JOIN test_results ON submissions.result_id = test_results.id
+JOIN test_result_types ON test_results.type = test_result_types.id
+WHERE roles.role = 'student' AND tutorials.id = $1`
+	rows, err := store.db.Query(query, tutorialID)
+	if err != nil {
+		return []Submission{}, err
+	}
+	var submissions []Submission = []Submission{}
+	for rows.Next() {
+		var title, assessmentName, description, feedback, testResult, warnings, errors string
+		var id, courseID, assessmentID int
+		var timestamp time.Time
+		err := rows.Scan(
+			&id,
+			&assessmentName,
+			&assessmentID,
+			&courseID,
+			&title,
+			&description,
+			&feedback,
+			&testResult,
+			&warnings,
+			&errors,
+			&timestamp,
+		)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		submissions = append(submissions, Submission{
+			ID:             id,
+			AssessmentName: assessmentName,
+			AssessmentID:   assessmentID,
+			CourseID:       courseID,
+			Title:          title,
+			Description:    description,
+			Feedback:       feedback,
+			TestResult:     testResult,
+			Warnings:       warnings,
+			Errors:         errors,
+			Timestamp:      timestamp,
+		})
+	}
+	rows.Close()
+	return submissions, nil
+}
+
+func (store *Store) getAssessmentForTutorial(tutorialID int) ([]Assessment, error) {
+	query := `
+SELECT
+	assessment.id,
+	assessment.course_id,
+	assessment.name,
+	assessment_types.type
+FROM assessment
+JOIN tutorials ON tutorials.id = assessment.course_id
+JOIN assessment_types ON assessment_types.id = assessment.type
+WHERE tutorials.id = $1`
+	rows, err := store.db.Query(query, tutorialID)
+	if err != nil {
+		return []Assessment{}, err
+	}
+	var assessment []Assessment = []Assessment{}
+	for rows.Next() {
+		var assessmentID, courseID int
+		var assessmentName, assessmentType string
+		err := rows.Scan(
+			&assessmentID,
+			&courseID,
+			&assessmentName,
+			&assessmentType,
+		)
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+		assessment = append(assessment, Assessment{
+			ID:         assessmentID,
+			Name:       assessmentName,
+			Type:       assessmentType,
+			CourseID:   courseID,
+			TestResult: "untested",
+		})
+	}
+	rows.Close()
+	return assessment, nil
 }

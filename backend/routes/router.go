@@ -16,6 +16,7 @@ func CreateMux(store *store.Store) *http.ServeMux {
 		"/user":            userHandler(store),
 		"/assessment":      assessmentHandler(store),
 		"/submissions":     submissionsHandler(store),
+		"/tutorials":       tutorialHandler(store),
 		//"/enrol":         enrolHandler(store),
 	}
 	mux := http.NewServeMux()
