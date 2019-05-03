@@ -11,13 +11,11 @@ func CreateMux(store *store.Store) *http.ServeMux {
 	var handlers = map[string]http.HandlerFunc{
 		"/auth":            authHandler(store),
 		"/refresh":         refreshHandler(),
-		"/state":           stateHandler(store),
 		"/upload/students": studentUploadHandler(store),
 		"/user":            userHandler(store),
 		"/assessment":      assessmentHandler(store),
 		"/submissions":     submissionsHandler(store),
 		"/tutorials":       tutorialHandler(store),
-		//"/enrol":         enrolHandler(store),
 	}
 	mux := http.NewServeMux()
 	for route, handler := range handlers {

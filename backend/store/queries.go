@@ -143,6 +143,7 @@ func (store *Store) GetSubmissions(uid string) ([]Submission, error) {
 	query := `
 SELECT
 	submissions.id,
+	uid,
 	title,
 	description,
 	feedback,
@@ -164,11 +165,12 @@ WHERE uid = $1`
 	}
 	var submissions []Submission
 	for rows.Next() {
-		var title, assessmentName, description, feedback, testResult, warnings, errors string
+		var title, uid, assessmentName, description, feedback, testResult, warnings, errors string
 		var id, courseID, assessmentID int
 		var timestamp time.Time
 		err := rows.Scan(
 			&id,
+			&uid,
 			&title,
 			&description,
 			&feedback,
@@ -186,6 +188,7 @@ WHERE uid = $1`
 		}
 		submissions = append(submissions, Submission{
 			ID:             id,
+			UID:            uid,
 			AssessmentName: assessmentName,
 			AssessmentID:   assessmentID,
 			CourseID:       courseID,
@@ -313,32 +316,45 @@ WHERE roles.role = 'tutor' AND tutorials.id = $1`
 	return tutors, nil
 }
 
-func (store *Store) getStudentsForTutorial(tutorialID int) ([]string, error) {
-	query := ` 
+func (store *Store) getStudentsForTutorial(tutorialID int) ([]User, error) {
+	query := `
 SELECT
-  tutorial_enrol.uid
+	users.uid,
+	users.first_name,
+	users.last_name,
+	users.email,
+	users.password
 FROM tutorial_enrol
 JOIN tutorials ON tutorial_enrol.tutorial_id = tutorials.id
 JOIN enrol ON tutorials.course_id = enrol.course_id AND tutorial_enrol.uid = enrol.uid
 JOIN roles ON enrol.role = roles.id
+JOIN users ON users.uid = tutorial_enrol.uid
 WHERE roles.role = 'student' AND tutorials.id = $1`
 	rows, err := store.db.Query(query, tutorialID)
 	if err != nil {
-		return []string{}, err
+		return []User{}, err
 	}
-	var students []string
+	var students []User
 	for rows.Next() {
-		var uid string
-		err := rows.Scan(&uid)
+		var uid, firstName, lastName, email string
+		var passwordHash []byte
+		err := rows.Scan(&uid, &firstName, &lastName, &email, &passwordHash)
 		if err != nil {
 			log.Println(err.Error())
 			continue
 		}
-		students = append(students, uid)
+		students = append(students, User{
+			Email:        email,
+			FirstName:    firstName,
+			LastName:     lastName,
+			UID:          uid,
+			PasswordHash: string(passwordHash),
+			Enrolment:    []Enrolment{},
+		})
 	}
 	rows.Close()
 	if len(students) == 0 {
-		return []string{}, nil
+		return []User{}, nil
 	}
 	return students, nil
 }

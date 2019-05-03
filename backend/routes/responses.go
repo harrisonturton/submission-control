@@ -15,15 +15,6 @@ type TokenResponse struct {
 	Token string `json:"token"`
 }
 
-// StudentStateResponse contains all the state data required to render
-// a students page on the client.
-type StudentStateResponse struct {
-	User        store.User         `json:"user"`
-	Assessment  []store.Assessment `json:"assessment"`
-	Submissions []store.Submission `json:"submissions"`
-	Enrolled    []store.Enrolment  `json:"enrolled"`
-}
-
 // UserResponse contains data for a single user and their
 // enrolled courses.
 type UserResponse struct {
@@ -81,35 +72,6 @@ func buildRefreshResponse(token string) ([]byte, error) {
 	}
 	return json.Marshal(TokenResponse{
 		Token: newToken,
-	})
-}
-
-func buildStudentStateResponse(store store.Reader, uid string) ([]byte, error) {
-	user, err := store.GetUser(uid)
-	if err != nil {
-		log.Printf("Error getting user: %v\n", err)
-		return nil, err
-	}
-	enrollments, err := store.GetEnrolment(uid)
-	if err != nil {
-		log.Printf("Error getting enrolments: %v\n", err)
-		return nil, err
-	}
-	assessment, err := store.GetAssessment(uid)
-	if err != nil {
-		log.Printf("Error getting assessments: %v\n", err)
-		return nil, err
-	}
-	submissions, err := store.GetSubmissions(uid)
-	if err != nil {
-		log.Printf("Error getting submissions: %v\n", err)
-		return nil, err
-	}
-	return json.Marshal(StudentStateResponse{
-		User:        *user,
-		Assessment:  assessment,
-		Submissions: submissions,
-		Enrolled:    enrollments,
 	})
 }
 

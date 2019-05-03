@@ -30,7 +30,7 @@ type Tutorial struct {
 	ID          int          `json:"id"`
 	Name        string       `json:"name"`
 	Tutors      []string     `json:"tutors"`
-	Students    []string     `json:"students"`
+	Students    []User       `json:"students"`
 	Submissions []Submission `json:"submissions"`
 	Assessment  []Assessment `json:"assessment"`
 }
@@ -66,6 +66,7 @@ type Assessment struct {
 // Submission is a single submission made by a user to an assessment item.
 type Submission struct {
 	ID             int    `json:"id"`
+	UID            string `json:"uid"`
 	AssessmentName string `json:"assessment_name"`
 	AssessmentID   int    `json:"assessment_id"`
 	CourseID       int    `json:"course_id"`

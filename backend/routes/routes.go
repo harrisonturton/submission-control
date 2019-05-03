@@ -45,23 +45,6 @@ func refreshHandler() http.HandlerFunc {
 	}))
 }
 
-func stateHandler(store store.Reader) http.HandlerFunc {
-	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
-		uid, err := queryURL("uid", r)
-		if err != nil {
-			writeBadRequest(w)
-			return
-		}
-		resp, err := buildStudentStateResponse(store, uid)
-		if err != nil {
-			log.Println("failed to build state response")
-			writeInternalServerError(w)
-			return
-		}
-		w.Write(resp)
-	}))
-}
-
 func userHandler(store store.Reader) http.HandlerFunc {
 	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
 		uid, err := queryURL("uid", r)
