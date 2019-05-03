@@ -53,9 +53,10 @@ INSERT INTO tutorials (id, name, course_id) VALUES
 INSERT INTO enrol (role, uid, course_id) VALUES
 	(4, 'u6386433', 1), -- Student for COMP2310
 	(3, 'u6386433', 2), -- Tutor for COMP2300
+	(2, 'u6386433', 5), -- Convenor for COMP1130
 	(3, 'u7654321', 2), -- Tutor for COMP2300
-	(3, 'u1111111', 2), -- Student for COMP2300
-	(3, 'u2222222', 2); -- Student for COMP2300
+	(4, 'u1111111', 2), -- Student for COMP2300
+	(4, 'u2222222', 2); -- Student for COMP2300
 
 INSERT INTO tutorial_enrol (uid, tutorial_id) VALUES
 	('u6386433', 1),
