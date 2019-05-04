@@ -27,7 +27,7 @@ var (
 
 // NewServer creates a new Server instance.
 func NewServer(port string, logger *log.Logger, store *store.Store) *Server {
-	mux := routes.CreateMux(store)
+	mux := routes.CreateMux(store, logger)
 	handler := addMiddleware(
 		mux,
 		logAll(logger),

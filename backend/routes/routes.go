@@ -112,6 +112,15 @@ func studentUploadHandler(store store.Reader) http.HandlerFunc {
 	}))
 }
 
+func logHandler(logger *log.Logger) http.HandlerFunc {
+	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
+		// Read data somehow?
+		// io.Copy(&buf, _)
+		// log contents
+		log.Println("Received remote logging")
+	}))
+}
+
 func tutorialHandler(store store.Reader) http.HandlerFunc {
 	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
 		uid, err := queryURL("uid", r)
