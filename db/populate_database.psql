@@ -48,7 +48,10 @@ INSERT INTO tutorials (id, name, course_id) VALUES
 	(4, 'Thur 4pm', 1),
 	(5, 'Mon 8:30am', 2),
 	(6, 'Tue 5pm', 2),
-	(7, 'Wed 11am', 2);
+	(7, 'Wed 11am', 2),
+	(8, 'Mon 10am', 5),
+	(9, 'Tue 5pm', 5),
+	(10, 'Wed 11am', 5);
 
 INSERT INTO enrol (role, uid, course_id) VALUES
 	(4, 'u6386433', 1), -- Student for COMP2310
@@ -85,7 +88,16 @@ INSERT INTO assessment (course_id, type, name) VALUES
 	(2, 2, 'Input Through Interrupts'),
 	(2, 2, 'Connecting Discoboards'),
 	(2, 2, 'DIY Operating System'),
-	(2, 2, 'DOOM');
+	(2, 2, 'DOOM'),
+	-- COMP1130
+	(5, 1, 'Assignment 1'),
+	(5, 1, 'Assignment 2'),
+	(5, 2, 'Lab 1'),
+	(5, 2, 'Lab 2'),
+	(5, 2, 'Lab 3'),
+	(5, 2, 'Lab 4'),
+	(5, 2, 'Lab 5'),
+	(5, 2, 'Lab 6');
 
 INSERT INTO test_results (warnings, errors, type) VALUES
 	('Expected tabs, but receieved spaces', 'Syntax error line 53, column 18', 3),
