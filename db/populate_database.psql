@@ -54,19 +54,33 @@ INSERT INTO tutorials (id, name, course_id) VALUES
 	(10, 'Wed 11am', 5);
 
 INSERT INTO enrol (role, uid, course_id) VALUES
-	(4, 'u6386433', 1), -- Student for COMP2310
-	(3, 'u6386433', 2), -- Tutor for COMP2300
-	(2, 'u6386433', 5), -- Convenor for COMP1130
-	(3, 'u7654321', 2), -- Tutor for COMP2300
-	(4, 'u1111111', 2), -- Student for COMP2300
-	(4, 'u2222222', 2); -- Student for COMP2300
+	-- COMP2310
+	(4, 'u6386433', 1), -- Student 
+	(3, 'u6386433', 2), -- Tutor 
+	-- COMP2300
+	(3, 'u7654321', 2), -- Tutor 
+	(4, 'u1111111', 2), -- Student 
+	(4, 'u2222222', 2), -- Student
+	-- COMP1130
+	(2, 'u6386433', 5), -- Convenor 
+	(3, 'u7654321', 5), -- Tutor 
+	(4, 'u1111111', 5), -- Student 
+	(4, 'u2222222', 5); -- Student
 
 INSERT INTO tutorial_enrol (uid, tutorial_id) VALUES
 	('u6386433', 1),
 	('u6386433', 5),
 	('u7654321', 5),
 	('u1111111', 5),
-	('u2222222', 5);
+	('u2222222', 5),
+	-- COMP1130
+	('u7654321', 7),
+	('u7654321', 7),
+	('u7654321', 8),
+	('u7654321', 9),
+	('u7654321', 10),
+	('u1111111', 10),
+	('u2222222', 10);
 
 INSERT INTO assessment (course_id, type, name) VALUES
 	-- COMP2310 first sem 2019
