@@ -1,11 +1,10 @@
 package routes
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/harrisonturton/submission-control/backend/store"
-	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -34,10 +33,12 @@ func refreshHandler() http.HandlerFunc {
 		uid, err := queryURL("uid", r)
 		if err != nil {
 			writeBadRequest(w)
+			log.Println("Bad request to " + r.URL.Path)
 			return
 		}
 		resp, err := buildRefreshResponse(uid)
 		if err != nil {
+			log.Println("Unauthorized access to " + r.URL.Path)
 			writeUnauthorized(w)
 			return
 		}
@@ -98,17 +99,15 @@ func submissionsHandler(store store.Reader) http.HandlerFunc {
 
 func studentUploadHandler(store store.Reader) http.HandlerFunc {
 	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
-		var buf bytes.Buffer
-		file, _, err := r.FormFile("file")
+		log.Println("Got student upload!")
+		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Println("Failed to get file")
+			log.Println("Failed to read /upload/students request body")
 			writeBadRequest(w)
 			return
 		}
-		defer file.Close()
-		io.Copy(&buf, file)
-		contents := buf.String()
-		w.Write([]byte(contents))
+		log.Println(string(body))
+		w.Write(body)
 	}))
 }
 
@@ -136,17 +135,4 @@ func tutorialHandler(store store.Reader) http.HandlerFunc {
 		}
 		w.Write(resp)
 	}))
-}
-
-func needsAuthorization(handler http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Reject if not authorized
-		if !request.IsAuthorized(r) {
-			log.Println("Unauthorized")
-			writeUnauthorized(w)
-			return
-		}
-		// Else handle normally
-		handler(w, r)
-	})
 }

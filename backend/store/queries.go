@@ -286,32 +286,42 @@ WHERE enrol.uid = $1`
 	return enrolment, nil
 }
 
-func (store *Store) getTutorsForTutorial(tutorialID int) ([]string, error) {
+func (store *Store) getTutorsForTutorial(tutorialID int) ([]User, error) {
 	query := ` 
 SELECT
-  tutorial_enrol.uid
+	users.first_name,
+	users.last_name,
+	users.email,
+	users.uid
 FROM tutorial_enrol
 JOIN tutorials ON tutorial_enrol.tutorial_id = tutorials.id
 JOIN enrol ON tutorials.course_id = enrol.course_id AND tutorial_enrol.uid = enrol.uid
 JOIN roles ON enrol.role = roles.id
+JOIN users ON users.uid = tutorial_enrol.uid
 WHERE roles.role = 'tutor' AND tutorials.id = $1`
 	rows, err := store.db.Query(query, tutorialID)
 	if err != nil {
-		return []string{}, err
+		return []User{}, err
 	}
-	var tutors []string
+	var tutors []User
 	for rows.Next() {
-		var uid string
-		err := rows.Scan(&uid)
+		var firstName, lastName, email, uid string
+		err := rows.Scan(&firstName, &lastName, &email, &uid)
 		if err != nil {
 			log.Println(err.Error())
 			continue
 		}
-		tutors = append(tutors, uid)
+		tutors = append(tutors, User{
+			Email:     email,
+			FirstName: firstName,
+			LastName:  lastName,
+			UID:       uid,
+			Enrolment: []Enrolment{},
+		})
 	}
 	rows.Close()
 	if len(tutors) == 0 {
-		return []string{}, nil
+		return []User{}, nil
 	}
 	return tutors, nil
 }

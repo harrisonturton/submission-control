@@ -29,7 +29,7 @@ type Course struct {
 type Tutorial struct {
 	ID          int          `json:"id"`
 	Name        string       `json:"name"`
-	Tutors      []string     `json:"tutors"`
+	Tutors      []User       `json:"tutors"`
 	Students    []User       `json:"students"`
 	Submissions []Submission `json:"submissions"`
 	Assessment  []Assessment `json:"assessment"`

@@ -61,17 +61,13 @@ func buildAuthResponse(store store.Reader, login LoginRequest) ([]byte, error) {
 	})
 }
 
-func buildRefreshResponse(token string) ([]byte, error) {
-	claims, err := auth.ParseToken(token)
-	if err != nil {
-		return nil, errors.New("failed to generate token")
-	}
-	newToken, err := auth.GenerateToken(claims.UID)
+func buildRefreshResponse(uid string) ([]byte, error) {
+	token, err := auth.GenerateToken(uid)
 	if err != nil {
 		return nil, errors.New("failed to generate token")
 	}
 	return json.Marshal(TokenResponse{
-		Token: newToken,
+		Token: token,
 	})
 }
 

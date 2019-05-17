@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/pkg/errors"
+	"log"
 	"net/http"
 )
 
@@ -20,6 +22,20 @@ func queryURL(key string, r *http.Request) (string, error) {
 		return "", errors.New("failed to get parameter from query url")
 	}
 	return values[0], nil
+}
+
+// needsAuthorization rejects all requests that are not authorized
+func needsAuthorization(handler http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Reject if not authorized
+		if !request.IsAuthorized(r) {
+			log.Println("Unauthorized: " + r.URL.Path)
+			writeUnauthorized(w)
+			return
+		}
+		// Else handle normally
+		handler(w, r)
+	})
 }
 
 // post is middleware that rejects requests that do not have a POST
