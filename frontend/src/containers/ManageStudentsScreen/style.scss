@@ -1,0 +1,63 @@
+@import "../../_partials.scss";
+
+.admin-title {
+	color: $font-colored;
+	font-weight: 300;
+	font-size: 34px;
+	margin-bottom: 10px;
+}
+
+.admin-description {
+	font-size: 16px;
+	line-height: 1.35;
+}
+
+.student-admin-form {
+	margin-top: 15px;
+	display: flex;
+	flex-direction: column;
+}
+
+.student-table {
+	width: 100%;
+	margin-bottom: 20px;
+
+	th {
+		text-align: left;	
+		font-weight: 600;
+		font-size: 12px;
+		color: $font-normal;			
+		padding-bottom: 5px;
+		padding-left: 10px;
+	}
+
+	td {
+		padding: 5px;
+		padding-left: 10px;
+	}
+
+	& tr:nth-child(2n) {
+		background-color: lighten($border-light, 5%);	
+	}
+}
+
+.student-list-header {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 13px;
+	padding-left: 10px;
+	padding-right: 30px;
+}
+
+.student-list-title {
+	color: $branding-highlight;
+	font-size: 0.8em;
+	letter-spacing: normal;
+}
+
+.student-list-subtitle {
+	color: $font-light;
+	font-size: 0.8em;
+	letter-spacing: normal;
+}
+

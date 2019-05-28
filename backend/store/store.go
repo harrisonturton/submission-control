@@ -13,6 +13,17 @@ type Reader interface {
 	GetSubmissions(uid string) ([]Submission, error)
 	GetEnrolment(uid string) ([]Enrolment, error)
 	GetTutorialEnrolment(uid string) ([]TutorialEnrolment, error)
+
+	GetCourse(courseID int) (*Course, error)
+	GetTutorial(tutorialID int) (*Tutorial, error)
+}
+
+// Writer mimics the Store write methods, allowing
+// us to mock the database.
+type Writer interface {
+	WriteUser(user User) error
+	WriteTutorialEnrolment(uid string, tutorialID int) error
+	WriteCourseEnrolment(uid string, courseID int, role string) error
 }
 
 // Store represents the database. It does NOT

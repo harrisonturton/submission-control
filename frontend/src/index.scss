@@ -1,0 +1,49 @@
+@import "_partials.scss";
+
+// Very basic CSS reset
+html, body, * {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	outline: none;
+	border: none;
+	box-sizing: border-box;
+
+	font-family: $font-family;
+	color: $font-normal;
+	font-size: 16px;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a {
+	color: inherit;
+}
+
+h1 {
+	color: $font-colored;
+	font-weight: 300;
+	font-size: 34px;
+	margin-bottom: 10px;
+}
+
+
+.app {
+	width: 100%;
+	height: 100%;
+}
+
+.column-parent {
+	display: flex;
+	flex-direction: row;
+
+	& > .column-right {
+		width: 50%;
+		margin-left: 15px;
+	}
+
+	& > .column-left {
+		width: 50%;
+		margin-right: 15px;
+	}
+}

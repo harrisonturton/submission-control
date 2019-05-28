@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/harrisonturton/submission-control/backend/store"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -97,17 +96,17 @@ func submissionsHandler(store store.Reader) http.HandlerFunc {
 	}))
 }
 
-func studentUploadHandler(store store.Reader) http.HandlerFunc {
+func studentUploadHandler(store *store.Store) http.HandlerFunc {
 	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Got student upload!")
-		body, err := ioutil.ReadAll(r.Body)
+		resp, err := buildStudentUploadResponse(store, r.Body)
 		if err != nil {
-			log.Println("Failed to read /upload/students request body")
-			writeBadRequest(w)
+			log.Println("Failed to build studentUploadResponse")
+			writeInternalServerError(w)
 			return
 		}
-		log.Println(string(body))
-		w.Write(body)
+		log.Println("Got upload respones: " + string(resp))
+		w.Write(resp)
 	}))
 }
 

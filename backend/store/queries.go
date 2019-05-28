@@ -286,6 +286,73 @@ WHERE enrol.uid = $1`
 	return enrolment, nil
 }
 
+// GetCourse will fetch a singular course.
+func (store *Store) GetCourse(courseID int) (*Course, error) {
+	query := `
+SELECT
+	courses.id,
+	courses.code,
+	courses.name,
+	courses.year,
+	periods.period
+FROM courses
+JOIN periods ON periods.id = courses.period
+WHERE courses.id = $1
+`
+	var id, year int
+	var name, courseCode, period string
+	err := store.db.
+		QueryRow(query, courseID).
+		Scan(&id, &courseCode, &name, &year, &period)
+	if err != nil {
+		return nil, err
+	}
+	return &Course{
+		ID:         id,
+		Name:       name,
+		CourseCode: courseCode,
+		Period:     period,
+		Year:       year,
+	}, nil
+}
+
+// GetTutorial will find a tutorial with the given ID
+func (store *Store) GetTutorial(tutorialID int) (*Tutorial, error) {
+	query := `SELECT * FROM tutorials WHERE tutorials.id = $1`
+	var id, courseID int
+	var name string
+	err := store.db.
+		QueryRow(query, tutorialID).
+		Scan(&id, &name, &courseID)
+	if err != nil {
+		return nil, err
+	}
+	tutors, err := store.getTutorsForTutorial(tutorialID)
+	if err != nil {
+		return nil, err
+	}
+	students, err := store.getStudentsForTutorial(tutorialID)
+	if err != nil {
+		return nil, err
+	}
+	submissions, err := store.getSubmissionsForTutorial(tutorialID)
+	if err != nil {
+		return nil, err
+	}
+	assessment, err := store.getAssessmentForTutorial(tutorialID)
+	if err != nil {
+		return nil, err
+	}
+	return &Tutorial{
+		ID:          id,
+		Name:        name,
+		Tutors:      tutors,
+		Students:    students,
+		Submissions: submissions,
+		Assessment:  assessment,
+	}, nil
+}
+
 func (store *Store) getTutorsForTutorial(tutorialID int) ([]User, error) {
 	query := ` 
 SELECT

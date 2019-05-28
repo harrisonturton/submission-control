@@ -110,14 +110,31 @@ func buildSubmissionsResponse(store store.Reader, uid string) ([]byte, error) {
 	})
 }
 
-func buildStudentUploadResponse(store *store.Reader, data io.Reader) ([]byte, error) {
+func buildStudentUploadResponse(store *store.Store, data io.Reader) ([]byte, error) {
 	r := csv.NewReader(data)
-	_, err := r.ReadAll() // [][]string
+	rawTable, err := r.ReadAll()
 	if err != nil {
 		log.Println("Failed to read .csv form data")
 		return nil, err
 	}
-	return nil, err
+	table, err := parseStudentUpload(rawTable)
+	if err != nil {
+		log.Println("Failed to parse .csv form data")
+		return nil, err
+	}
+	for _, row := range table {
+		err := store.WriteUser(row.Student)
+		if err != nil {
+			log.Println("Failed to write user")
+			continue
+		}
+		err = store.WriteTutorialEnrolment(row.Student.UID, row.TutorialID)
+		if err != nil {
+			log.Println("Failed to write enrolment for " + row.Student.UID)
+			continue
+		}
+	}
+	return nil, nil
 }
 
 func buildTutorialResponse(store store.Reader, uid string) ([]byte, error) {
