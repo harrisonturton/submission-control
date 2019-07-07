@@ -16,8 +16,12 @@ type StudentUploadItem struct {
 
 func parseStudentUpload(data [][]string) ([]StudentUploadItem, error) {
 	results := []StudentUploadItem{}
+	log.Println("Inside parseStudentUpload")
+	log.Printf("Data:  %v\nWith length: %d\n", data, len(data))
 	for _, row := range data {
+		log.Printf("Working with row %v\n", row)
 		if len(row) != 6 {
+			log.Printf("Row length is not 6 but %d\n", len(row))
 			continue
 		}
 		tutorialID, err := strconv.Atoi(row[3])
@@ -25,6 +29,7 @@ func parseStudentUpload(data [][]string) ([]StudentUploadItem, error) {
 			log.Println("Invalid tutorial ID: " + row[3])
 			continue
 		}
+		log.Println("With name: " + row[0] + " " + row[1])
 		item := StudentUploadItem{
 			Student: store.User{
 				UID:          row[0],

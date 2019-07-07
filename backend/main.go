@@ -45,6 +45,12 @@ func createStore(logger *log.Logger) *store.Store {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	err = store.WriteSubmission("u6386433", 1, "Submission Test", "Description", []byte("File content"))
+	if err != nil {
+		log.Printf("Got error when writing submission: %v\n", err)
+		return store
+	}
+	log.Printf("Wrote submission!\n")
 	return store
 }
 

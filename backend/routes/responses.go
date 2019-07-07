@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"github.com/harrisonturton/submission-control/backend/auth"
@@ -110,16 +111,30 @@ func buildSubmissionsResponse(store store.Reader, uid string) ([]byte, error) {
 	})
 }
 
-func buildStudentUploadResponse(store *store.Store, data io.Reader) ([]byte, error) {
+func buildSubmissionUploadResponse(store *store.Store, assessmentID int, data io.Reader) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	_, err := buf.ReadFrom(data)
+	if err != nil {
+		log.Println("Failed to read assessment submission " + err.Error())
+		return nil, err
+	}
+	// TODO write to database
+	log.Println("Pretend to write to database...")
+	log.Println(buf.String())
+	return nil, nil
+}
+
+func buildStudentUploadResponse(store *store.Store, courseID int, data io.Reader) ([]byte, error) {
 	r := csv.NewReader(data)
 	rawTable, err := r.ReadAll()
 	if err != nil {
-		log.Println("Failed to read .csv form data")
+		log.Println("Failed to read .csv form data " + err.Error())
 		return nil, err
 	}
+	log.Println(rawTable)
 	table, err := parseStudentUpload(rawTable)
 	if err != nil {
-		log.Println("Failed to parse .csv form data")
+		log.Println("Failed to parse .csv form data! I don't understand it: " + err.Error())
 		return nil, err
 	}
 	for _, row := range table {
@@ -128,10 +143,13 @@ func buildStudentUploadResponse(store *store.Store, data io.Reader) ([]byte, err
 			log.Println("Failed to write user")
 			continue
 		}
+		err = store.WriteCourseEnrolment(row.Student.UID, courseID, 4)
+		if err != nil {
+			log.Println("Failed to write course enrolment for " + string(courseID))
+		}
 		err = store.WriteTutorialEnrolment(row.Student.UID, row.TutorialID)
 		if err != nil {
-			log.Println("Failed to write enrolment for " + row.Student.UID)
-			continue
+			log.Println("Failed to write tutorial enrolment for " + row.Student.UID)
 		}
 	}
 	return nil, nil

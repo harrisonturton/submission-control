@@ -6,6 +6,7 @@ import (
 	"github.com/harrisonturton/submission-control/backend/store"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func authHandler(store store.Reader) http.HandlerFunc {
@@ -99,13 +100,47 @@ func submissionsHandler(store store.Reader) http.HandlerFunc {
 func studentUploadHandler(store *store.Store) http.HandlerFunc {
 	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Got student upload!")
-		resp, err := buildStudentUploadResponse(store, r.Body)
+		rawCourseID, err := queryURL("course_id", r)
 		if err != nil {
-			log.Println("Failed to build studentUploadResponse")
+			writeBadRequest(w)
+			return
+		}
+		courseID, err := strconv.Atoi(rawCourseID)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		resp, err := buildStudentUploadResponse(store, courseID, r.Body)
+		if err != nil {
+			log.Println("Failed to build studentUploadResponse " + err.Error())
 			writeInternalServerError(w)
 			return
 		}
 		log.Println("Got upload respones: " + string(resp))
+		w.Write(resp)
+	}))
+}
+
+func submissionUploadHandler(store *store.Store) http.HandlerFunc {
+	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Got submission upload!")
+		rawAssessmentID, err := queryURL("assessment_id", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		assessmentID, err := strconv.Atoi(rawAssessmentID)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		resp, err := buildSubmissionUploadResponse(store, assessmentID, r.Body)
+		if err != nil {
+			log.Println("Failed to build submissionUploadResponse " + err.Error())
+			writeInternalServerError(w)
+			return
+		}
+		log.Println("Got upload response: " + string(resp))
 		w.Write(resp)
 	}))
 }

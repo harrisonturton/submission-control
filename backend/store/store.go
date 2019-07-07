@@ -23,7 +23,9 @@ type Reader interface {
 type Writer interface {
 	WriteUser(user User) error
 	WriteTutorialEnrolment(uid string, tutorialID int) error
-	WriteCourseEnrolment(uid string, courseID int, role string) error
+	WriteCourseEnrolment(uid string, courseID int, role int) error
+	WriteSubmission(uid string, assessmentID int, title string, description string, file []byte) (int64, error)
+	WriteTestResult(testWarnings, testErrors, resultType string) (int64, error)
 }
 
 // Store represents the database. It does NOT
