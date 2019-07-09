@@ -111,16 +111,19 @@ func buildSubmissionsResponse(store store.Reader, uid string) ([]byte, error) {
 	})
 }
 
-func buildSubmissionUploadResponse(store *store.Store, assessmentID int, data io.Reader) ([]byte, error) {
+func buildSubmissionUploadResponse(store *store.Store, uid string, title string, description string, assessmentID int, data io.Reader) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(data)
 	if err != nil {
 		log.Println("Failed to read assessment submission " + err.Error())
 		return nil, err
 	}
-	// TODO write to database
-	log.Println("Pretend to write to database...")
-	log.Println(buf.String())
+	log.Println("Writing: %s\n", buf.String())
+	err = store.WriteSubmission(uid, assessmentID, title, description, buf.Bytes())
+	if err != nil {
+		log.Println("Failed to write submission: " + err.Error())
+		return nil, err
+	}
 	return nil, nil
 }
 
@@ -161,8 +164,6 @@ func buildTutorialResponse(store store.Reader, uid string) ([]byte, error) {
 		log.Printf("Error getting tutorials: %v\n", err)
 		return nil, err
 	}
-	b, _ := json.Marshal(tutorialEnrolment[0])
-	log.Print(string(b))
 	return json.Marshal(TutorialResponse{
 		Tutorials: tutorialEnrolment,
 	})

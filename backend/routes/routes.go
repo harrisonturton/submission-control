@@ -124,6 +124,21 @@ func studentUploadHandler(store *store.Store) http.HandlerFunc {
 func submissionUploadHandler(store *store.Store) http.HandlerFunc {
 	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Got submission upload!")
+		uid, err := queryURL("uid", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		title, err := queryURL("title", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		description, err := queryURL("description", r)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
 		rawAssessmentID, err := queryURL("assessment_id", r)
 		if err != nil {
 			writeBadRequest(w)
@@ -134,7 +149,7 @@ func submissionUploadHandler(store *store.Store) http.HandlerFunc {
 			writeBadRequest(w)
 			return
 		}
-		resp, err := buildSubmissionUploadResponse(store, assessmentID, r.Body)
+		resp, err := buildSubmissionUploadResponse(store, uid, title, description, assessmentID, r.Body)
 		if err != nil {
 			log.Println("Failed to build submissionUploadResponse " + err.Error())
 			writeInternalServerError(w)

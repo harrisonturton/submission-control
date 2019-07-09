@@ -87,26 +87,31 @@ WHERE uid = $1
 // GetAssessment will fetch the entire list of assessments for some student
 func (store *Store) GetAssessment(uid string) ([]Assessment, error) {
 	query := `
-WITH statuses AS (
-	SELECT
-		submissions.assessment_id,
-		type
-	FROM submissions
-	JOIN test_result_types ON test_result_types.id = submissions.result_id
-	ORDER BY timestamp LIMIT 1)
+WITH
+	test_results AS (
+		SELECT
+			submissions.title,
+			submissions.assessment_id,
+			test_result_types.type
+		FROM submissions
+		JOIN test_results ON submissions.id = test_results.submission_id
+		JOIN test_result_types ON test_result_types.id = test_results.type),
+	enrolled_courses AS (
+		SELECT
+			*
+		FROM courses
+		JOIN enrol ON enrol.course_id = courses.id
+		WHERE enrol.uid=$1)
 SELECT
 	assessment.id,
-	courses.id,
+	enrolled_courses.course_id,
 	assessment.name,
 	assessment_types.type,
-	coalesce(statuses.type, 'untested')
-FROM courses
-JOIN enrol ON enrol.course_id = courses.id
-JOIN assessment ON assessment.course_id = enrol.course_id
-JOIN assessment_types ON assessment.type = assessment_types.id
-FULL OUTER JOIN statuses ON statuses.assessment_id = assessment.id
-WHERE enrol.uid = $1
-`
+	coalesce(test_results.type, 'untested')
+FROM assessment
+JOIN enrolled_courses ON assessment.course_id = enrolled_courses.course_id
+JOIN assessment_types ON assessment_types.id = assessment.type
+LEFT JOIN test_results ON assessment.id = test_results.assessment_id`
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
 		return []Assessment{}, err
@@ -148,17 +153,18 @@ SELECT
 	description,
 	feedback,
 	timestamp,
-	name as assessment_name,
+	name AS assessment_name,
 	course_id,
 	assessment_id,
-	test_result_types.type AS test_result,
+	COALESCE(test_result_types.type, 'untested'),
 	warnings,
 	errors
 FROM submissions
-JOIN assessment ON assessment_id = assessment.id
-JOIN test_results ON result_id = test_results.id
-JOIN test_result_types ON test_results.type = test_result_types.id
-WHERE uid = $1`
+JOIN assessment on assessment.id = submissions.assessment_id
+LEFT JOIN test_results ON test_results.submission_id = submissions.id
+LEFT JOIN test_result_types ON test_results.type = test_result_types.id
+WHERE uid=$1
+`
 	rows, err := store.db.Query(query, uid)
 	if err != nil {
 		return []Submission{}, err
@@ -458,7 +464,7 @@ JOIN enrol ON tutorials.course_id = enrol.course_id AND tutorial_enrol.uid = enr
 JOIN roles ON enrol.role = roles.id
 JOIN submissions ON submissions.uid = enrol.uid
 JOIN assessment ON submissions.assessment_id = assessment.id AND enrol.course_id = assessment.course_id
-JOIN test_results ON submissions.result_id = test_results.id
+JOIN test_results ON submissions.id = test_results.submission_id
 JOIN test_result_types ON test_results.type = test_result_types.id
 WHERE roles.role = 'student' AND tutorials.id = $1`
 	rows, err := store.db.Query(query, tutorialID)

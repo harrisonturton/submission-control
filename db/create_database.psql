@@ -92,7 +92,7 @@ CREATE TABLE assessment (
 
 CREATE TABLE submissions (
 	id            SERIAL      PRIMARY KEY,
-	feedback      TEXT,
+	feedback      TEXT        NOT NULL,
 	title         TEXT        NOT NULL,
 	description   TEXT        NOT NULL,
 	timestamp     TIMESTAMP   NOT NULL,
@@ -105,7 +105,7 @@ CREATE TABLE test_results (
 	submission_id INTEGER PRIMARY KEY REFERENCES submissions(id),
 	warnings      TEXT    NOT NULL,
 	errors        TEXT    NOT NULL,
-	type          INTEGER NOT NULL REFERENCES test_result_types(id),
+	type          INTEGER NOT NULL REFERENCES test_result_types(id)
 );
 
 CREATE TABLE enrol (
