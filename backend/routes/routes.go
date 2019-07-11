@@ -161,7 +161,7 @@ func submissionUploadHandler(store *store.Store) http.HandlerFunc {
 			return
 		}
 		formValueParams, ok := form.Value["title"]
-		if ok || len(formValueParams) == 0 {
+		if !ok || len(formValueParams) == 0 {
 			log.Println("submissionUploadHandler could not find submission title")
 			writeBadRequest(w)
 		}

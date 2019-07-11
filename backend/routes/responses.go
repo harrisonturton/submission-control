@@ -118,7 +118,7 @@ func buildSubmissionUploadResponse(store *store.Store, uid string, title string,
 		log.Println("Failed to read assessment submission " + err.Error())
 		return nil, err
 	}
-	log.Println("Writing: %s\n", buf.String())
+	log.Printf("Writing: %s\n", buf.String())
 	err = store.WriteSubmission(uid, assessmentID, title, description, buf.Bytes())
 	if err != nil {
 		log.Println("Failed to write submission: " + err.Error())
