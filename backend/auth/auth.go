@@ -24,7 +24,7 @@ var (
 	// TokenTimeout is the duration a client can use the token to
 	// access authenticated resources, after which it will be
 	// rejected.
-	TokenTimeout = time.Minute * 10
+	TokenTimeout = time.Minute * 60 * 3
 )
 
 // ParseToken parses a token into a Claims instance

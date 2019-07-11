@@ -26,7 +26,7 @@ func addMiddleware(handler http.Handler, middlewares ...Middleware) http.Handler
 // Middleware functions
 
 // attachContext will verify the request, read the body, and store these results
-// in the request.Context object. See server/context.go for more details.
+// in the request.Context object. See request/request.go for more details.
 func attachContext() Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

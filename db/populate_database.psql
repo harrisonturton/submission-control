@@ -122,6 +122,6 @@ INSERT INTO submissions (uid, timestamp, assessment_id, data, title, description
 
 INSERT INTO test_results (submission_id, type, warnings, errors) VALUES
 	(1, 3, 'Expected tabs but got spaces', 'Syntax error at 53:18'),
-	(2, 1, '', ''),
+	(2, 1, ' ', ' '),
 	(3, 2, 'Illegally nested comments', ''),
-	(4, 4, '', '');
+	(4, 4, ' ', ' ');

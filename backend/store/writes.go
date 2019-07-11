@@ -42,8 +42,8 @@ ON CONFLICT DO UPDATE`
 // WriteSubmission will write a submission to the database.
 func (store *Store) WriteSubmission(uid string, assessmentID int, title string, description string, file []byte) error {
 	command := `
-INSERT INTO submissions (uid, timestamp, assessment_id, data, title, description) VALUES
-	($1, $2, $3, $4, $5, $6)
+INSERT INTO submissions (uid, timestamp, assessment_id, data, title, description, feedback) VALUES
+	($1, $2, $3, $4, $5, $6, '')
 `
 	_, err := store.db.Exec(command, uid, time.Now(), assessmentID, file, title, description)
 	return errors.Wrap(err, "failed to write submission")
