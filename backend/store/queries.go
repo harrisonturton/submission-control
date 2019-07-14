@@ -171,7 +171,8 @@ WHERE uid=$1
 	}
 	var submissions []Submission
 	for rows.Next() {
-		var title, uid, assessmentName, description, feedback, testResult, warnings, errors string
+		var warnings, errors *string
+		var title, uid, assessmentName, description, feedback, testResult string
 		var id, courseID, assessmentID int
 		var timestamp time.Time
 		err := rows.Scan(
@@ -473,7 +474,8 @@ WHERE roles.role = 'student' AND tutorials.id = $1`
 	}
 	var submissions []Submission = []Submission{}
 	for rows.Next() {
-		var title, assessmentName, description, feedback, testResult, warnings, errors string
+		var warnings, errors *string
+		var title, assessmentName, description, feedback, testResult string
 		var id, courseID, assessmentID int
 		var timestamp time.Time
 		err := rows.Scan(
