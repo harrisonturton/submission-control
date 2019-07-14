@@ -13,6 +13,8 @@ import (
 	"github.com/harrisonturton/submission-control/backend/server"
 	"os/signal"
 	"sync"
+
+	"github.com/harrisonturton/submission-control/backend/ci"
 )
 
 var (
@@ -29,8 +31,9 @@ const (
 func main() {
 	logger := log.New(os.Stdout, "[server] ", log.LstdFlags)
 	store := createStore(logger)
-	srv := server.NewServer(*port, logger, store)
-	runServer(srv)
+	ci := ci.NewCi(log.New(os.Stdout, "[ci] ", log.LstdFlags), store)
+	srv := server.NewServer(*port, logger, store, ci)
+	runServer(srv, ci)
 	logger.Println("Exiting.")
 }
 
@@ -45,12 +48,6 @@ func createStore(logger *log.Logger) *store.Store {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	err = store.WriteSubmission("u6386433", 1, "Submission Test", "Description", []byte("File content"))
-	if err != nil {
-		log.Printf("Got error when writing submission: %v\n", err)
-		return store
-	}
-	log.Printf("Wrote submission!\n")
 	return store
 }
 
@@ -63,14 +60,16 @@ func createDatabase() (*sql.DB, error) {
 }
 
 // runServer will run the server until an interrupt is sent
-func runServer(srv *server.Server) {
+func runServer(srv *server.Server, ci *ci.Ci) {
 	// Boilerplate for graceful shutdown
 	var wg sync.WaitGroup
 	done := make(chan struct{})
 	// Run server
-	wg.Add(1)
+	wg.Add(2)
 	//go srv.ServeTLS(certFile, keyFile, &wg, done)
 	go srv.Serve(&wg, done)
+	go ci.Run(5, &wg, done)
+	ci.Notify()
 	// Kill server on SIGINT
 	wg.Add(1)
 	kill := make(chan os.Signal, 1)

@@ -14,6 +14,8 @@ type Reader interface {
 	GetEnrolment(uid string) ([]Enrolment, error)
 	GetTutorialEnrolment(uid string) ([]TutorialEnrolment, error)
 	GetSubmissionFiles(submissionID int) ([]byte, error)
+	GetUntestedSubmissionIDs() ([]Submission, error)
+	GetAssessmentSpec(assessmentID int) ([]byte, error)
 
 	GetCourse(courseID int) (*Course, error)
 	GetTutorial(tutorialID int) (*Tutorial, error)

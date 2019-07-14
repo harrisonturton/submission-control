@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/harrisonturton/submission-control/backend/ci"
 	"github.com/harrisonturton/submission-control/backend/routes"
 	"github.com/harrisonturton/submission-control/backend/store"
 	"log"
@@ -17,6 +18,7 @@ type Server struct {
 	logger *log.Logger
 	server *http.Server
 	store  *store.Store
+	ci     *ci.Ci
 }
 
 var (
@@ -26,8 +28,8 @@ var (
 )
 
 // NewServer creates a new Server instance.
-func NewServer(port string, logger *log.Logger, store *store.Store) *Server {
-	mux := routes.CreateMux(store, logger)
+func NewServer(port string, logger *log.Logger, store *store.Store, ci *ci.Ci) *Server {
+	mux := routes.CreateMux(store, logger, ci)
 	handler := addMiddleware(
 		mux,
 		logAll(logger),
@@ -37,6 +39,7 @@ func NewServer(port string, logger *log.Logger, store *store.Store) *Server {
 	return &Server{
 		logger: logger,
 		store:  store,
+		ci:     ci,
 		server: &http.Server{
 			Addr:         ":" + port,
 			Handler:      handler,

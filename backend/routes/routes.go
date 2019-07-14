@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/go-chi/chi"
+	"github.com/harrisonturton/submission-control/backend/ci"
 	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/harrisonturton/submission-control/backend/store"
 	"log"
@@ -172,7 +173,7 @@ func studentUploadHandler(store *store.Store) http.HandlerFunc {
 	}))
 }
 
-func submissionUploadHandler(store *store.Store) http.HandlerFunc {
+func submissionUploadHandler(store *store.Store, ci *ci.Ci) http.HandlerFunc {
 	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
 		contentTypeParams, ok := r.Header["Content-Type"]
 		if !ok {
@@ -250,7 +251,7 @@ func submissionUploadHandler(store *store.Store) http.HandlerFunc {
 			writeBadRequest(w)
 			return
 		}
-		resp, err := buildSubmissionUploadResponse(store, uid, title, description, int(assessmentID), fileReader)
+		resp, err := buildSubmissionUploadResponse(store, ci, uid, title, description, int(assessmentID), fileReader)
 		if err != nil {
 			log.Println("Failed to build submissionUploadResponse " + err.Error())
 			writeInternalServerError(w)

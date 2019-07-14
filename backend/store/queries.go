@@ -6,6 +6,36 @@ import (
 	"time"
 )
 
+// GetUntestedSubmissionIDs will fetch all submissions which have not been tested yet
+func (store *Store) GetUntestedSubmissionIDs() ([]Submission, error) {
+	query := `
+SELECT
+	submissions.id,
+	submissions.assessment_id
+FROM submissions
+LEFT JOIN test_results ON submissions.id = test_results.submission_id
+LEFT JOIN test_result_types ON test_result_types.id = test_results.type
+WHERE coalesce(test_result_types.type, 'unteseted') = 'untested'`
+	rows, err := store.db.Query(query)
+	if err != nil {
+		return []Submission{}, err
+	}
+	var ids []Submission
+	for rows.Next() {
+		var id, assessmentID int
+		err := rows.Scan(&id, &assessmentID)
+		if err != nil {
+			log.Printf("failed to scan submissionID in GetUntestedSubmissionIDs: %v\n", err)
+			continue
+		}
+		ids = append(ids, Submission{
+			ID:           id,
+			AssessmentID: assessmentID,
+		})
+	}
+	return ids, nil
+}
+
 // GetUser will fetch the data for a single user
 func (store *Store) GetUser(uid string) (*User, error) {
 	query := `
@@ -325,10 +355,18 @@ WHERE courses.id = $1
 
 // GetSubmissionFiles will fetch the files saved for an assessment submission
 func (store *Store) GetSubmissionFiles(submissionID int) ([]byte, error) {
-	query := `SELECT data FROM submissions WHERE submissions.id = $1`
+	query := `SELECT data FROM submissions WHERE id = $1`
 	var data []byte
 	err := store.db.QueryRow(query, submissionID).Scan(&data)
 	return data, err
+}
+
+// GetAssessmentSpec will fetch the files saved for an assessment submission
+func (store *Store) GetAssessmentSpec(assessmentID int) ([]byte, error) {
+	query := `SELECT test_spec FROM assessment WHERE assessment.id = $1`
+	var testSpec []byte
+	err := store.db.QueryRow(query, assessmentID).Scan(&testSpec)
+	return testSpec, err
 }
 
 // GetTutorial will find a tutorial with the given ID

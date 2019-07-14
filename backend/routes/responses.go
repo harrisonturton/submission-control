@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"github.com/harrisonturton/submission-control/backend/auth"
+	"github.com/harrisonturton/submission-control/backend/ci"
 	"github.com/harrisonturton/submission-control/backend/store"
 	"github.com/pkg/errors"
 	"io"
@@ -116,7 +117,7 @@ func buildSubmissionsResponse(store store.Reader, uid string) ([]byte, error) {
 	})
 }
 
-func buildSubmissionUploadResponse(store *store.Store, uid string, title string, description string, assessmentID int, data io.Reader) ([]byte, error) {
+func buildSubmissionUploadResponse(store *store.Store, ci *ci.Ci, uid string, title string, description string, assessmentID int, data io.Reader) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(data)
 	if err != nil {
@@ -129,6 +130,7 @@ func buildSubmissionUploadResponse(store *store.Store, uid string, title string,
 		log.Println("Failed to write submission: " + err.Error())
 		return nil, err
 	}
+	ci.Notify()
 	return nil, nil
 }
 
