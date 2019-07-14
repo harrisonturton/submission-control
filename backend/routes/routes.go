@@ -3,6 +3,7 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/go-chi/chi"
 	"github.com/harrisonturton/submission-control/backend/request"
 	"github.com/harrisonturton/submission-control/backend/store"
 	"log"
@@ -97,6 +98,49 @@ func submissionsHandler(store store.Reader) http.HandlerFunc {
 		resp, err := buildSubmissionsResponse(store, uid)
 		if err != nil {
 			log.Println("failed to build submissions response")
+			writeInternalServerError(w)
+			return
+		}
+		w.Write(resp)
+	}))
+}
+
+func submissionFileHandler(store *store.Store) http.HandlerFunc {
+	return needsAuthorization(get(func(w http.ResponseWriter, r *http.Request) {
+		rawSubmissionID := chi.URLParam(r, "submissionID")
+		submissionID, err := strconv.ParseInt(rawSubmissionID, 10, 32)
+		if err != nil {
+			log.Printf("could not parse submission ID %s: %v\n", rawSubmissionID, err)
+			writeBadRequest(w)
+		}
+		file, err := store.GetSubmissionFiles(int(submissionID))
+		if err != nil {
+			log.Printf("failed to get submissions file: %v\n", err)
+			writeInternalServerError(w)
+			return
+		}
+		w.Write(file)
+	}))
+}
+
+func submissionFeedbackHandler(store *store.Store) http.HandlerFunc {
+	return needsAuthorization(post(func(w http.ResponseWriter, r *http.Request) {
+		// Unmarshal the POST body
+		var feedbackReq SubmissionFeedbackRequest
+		err := json.Unmarshal(request.GetBody(r), &feedbackReq)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
+		rawSubmissionID := chi.URLParam(r, "submissionID")
+		submissionID, err := strconv.ParseInt(rawSubmissionID, 10, 32)
+		if err != nil {
+			log.Printf("could not parse submission ID %s: %v\n", rawSubmissionID, err)
+			writeBadRequest(w)
+		}
+		resp, err := buildSubmissionsFeedbackResponse(store, int(submissionID), feedbackReq.Feedback)
+		if err != nil {
+			log.Printf("failed to build submissions feedback response: %v\n", err)
 			writeInternalServerError(w)
 			return
 		}
@@ -214,49 +258,6 @@ func submissionUploadHandler(store *store.Store) http.HandlerFunc {
 		}
 		log.Println("Got upload response: " + string(resp))
 		w.Write(resp)
-		/*
-			contentType := r.Header["Content-Type"][0]
-			log.Println(contentType)
-			mediatype, params, err := mime.ParseMediaType(contentType)
-			if err != nil {
-				log.Printf("Failed to parse media type: %v\n", err)
-				return
-			}
-			boundary := params["boundary"]
-			log.Printf("%s %v", mediatype, params)
-			body := request.GetBody(r)
-			form, err := multipart.NewReader(bytes.NewReader(body), boundary).ReadForm(1000 * mb)
-			if err != nil {
-				log.Printf("Failed to read form: %v\n", err)
-				return
-			}
-			rawFile := form.File["file"][0]
-			file, err := rawFile.Open()
-			if err != nil {
-				log.Printf("Failed to open file: %v\n", err)
-				return
-			}
-			log.Printf("Title: %s\n", form.Value["title"])
-			log.Printf("Description: %s\n", form.Value["description"])
-			f, _ := ioutil.ReadAll(file)
-			log.Printf("File: %v\n", string(f))
-			writeInternalServerError(w)
-			/*
-				assessmentID:[1]
-				description:[asdf]
-				name:[test.txt.zip]
-				relativePath:[null]
-				title:[sadf]
-				type:[application/zip]] map[file:[0xc0000a0190]]}
-		*/
-		/*resp, err := buildSubmissionUploadResponse(store, uid, title, description, assessmentID, r.Body)
-		if err != nil {
-			log.Println("Failed to build submissionUploadResponse " + err.Error())
-			writeInternalServerError(w)
-			return
-		}
-		log.Println("Got upload response: " + string(resp))
-		w.Write(resp)*/
 	}))
 }
 

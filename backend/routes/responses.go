@@ -100,6 +100,11 @@ func buildAssessmentResponse(store store.Reader, uid string) ([]byte, error) {
 	})
 }
 
+func buildSubmissionsFeedbackResponse(store store.Writer, submissionID int, feedback string) ([]byte, error) {
+	err := store.WriteSubmissionFeedback(submissionID, feedback)
+	return []byte{}, err
+}
+
 func buildSubmissionsResponse(store store.Reader, uid string) ([]byte, error) {
 	submissions, err := store.GetSubmissions(uid)
 	if err != nil {

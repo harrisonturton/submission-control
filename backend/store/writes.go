@@ -49,6 +49,13 @@ INSERT INTO submissions (uid, timestamp, assessment_id, data, title, description
 	return errors.Wrap(err, "failed to write submission")
 }
 
+// WriteSubmissionFeedback will write new feedback onto a submission
+func (store *Store) WriteSubmissionFeedback(submissionID int, feedback string) error {
+	command := `UPDATE submissions SET feedback=$1 WHERE id=$2`
+	_, err := store.db.Exec(command, feedback, submissionID)
+	return errors.Wrap(err, "failed to write submission feedback")
+}
+
 // WriteTestResult will write a test result to the database.
 func (store *Store) WriteTestResult(submissionID int, testWarnings, testErrors, resultType string) error {
 	command := `

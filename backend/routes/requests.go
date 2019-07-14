@@ -15,3 +15,9 @@ type LoginRequest struct {
 type RefreshRequest struct {
 	Token string `json:"token"`
 }
+
+// SubmissionFeedbackRequest is a request to modify
+// feedback on a certain assessment submission.
+type SubmissionFeedbackRequest struct {
+	Feedback string `json:"feedback"`
+}

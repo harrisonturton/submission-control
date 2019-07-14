@@ -13,6 +13,7 @@ type Reader interface {
 	GetSubmissions(uid string) ([]Submission, error)
 	GetEnrolment(uid string) ([]Enrolment, error)
 	GetTutorialEnrolment(uid string) ([]TutorialEnrolment, error)
+	GetSubmissionFiles(submissionID int) ([]byte, error)
 
 	GetCourse(courseID int) (*Course, error)
 	GetTutorial(tutorialID int) (*Tutorial, error)
@@ -24,8 +25,9 @@ type Writer interface {
 	WriteUser(user User) error
 	WriteTutorialEnrolment(uid string, tutorialID int) error
 	WriteCourseEnrolment(uid string, courseID int, role int) error
-	WriteSubmission(uid string, assessmentID int, title string, description string, file []byte) (int64, error)
-	WriteTestResult(testWarnings, testErrors, resultType string) (int64, error)
+	WriteSubmission(uid string, assessmentID int, title string, description string, file []byte) error
+	WriteSubmissionFeedback(submissionID int, feedback string) error
+	WriteTestResult(submissionID int, testWarnings, testErrors, resultType string) error
 }
 
 // Store represents the database. It does NOT

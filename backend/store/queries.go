@@ -323,6 +323,14 @@ WHERE courses.id = $1
 	}, nil
 }
 
+// GetSubmissionFiles will fetch the files saved for an assessment submission
+func (store *Store) GetSubmissionFiles(submissionID int) ([]byte, error) {
+	query := `SELECT data FROM submissions WHERE submissions.id = $1`
+	var data []byte
+	err := store.db.QueryRow(query, submissionID).Scan(&data)
+	return data, err
+}
+
 // GetTutorial will find a tutorial with the given ID
 func (store *Store) GetTutorial(tutorialID int) (*Tutorial, error) {
 	query := `SELECT * FROM tutorials WHERE tutorials.id = $1`
@@ -453,6 +461,7 @@ SELECT
   assessment.id,
   assessment.course_id,
   submissions.title,
+  submissions.uid,
   submissions.description,
   submissions.feedback,
   test_result_types.type,
@@ -475,7 +484,7 @@ WHERE roles.role = 'student' AND tutorials.id = $1`
 	var submissions []Submission = []Submission{}
 	for rows.Next() {
 		var warnings, errors *string
-		var title, assessmentName, description, feedback, testResult string
+		var title, assessmentName, uid, description, feedback, testResult string
 		var id, courseID, assessmentID int
 		var timestamp time.Time
 		err := rows.Scan(
@@ -484,6 +493,7 @@ WHERE roles.role = 'student' AND tutorials.id = $1`
 			&assessmentID,
 			&courseID,
 			&title,
+			&uid,
 			&description,
 			&feedback,
 			&testResult,
@@ -497,6 +507,7 @@ WHERE roles.role = 'student' AND tutorials.id = $1`
 		}
 		submissions = append(submissions, Submission{
 			ID:             id,
+			UID:            uid,
 			AssessmentName: assessmentName,
 			AssessmentID:   assessmentID,
 			CourseID:       courseID,
