@@ -75,8 +75,8 @@ type Submission struct {
 	Feedback       string `json:"feedback"`
 
 	TestResult string    `json:"test_result"`
-	Warnings   *string   `json:"warnings"`
-	Errors     *string   `json:"errors"`
+	Stdout     string    `json:"stdout"`
+	Stderr     string    `json:"stderr"`
 	Timestamp  time.Time `json:"timestamp"`
 }
 

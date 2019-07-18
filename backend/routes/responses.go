@@ -134,8 +134,8 @@ func buildSubmissionUploadResponse(store *store.Store, ci *ci.Ci, uid string, ti
 	return nil, nil
 }
 
-func buildStudentUploadResponse(store *store.Store, courseID int, data io.Reader) ([]byte, error) {
-	r := csv.NewReader(data)
+func buildStudentUploadResponse(store *store.Store, courseID int, data []byte) ([]byte, error) {
+	r := csv.NewReader(bytes.NewReader(data))
 	rawTable, err := r.ReadAll()
 	if err != nil {
 		log.Println("Failed to read .csv form data " + err.Error())
@@ -150,17 +150,18 @@ func buildStudentUploadResponse(store *store.Store, courseID int, data io.Reader
 	for _, row := range table {
 		err := store.WriteUser(row.Student)
 		if err != nil {
-			log.Println("Failed to write user")
+			log.Printf("Failed to write user: %v\n", err)
 			continue
 		}
-		err = store.WriteCourseEnrolment(row.Student.UID, courseID, 4)
+		log.Printf("Wrote user: %s\n", row.Student.FirstName)
+		/*err = store.WriteCourseEnrolment(row.Student.UID, courseID, 4)
 		if err != nil {
 			log.Println("Failed to write course enrolment for " + string(courseID))
-		}
-		err = store.WriteTutorialEnrolment(row.Student.UID, row.TutorialID)
+		}*/
+		/*err = store.WriteTutorialEnrolment(row.Student.UID, row.TutorialID)
 		if err != nil {
 			log.Println("Failed to write tutorial enrolment for " + row.Student.UID)
-		}
+		}*/
 	}
 	return nil, nil
 }

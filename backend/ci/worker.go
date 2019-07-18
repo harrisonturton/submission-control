@@ -2,6 +2,7 @@ package ci
 
 import (
 	"github.com/harrisonturton/submission-control/backend/store"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -44,22 +45,47 @@ func (worker *Worker) handleJob(submissionID int, assessmentID int) {
 		worker.log.Printf("failed to write files: %v\n", err)
 		return
 	}
-	stdout, err := worker.runTestSpec(submissionID)
+	stdout, stderr, err := worker.runTestSpec(submissionID)
 	if err != nil {
 		worker.log.Printf("failed to run test spec: %v\n", err)
 		return
 	}
-	worker.log.Printf("Tested: %s\n", string(stdout))
-	//err := worker.store.WriteTestResult(submissionID, "", "", "success")
-	//if err != nil {
-	//	worker.log.Printf("failed to save test result: %v\n", err)
-	//}
+	logTestResult(worker.log, submissionID, stdout, stderr)
+	var result string
+	if string(stderr) == "" {
+		result = "success"
+	} else {
+		result = "failed"
+	}
+	err = worker.store.WriteTestResult(submissionID, string(stdout), string(stderr), result)
+	if err != nil {
+		worker.log.Printf("failed to save test result: %v\n", err)
+	}
 }
 
-func (worker *Worker) runTestSpec(submissionID int) ([]byte, error) {
+func (worker *Worker) runTestSpec(submissionID int) ([]byte, []byte, error) {
 	path := writeTestDir(submissionID, specFilename)
-	out, err := exec.Command("sh", path).Output()
-	return out, err
+	cmd := exec.Command("sh", path)
+	stdoutPipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, nil, err
+	}
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		return nil, nil, err
+	}
+	if err = cmd.Start(); err != nil {
+		return nil, nil, err
+	}
+	stdout, err := ioutil.ReadAll(stdoutPipe)
+	if err != nil {
+		return nil, nil, err
+	}
+	stderr, err := ioutil.ReadAll(stderrPipe)
+	if err != nil {
+		return nil, nil, err
+	}
+	return stdout, stderr, nil
 }
 
 func (worker *Worker) writeFiles(assessmentID, submissionID int) error {
@@ -120,4 +146,10 @@ func (worker *Worker) writeTestSpec(assessmentID int, submissionID int) error {
 
 func writeTestDir(submissionID int, file string) string {
 	return testDir + testDirPrefix + strconv.Itoa(submissionID) + "/" + file
+}
+
+func logTestResult(log *log.Logger, submissionID int, stdout []byte, stderr []byte) {
+	const divider = "----------------------------------"
+	const formatStr = "Results for { submission %d}\nstdout %s\n%s\nstderr %s\n%s\n-------%s"
+	log.Printf(formatStr, submissionID, divider, string(stdout), divider, string(stderr), divider)
 }

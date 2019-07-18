@@ -15,7 +15,7 @@ SELECT
 FROM submissions
 LEFT JOIN test_results ON submissions.id = test_results.submission_id
 LEFT JOIN test_result_types ON test_result_types.id = test_results.type
-WHERE coalesce(test_result_types.type, 'unteseted') = 'untested'`
+WHERE coalesce(test_result_types.type, 'untested') = 'untested'`
 	rows, err := store.db.Query(query)
 	if err != nil {
 		return []Submission{}, err
@@ -186,9 +186,8 @@ SELECT
 	name AS assessment_name,
 	course_id,
 	assessment_id,
-	COALESCE(test_result_types.type, 'untested'),
-	warnings,
-	errors
+	test_results.stdout,
+	test_results.stderr
 FROM submissions
 JOIN assessment on assessment.id = submissions.assessment_id
 LEFT JOIN test_results ON test_results.submission_id = submissions.id
@@ -201,8 +200,8 @@ WHERE uid=$1
 	}
 	var submissions []Submission
 	for rows.Next() {
-		var warnings, errors *string
-		var title, uid, assessmentName, description, feedback, testResult string
+		var stdout, stderr string
+		var title, uid, assessmentName, description, feedback string
 		var id, courseID, assessmentID int
 		var timestamp time.Time
 		err := rows.Scan(
@@ -215,9 +214,8 @@ WHERE uid=$1
 			&assessmentName,
 			&courseID,
 			&assessmentID,
-			&testResult,
-			&warnings,
-			&errors,
+			&stdout,
+			&stderr,
 		)
 		if err != nil {
 			log.Println(err.Error())
@@ -232,9 +230,8 @@ WHERE uid=$1
 			Title:          title,
 			Description:    description,
 			Feedback:       feedback,
-			TestResult:     testResult,
-			Warnings:       warnings,
-			Errors:         errors,
+			Stdout:         stdout,
+			Stderr:         stderr,
 			Timestamp:      timestamp,
 		})
 	}
@@ -503,8 +500,8 @@ SELECT
   submissions.description,
   submissions.feedback,
   test_result_types.type,
-  test_results.warnings,
-  test_results.errors,
+  test_results.stdout,
+  test_results.stderr,
   submissions.timestamp
 FROM tutorial_enrol
 JOIN tutorials ON tutorial_enrol.tutorial_id = tutorials.id
@@ -521,7 +518,7 @@ WHERE roles.role = 'student' AND tutorials.id = $1`
 	}
 	var submissions []Submission = []Submission{}
 	for rows.Next() {
-		var warnings, errors *string
+		var stdout, stderr string
 		var title, assessmentName, uid, description, feedback, testResult string
 		var id, courseID, assessmentID int
 		var timestamp time.Time
@@ -535,8 +532,8 @@ WHERE roles.role = 'student' AND tutorials.id = $1`
 			&description,
 			&feedback,
 			&testResult,
-			&warnings,
-			&errors,
+			&stdout,
+			&stderr,
 			&timestamp,
 		)
 		if err != nil {
@@ -553,8 +550,8 @@ WHERE roles.role = 'student' AND tutorials.id = $1`
 			Description:    description,
 			Feedback:       feedback,
 			TestResult:     testResult,
-			Warnings:       warnings,
-			Errors:         errors,
+			Stdout:         stdout,
+			Stderr:         stderr,
 			Timestamp:      timestamp,
 		})
 	}

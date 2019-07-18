@@ -85,6 +85,7 @@ CREATE TABLE assessment (
 	name         VARCHAR(255)    NOT NULL,	
 	type         INTEGER         NOT NULL REFERENCES assessment_types(id),
 	course_id    INTEGER         NOT NULL REFERENCES courses(id),
+	test_spec    BYTEA           NOT NULL,
 	-- assessment names must be unique within a course,
 	-- but not across courses.
 	CONSTRAINT unique_name_per_course UNIQUE (name, course_id)
@@ -103,8 +104,8 @@ CREATE TABLE submissions (
 
 CREATE TABLE test_results (
 	submission_id INTEGER PRIMARY KEY REFERENCES submissions(id),
-	warnings      TEXT    NOT NULL,
-	errors        TEXT    NOT NULL,
+	stdout        TEXT    NOT NULL,
+	stderr        TEXT    NOT NULL,
 	type          INTEGER NOT NULL REFERENCES test_result_types(id)
 );
 

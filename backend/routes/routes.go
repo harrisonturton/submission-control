@@ -162,7 +162,7 @@ func studentUploadHandler(store *store.Store) http.HandlerFunc {
 			writeBadRequest(w)
 			return
 		}
-		resp, err := buildStudentUploadResponse(store, courseID, r.Body)
+		resp, err := buildStudentUploadResponse(store, courseID, request.GetBody(r))
 		if err != nil {
 			log.Println("Failed to build studentUploadResponse " + err.Error())
 			writeInternalServerError(w)

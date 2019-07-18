@@ -11,10 +11,11 @@ import (
 func (store *Store) WriteUser(user User) error {
 	command := `
 INSERT INTO users (uid, first_name, last_name, email, password) VALUES
-	($1, $2, $3, $3, $4, $5)
-ON CONFLICT DO UPDATE	
+	($1, $2, $3, $4, $5)
+ON CONFLICT (uid) DO UPDATE SET
+(first_name, last_name, email, password) = (EXCLUDED.first_name, EXCLUDED.last_name, EXCLUDED.email, EXCLUDED.password)
 `
-	_, err := store.db.Exec(command, user.UID, user.FirstName, user.LastName, user.Email, user.PasswordHash)
+	_, err := store.db.Exec(command, user.UID, user.FirstName, user.LastName, user.Email, "")
 	return errors.Wrap(err, "failed to write user")
 }
 
@@ -57,11 +58,10 @@ func (store *Store) WriteSubmissionFeedback(submissionID int, feedback string) e
 }
 
 // WriteTestResult will write a test result to the database.
-func (store *Store) WriteTestResult(submissionID int, testWarnings, testErrors, resultType string) error {
+func (store *Store) WriteTestResult(submissionID int, stdout, stderr, resultType string) error {
 	command := `
-INSERT INTO test_results (submission_id, warnings, errors, type) VALUES
-	($1, $2, $3, $4)
-`
+INSERT INTO test_results (submission_id, stdout, stderr, type) VALUES
+	($1, $2, $3, $4)`
 	var resultTypeID int
 	switch resultType {
 	case "success":
@@ -77,6 +77,6 @@ INSERT INTO test_results (submission_id, warnings, errors, type) VALUES
 		resultTypeID = 4
 		break
 	}
-	_, err := store.db.Exec(command, submissionID, testWarnings, testErrors, resultTypeID)
+	_, err := store.db.Exec(command, submissionID, stdout, stderr, resultTypeID)
 	return errors.Wrap(err, "failed to write test result")
 }
